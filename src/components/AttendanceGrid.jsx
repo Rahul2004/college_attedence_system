@@ -5,7 +5,6 @@ import {
   AlertCircle, 
   Search, 
   CheckCheck, 
-  Sparkles,
   Users2,
   Filter,
   CheckCircle2

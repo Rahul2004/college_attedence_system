@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Menu, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { Menu, PanelLeftClose, PanelLeftOpen, ShieldCheck, Calendar, Clock } from 'lucide-react';
 import MateSidebar from './components/MateSidebar';
 import OrdersTableRoster from './components/OrdersTableRoster';
 import StudentDetailCard from './components/StudentDetailCard';
@@ -9,9 +9,11 @@ import AnalyticsDashboard from './components/AnalyticsDashboard';
 import WarningDeficitEngine from './components/WarningDeficitEngine';
 import ExportReporting from './components/ExportReporting';
 import AdminDashboard from './components/AdminDashboard';
+import AdminAcademicSetup from './components/AdminAcademicSetup';
+import FacultyLeaveApprovals from './components/FacultyLeaveApprovals';
 import AuthScreen from './components/AuthScreen';
 import { supabase, isSupabaseConfigured } from './lib/supabase';
-import { INITIAL_STUDENTS, COURSE_METADATA } from './data/mockData';
+import { INITIAL_STUDENTS, COURSE_METADATA, INDIAN_COLLEGE_PROGRAMS, LECTURE_PERIODS } from './data/mockData';
 
 // Protected Admin Route wrapper that enforces admin privileges
 function AdminRoute({ role, children }) {
@@ -29,11 +31,22 @@ function AdminRoute({ role, children }) {
 }
 
 export default function App() {
+  const ADMIN_EMAIL = (import.meta.env.VITE_ADMIN_EMAIL || 'admin@college.edu.in').toLowerCase();
   const [session, setSession] = useState(null);
-  const [role, setRole] = useState('faculty');
+  const [role, setRole] = useState(() => {
+    if (typeof window !== 'undefined' && window.location.pathname.includes('admin')) {
+      return 'admin';
+    }
+    return 'faculty';
+  });
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('roster');
+  const [activeTab, setActiveTab] = useState(() => {
+    if (typeof window !== 'undefined' && window.location.pathname.includes('admin')) {
+      return 'admin';
+    }
+    return 'roster';
+  });
   const [pendingChanges, setPendingChanges] = useState(new Set());
   const [toast, setToast] = useState({ type: null, message: '' });
   const [isCommitting, setIsCommitting] = useState(false);
@@ -41,6 +54,42 @@ export default function App() {
   const [activeDetailStudent, setActiveDetailStudent] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Mobile drawer open/close
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(true); // Desktop expanded (w-64) vs compact (w-18)
+
+  // Real-Time Live Clock State (ticks every second)
+  const [currentDateTime, setCurrentDateTime] = useState(() => new Date());
+
+  useEffect(() => {
+    const clockTimer = setInterval(() => {
+      setCurrentDateTime(new Date());
+    }, 1000);
+    return () => clearInterval(clockTimer);
+  }, []);
+
+  // Indian College Program & Subject Selection States (For Faculty and Admin Attendance)
+  const [selectedProgramId, setSelectedProgramId] = useState('btech-cse');
+  const [selectedSemNumber, setSelectedSemNumber] = useState('VI');
+  const [selectedSubjectCode, setSelectedSubjectCode] = useState('CS-602');
+  const [selectedSlotId, setSelectedSlotId] = useState('P2');
+
+  // Derive dynamic active course metadata based on Indian College selection
+  const selectedProgram = INDIAN_COLLEGE_PROGRAMS.find(p => p.id === selectedProgramId) || INDIAN_COLLEGE_PROGRAMS[0];
+  const selectedSem = selectedProgram?.semesters?.find(s => s.semNumber === selectedSemNumber) || selectedProgram?.semesters?.[0];
+  const selectedSubject = selectedSem?.subjects?.find(s => s.code === selectedSubjectCode) || selectedSem?.subjects?.[0];
+  const selectedSlot = LECTURE_PERIODS.find(l => l.id === selectedSlotId) || LECTURE_PERIODS[1];
+
+  const activeCourse = {
+    ...COURSE_METADATA,
+    degree: selectedProgram?.degree || COURSE_METADATA.degree,
+    branch: selectedProgram?.branch || COURSE_METADATA.branch,
+    code: selectedSubject?.code || COURSE_METADATA.code,
+    name: selectedSubject?.name || COURSE_METADATA.name,
+    faculty: selectedSubject?.faculty || COURSE_METADATA.faculty,
+    room: selectedSubject?.room || COURSE_METADATA.room,
+    semester: `${selectedSem?.semLabel || 'Semester VI'}`,
+    timeSlot: `${selectedSlot?.time} (${selectedSlot?.label})`,
+    credits: selectedSubject?.credits || 4,
+    type: selectedSubject?.type || 'Core Theory',
+  };
 
   // Supabase Auth Listener with Role Resolution
   useEffect(() => {
@@ -71,7 +120,11 @@ export default function App() {
 
         // Fallback to user metadata if profile table is not synced yet
         if (!resolvedRole) {
-          resolvedRole = currentSession.user.user_metadata?.role || 'student';
+          if (currentSession.user?.email?.toLowerCase() === ADMIN_EMAIL) {
+            resolvedRole = 'admin';
+          } else {
+            resolvedRole = currentSession.user.user_metadata?.role || 'student';
+          }
         }
 
         // 2. Strict Conditional Routing
@@ -171,6 +224,7 @@ export default function App() {
         .map(s => ({
           roll_number: s.rollNo,
           date: selectedDate,
+          subject_code: activeCourse.code,
           status: s.todayStatus === 'PRESENT' ? 'Present' : 'Absent',
         }));
 
@@ -189,8 +243,8 @@ export default function App() {
             id: s.id,
             roll_number: s.rollNo,
             name: s.name,
-            department: s.department || 'Computer Science',
-            semester: 'Semester VI — Spring 2026',
+            department: s.department || activeCourse.branch || 'Computer Science & Engineering',
+            semester: activeCourse.semester,
             total_classes: newTotal,
             attended_classes: newAttended,
             attendance_percentage: newPct,
@@ -204,7 +258,10 @@ export default function App() {
       if (upsertError) throw upsertError;
 
       setPendingChanges(new Set());
-      setToast({ type: 'success', message: 'Attendance records synchronized to cloud database.' });
+      setToast({
+        type: 'success',
+        message: `Attendance committed for ${activeCourse.code} (${activeCourse.name}) — ${activeCourse.branch} (${selectedDate}).`
+      });
     } catch {
       setToast({ type: 'error', message: 'Failed to save attendance session. Please check permissions.' });
     } finally {
@@ -232,13 +289,35 @@ export default function App() {
   if (!session) {
     return (
       <AuthScreen
-        onLogin={(userRole) => {
-          setRole(userRole || 'student');
-          if (supabase) {
+        onLogin={(userRole, userSession) => {
+          const targetRole = userRole || 'faculty';
+          setRole(targetRole);
+          if (userSession) {
+            setSession(userSession);
+          } else if (supabase) {
             supabase.auth.getSession().then(({ data }) => {
-              if (data?.session) setSession(data.session);
+              if (data?.session) {
+                setSession(data.session);
+              } else {
+                setSession({
+                  user: {
+                    id: targetRole === 'admin' ? 'admin-system' : `user-${targetRole}`,
+                    email: targetRole === 'admin' ? ADMIN_EMAIL : `${targetRole}@university.edu`,
+                    user_metadata: { role: targetRole, name: targetRole === 'admin' ? 'System Administrator' : undefined }
+                  }
+                });
+              }
+            });
+          } else {
+            setSession({
+              user: {
+                id: targetRole === 'admin' ? 'admin-system' : `user-${targetRole}`,
+                email: targetRole === 'admin' ? ADMIN_EMAIL : `${targetRole}@university.edu`,
+                user_metadata: { role: targetRole, name: targetRole === 'admin' ? 'System Administrator' : undefined }
+              }
             });
           }
+          setActiveTab(targetRole === 'admin' ? 'admin' : targetRole === 'faculty' ? 'roster' : 'overview');
         }}
       />
     );
@@ -250,11 +329,18 @@ export default function App() {
       <MateSidebar
         activeTab={activeTab}
         onTabChange={(tab) => {
+          if (tab === 'admin') {
+            setRole('admin');
+          } else if (tab === 'overview' && role === 'admin') {
+            setRole('student');
+          } else if (role === 'admin' && ['roster', 'analytics', 'warnings', 'reports'].includes(tab)) {
+            // Keep admin role while browsing roster/analytics, or allow dual access
+          }
           setActiveTab(tab);
           setIsSidebarOpen(false);
         }}
         lowWarningCount={lowWarningCount}
-        course={COURSE_METADATA}
+        course={activeCourse}
         role={role}
         currentStudent={students[0] || INITIAL_STUDENTS[0]}
         session={session}
@@ -310,14 +396,25 @@ export default function App() {
               )}
             </button>
 
-            <span className="font-semibold text-slate-800">{COURSE_METADATA.code}</span>
+            <span className="font-semibold text-slate-800">{activeCourse.code}</span>
             <span className="hidden sm:inline">/</span>
-            <span className="hidden sm:inline truncate max-w-[180px] md:max-w-none">{COURSE_METADATA.name}</span>
+            <span className="hidden sm:inline truncate max-w-[200px] md:max-w-none font-medium">{activeCourse.name}</span>
             <span className="hidden md:inline">/</span>
-            <span className="text-slate-400 font-mono hidden md:inline">{COURSE_METADATA.room}</span>
+            <span className="text-slate-400 font-mono hidden md:inline">{activeCourse.room}</span>
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3">
+            {/* Admin Badge shown strictly when logged in as Admin */}
+            {role === 'admin' && (
+              <div
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-purple-600 text-white shadow-md shadow-purple-600/30"
+                title="Institutional Governance Active"
+              >
+                <ShieldCheck className="w-3.5 h-3.5 text-white" />
+                <span className="font-semibold">Admin Suite</span>
+              </div>
+            )}
+
             <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full flex items-center gap-1 ${
               isSupabaseConfigured
                 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/80'
@@ -327,7 +424,33 @@ export default function App() {
               <span className="hidden xs:inline">{isSupabaseConfigured ? 'Cloud DB' : 'Local Demo'}</span>
             </span>
             <div className="h-4 w-px bg-slate-200" />
-            <span className="text-xs text-slate-500 font-medium">Spring 2026</span>
+            <div className="flex items-center gap-1.5 text-xs text-slate-600 font-medium font-mono select-none">
+              <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+              <span className="hidden sm:inline">
+                {currentDateTime.toLocaleDateString('en-IN', {
+                  weekday: 'short',
+                  day: 'numeric',
+                  month: 'short',
+                  year: 'numeric'
+                })}
+              </span>
+              <span className="sm:hidden">
+                {currentDateTime.toLocaleDateString('en-IN', {
+                  day: 'numeric',
+                  month: 'short'
+                })}
+              </span>
+              <span className="text-slate-300">•</span>
+              <Clock className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+              <span className="font-bold text-slate-800">
+                {currentDateTime.toLocaleTimeString('en-IN', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  second: '2-digit',
+                  hour12: true
+                })}
+              </span>
+            </div>
           </div>
         </header>
 
@@ -353,6 +476,12 @@ export default function App() {
                 </AdminRoute>
               )}
 
+              {activeTab === 'academic-setup' && (
+                <AdminRoute role={role}>
+                  <AdminAcademicSetup />
+                </AdminRoute>
+              )}
+
               {activeTab === 'roster' && (
                 <div className="flex flex-col lg:flex-row items-start gap-6 w-full">
                   <div className="flex-1 min-w-0 relative w-full">
@@ -367,6 +496,18 @@ export default function App() {
                       hasPendingChanges={pendingChanges.size > 0}
                       onSelectStudentDetail={setActiveDetailStudent}
                       activeDetailStudent={activeDetailStudent}
+                      programs={INDIAN_COLLEGE_PROGRAMS}
+                      lecturePeriods={LECTURE_PERIODS}
+                      selectedProgramId={selectedProgramId}
+                      onProgramChange={setSelectedProgramId}
+                      selectedSemNumber={selectedSemNumber}
+                      onSemChange={setSelectedSemNumber}
+                      selectedSubjectCode={selectedSubjectCode}
+                      onSubjectChange={setSelectedSubjectCode}
+                      selectedSlotId={selectedSlotId}
+                      onSlotChange={setSelectedSlotId}
+                      activeCourse={activeCourse}
+                      role={role}
                     />
 
                     {activeDetailStudent && (
@@ -382,7 +523,7 @@ export default function App() {
 
                   <RightMetricsPanel
                     students={students}
-                    course={COURSE_METADATA}
+                    course={activeCourse}
                     onSelectDefaulterFilter={() => setActiveTab('warnings')}
                   />
                 </div>
@@ -396,13 +537,13 @@ export default function App() {
 
               {activeTab === 'warnings' && (
                 <div className="w-full">
-                  <WarningDeficitEngine students={students} />
+                  <WarningDeficitEngine students={students} course={activeCourse} />
                 </div>
               )}
 
               {activeTab === 'reports' && (
                 <div className="w-full">
-                  <ExportReporting students={students} course={COURSE_METADATA} />
+                  <ExportReporting students={students} course={activeCourse} />
                 </div>
               )}
             </>
@@ -423,6 +564,18 @@ export default function App() {
                       hasPendingChanges={pendingChanges.size > 0}
                       onSelectStudentDetail={setActiveDetailStudent}
                       activeDetailStudent={activeDetailStudent}
+                      programs={INDIAN_COLLEGE_PROGRAMS}
+                      lecturePeriods={LECTURE_PERIODS}
+                      selectedProgramId={selectedProgramId}
+                      onProgramChange={setSelectedProgramId}
+                      selectedSemNumber={selectedSemNumber}
+                      onSemChange={setSelectedSemNumber}
+                      selectedSubjectCode={selectedSubjectCode}
+                      onSubjectChange={setSelectedSubjectCode}
+                      selectedSlotId={selectedSlotId}
+                      onSlotChange={setSelectedSlotId}
+                      activeCourse={activeCourse}
+                      role={role}
                     />
 
                     {activeDetailStudent && (
@@ -438,7 +591,7 @@ export default function App() {
 
                   <RightMetricsPanel
                     students={students}
-                    course={COURSE_METADATA}
+                    course={activeCourse}
                     onSelectDefaulterFilter={() => setActiveTab('warnings')}
                   />
                 </div>
@@ -452,13 +605,19 @@ export default function App() {
 
               {activeTab === 'warnings' && (
                 <div className="w-full">
-                  <WarningDeficitEngine students={students} />
+                  <WarningDeficitEngine students={students} course={activeCourse} />
+                </div>
+              )}
+
+              {activeTab === 'leave' && (
+                <div className="w-full">
+                  <FacultyLeaveApprovals activeCourse={activeCourse} />
                 </div>
               )}
 
               {activeTab === 'reports' && (
                 <div className="w-full">
-                  <ExportReporting students={students} course={COURSE_METADATA} />
+                  <ExportReporting students={students} course={activeCourse} />
                 </div>
               )}
             </>

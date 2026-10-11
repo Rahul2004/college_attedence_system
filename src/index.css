@@ -55,3 +55,76 @@ body {
     box-shadow: none !important;
   }
 }
+
+/* Fluid Organic Wave Keyframes */
+@keyframes waveFlow {
+  0% {
+    transform: translateX(0) translateZ(0) scaleY(1);
+  }
+  50% {
+    transform: translateX(-25%) translateZ(0) scaleY(1.12);
+  }
+  100% {
+    transform: translateX(-50%) translateZ(0) scaleY(1);
+  }
+}
+
+@keyframes waveFlowReverse {
+  0% {
+    transform: translateX(-50%) translateZ(0) scaleY(1);
+  }
+  50% {
+    transform: translateX(-25%) translateZ(0) scaleY(0.9);
+  }
+  100% {
+    transform: translateX(0) translateZ(0) scaleY(1);
+  }
+}
+
+@keyframes fluidMorph {
+  0%, 100% {
+    border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%;
+    transform: translate(0, 0) rotate(0deg) scale(1);
+  }
+  33% {
+    border-radius: 70% 30% 46% 54% / 30% 29% 71% 70%;
+    transform: translate(30px, -25px) rotate(120deg) scale(1.15);
+  }
+  66% {
+    border-radius: 100% 60% 60% 100% / 100% 100% 60% 60%;
+    transform: translate(-25px, 25px) rotate(240deg) scale(0.9);
+  }
+}
+
+@keyframes liquidGradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-wave-flow {
+  animation: waveFlow 10s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite;
+}
+
+.animate-wave-flow-slow {
+  animation: waveFlowReverse 16s ease-in-out infinite;
+}
+
+.animate-wave-flow-fast {
+  animation: waveFlow 6s ease-in-out infinite;
+}
+
+.animate-fluid-blob {
+  animation: fluidMorph 12s ease-in-out infinite;
+}
+
+.animate-liquid-bg {
+  background-size: 200% 200%;
+  animation: liquidGradient 8s ease infinite;
+}

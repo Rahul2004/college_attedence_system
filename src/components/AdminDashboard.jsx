@@ -9,13 +9,16 @@ import {
   Clock, 
   AlertCircle, 
   BarChart3, 
-  Sparkles, 
   RefreshCw,
   MoreVertical,
   Calendar,
   Lock,
-  ArrowUpRight
+  ArrowUpRight,
+  FileSpreadsheet,
+  FileText
 } from 'lucide-react';
+import AdminBulkImporter from './AdminBulkImporter';
+import AdminDebarmentNoticeModal from './AdminDebarmentNoticeModal';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
 // Mock administrative fallback roster in case database is empty or local
@@ -37,6 +40,8 @@ export default function AdminDashboard({ currentSession }) {
   const [termSetting, setTermSetting] = useState('Spring 2026');
   const [minAttendanceThreshold, setMinAttendanceThreshold] = useState(75);
   const [feedbackToast, setFeedbackToast] = useState(null);
+  const [isBulkImporterOpen, setIsBulkImporterOpen] = useState(false);
+  const [isDebarmentCircularOpen, setIsDebarmentCircularOpen] = useState(false);
 
   // Fetch real profiles from Supabase if configured
   useEffect(() => {
@@ -243,6 +248,27 @@ export default function AdminDashboard({ currentSession }) {
                 </button>
               ))}
             </div>
+
+            {/* Bulk Ingestion and Debarment Notice Action Buttons */}
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setIsBulkImporterOpen(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 transition-colors shadow-xs"
+              >
+                <FileSpreadsheet className="w-3.5 h-3.5 text-indigo-600" />
+                <span>Bulk Import (CSV / Excel)</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsDebarmentCircularOpen(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white transition-colors shadow-xs"
+              >
+                <FileText className="w-3.5 h-3.5 text-rose-400" />
+                <span>Debarment Circular</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -438,6 +464,39 @@ export default function AdminDashboard({ currentSession }) {
           </div>
         </div>
       </div>
+
+      {/* Bulk CSV / Excel Importer Modal */}
+      {isBulkImporterOpen && (
+        <AdminBulkImporter
+          onClose={() => setIsBulkImporterOpen(false)}
+          onImportSuccess={(newRows) => {
+            const mappedUsers = newRows.map((nr, idx) => ({
+              id: `usr-bulk-${Date.now()}-${idx}`,
+              email: nr.email,
+              role: 'student',
+              status: 'active',
+              name: nr.name,
+              dept: nr.program || 'Computer Science',
+              lastActive: 'Just registered'
+            }));
+            setUsers(prev => [...mappedUsers, ...prev]);
+            showToast(`Successfully registered ${newRows.length} candidates into University directory!`);
+          }}
+        />
+      )}
+
+      {/* Official Debarment Circular Modal */}
+      {isDebarmentCircularOpen && (
+        <AdminDebarmentNoticeModal
+          defaulters={[
+            { id: 'usr-4', rollNo: 'CS-603', name: 'Rohan Verma', effectiveAttended: 32, effectiveTotal: 48, percentage: 66.7 },
+            { id: 'usr-5', rollNo: 'CS-608', name: 'Meera Nambiar', effectiveAttended: 30, effectiveTotal: 48, percentage: 62.5 },
+            { id: 'usr-7', rollNo: 'CS-614', name: 'Divya Sundaram', effectiveAttended: 33, effectiveTotal: 48, percentage: 68.8 }
+          ]}
+          course={{ code: 'CS-602', name: 'Database Management Systems' }}
+          onClose={() => setIsDebarmentCircularOpen(false)}
+        />
+      )}
     </div>
   );
 }

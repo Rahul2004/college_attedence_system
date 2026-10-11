@@ -19,9 +19,16 @@ import {
   Save,
   Download,
   Printer,
-  Sparkles,
-  Maximize2
+  Maximize2,
+  BookOpen,
+  GraduationCap,
+  Clock,
+  Building2,
+  UserCheck,
+  ShieldCheck,
+  QrCode
 } from 'lucide-react';
+import DynamicQrAttendanceModal from './DynamicQrAttendanceModal';
 
 export default function OrdersTableRoster({
   students,
@@ -33,12 +40,25 @@ export default function OrdersTableRoster({
   isCommitting,
   hasPendingChanges,
   onSelectStudentDetail,
-  activeDetailStudent
+  activeDetailStudent,
+  programs = [],
+  lecturePeriods = [],
+  selectedProgramId = 'btech-cse',
+  onProgramChange,
+  selectedSemNumber = 'VI',
+  onSemChange,
+  selectedSubjectCode = 'CS-602',
+  onSubjectChange,
+  selectedSlotId = 'P2',
+  onSlotChange,
+  activeCourse,
+  role = 'faculty'
 }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [filterType, setFilterType] = useState('ALL'); // 'ALL' | 'WARNING' | 'ABSENT' | 'PRESENT'
   const [statusDropdownOpen, setStatusDropdownOpen] = useState(false);
+  const [isQrModalOpen, setIsQrModalOpen] = useState(false);
 
   // Filter students
   const filteredStudents = students.filter(student => {
@@ -92,8 +112,187 @@ export default function OrdersTableRoster({
     });
   };
 
+  // Resolve active program, semester, subject, and lecture period
+  const currentProgram = programs.find(p => p.id === selectedProgramId) || programs[0] || null;
+  const currentSemesters = currentProgram?.semesters || [];
+  const currentSemester = currentSemesters.find(s => s.semNumber === selectedSemNumber) || currentSemesters[0] || null;
+  const currentSubjects = currentSemester?.subjects || [];
+  const currentSubject = currentSubjects.find(sub => sub.code === selectedSubjectCode) || currentSubjects[0] || null;
+  const currentSlot = lecturePeriods.find(l => l.id === selectedSlotId) || lecturePeriods[0] || null;
+
   return (
     <div className="relative">
+      {/* ================= INDIAN COLLEGE COURSE & SUBJECT ATTENDANCE SELECTOR ================= */}
+      {programs && programs.length > 0 && (
+        <div className="mb-6 rounded-2xl border border-slate-200/90 bg-white p-4.5 sm:p-5 shadow-xs transition-all">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 mb-4 border-b border-slate-100">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
+                <GraduationCap className="w-4.5 h-4.5" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-sm font-bold text-slate-900 tracking-tight">
+                    Course & Subject Attendance Selector
+                  </h2>
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200">
+                    Indian University Curriculum
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500">
+                  Select branch, semester, and course subject to initiate attendance marking.
+                </p>
+              </div>
+            </div>
+
+            {/* Role Mode Badge */}
+            <div className="flex items-center gap-2">
+              {role === 'admin' ? (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-50 text-purple-700 border border-purple-200 text-xs font-bold">
+                  <ShieldCheck className="w-3.5 h-3.5 text-purple-600" />
+                  Admin Multi-Department Mode
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 text-xs font-bold">
+                  <UserCheck className="w-3.5 h-3.5 text-indigo-600" />
+                  Faculty In-Charge Mode
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* 4 Interactive Dropdowns */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+            {/* 1. Course / Degree Program */}
+            <div>
+              <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                <BookOpen className="w-3.5 h-3.5 text-indigo-500" />
+                Course / Program
+              </label>
+              <select
+                id="program-selector"
+                value={selectedProgramId}
+                onChange={(e) => {
+                  const newProgId = e.target.value;
+                  onProgramChange?.(newProgId);
+                  const prog = programs.find(p => p.id === newProgId);
+                  if (prog?.semesters?.length > 0) {
+                    const firstSem = prog.semesters[0];
+                    onSemChange?.(firstSem.semNumber);
+                    if (firstSem.subjects?.length > 0) {
+                      onSubjectChange?.(firstSem.subjects[0].code);
+                    }
+                  }
+                }}
+                className="w-full text-xs font-semibold text-slate-800 bg-slate-50/80 hover:bg-slate-50 focus:bg-white border border-slate-200 rounded-xl px-3 py-2.5 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all cursor-pointer"
+              >
+                {programs.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.degree} {p.code} — {p.branch}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* 2. Academic Semester */}
+            <div>
+              <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                <Building2 className="w-3.5 h-3.5 text-indigo-500" />
+                Semester / Term
+              </label>
+              <select
+                id="semester-selector"
+                value={currentSemester?.semNumber || selectedSemNumber}
+                onChange={(e) => {
+                  const newSem = e.target.value;
+                  onSemChange?.(newSem);
+                  const semObj = currentSemesters.find(s => s.semNumber === newSem);
+                  if (semObj?.subjects?.length > 0) {
+                    onSubjectChange?.(semObj.subjects[0].code);
+                  }
+                }}
+                className="w-full text-xs font-semibold text-slate-800 bg-slate-50/80 hover:bg-slate-50 focus:bg-white border border-slate-200 rounded-xl px-3 py-2.5 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all cursor-pointer"
+              >
+                {currentSemesters.map((s) => (
+                  <option key={s.semNumber} value={s.semNumber}>
+                    {s.semLabel}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* 3. Subject / Paper */}
+            <div>
+              <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                <GraduationCap className="w-3.5 h-3.5 text-indigo-500" />
+                Subject / Paper
+              </label>
+              <select
+                id="subject-selector"
+                value={currentSubject?.code || selectedSubjectCode}
+                onChange={(e) => onSubjectChange?.(e.target.value)}
+                className="w-full text-xs font-semibold text-slate-800 bg-slate-50/80 hover:bg-slate-50 focus:bg-white border border-slate-200 rounded-xl px-3 py-2.5 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all cursor-pointer truncate"
+              >
+                {currentSubjects.map((sub) => (
+                  <option key={sub.code} value={sub.code}>
+                    {sub.code}: {sub.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* 4. Lecture Slot / Timing */}
+            <div>
+              <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                <Clock className="w-3.5 h-3.5 text-indigo-500" />
+                Lecture Period
+              </label>
+              <select
+                id="period-selector"
+                value={currentSlot?.id || selectedSlotId}
+                onChange={(e) => onSlotChange?.(e.target.value)}
+                className="w-full text-xs font-semibold text-slate-800 bg-slate-50/80 hover:bg-slate-50 focus:bg-white border border-slate-200 rounded-xl px-3 py-2.5 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all cursor-pointer"
+              >
+                {lecturePeriods.map((slot) => (
+                  <option key={slot.id} value={slot.id}>
+                    {slot.label} ({slot.time})
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Active Subject Information Card Strip */}
+          {currentSubject && (
+            <div className="mt-4 pt-3.5 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 text-xs bg-slate-50/60 p-3 rounded-xl border border-slate-100">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="font-bold text-slate-900 bg-white px-2 py-0.5 rounded-md border border-slate-200/80 text-[11px]">
+                  {currentSubject.code}
+                </span>
+                <span className="font-semibold text-slate-800">
+                  {currentSubject.name}
+                </span>
+                <span className="text-slate-400">•</span>
+                <span className="text-slate-600 font-medium">
+                  Faculty: <strong className="text-slate-800 font-semibold">{currentSubject.faculty}</strong>
+                </span>
+              </div>
+
+              <div className="flex items-center gap-3 text-slate-500 text-[11px]">
+                <span className="flex items-center gap-1 text-slate-700 font-medium">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  {currentSubject.room}
+                </span>
+                <span>•</span>
+                <span className="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-md font-semibold border border-indigo-100">
+                  {currentSubject.credits} Credits ({currentSubject.type})
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Top Header Row of the Table View: Title + Actions (like "Orders" + Import/Export) */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-6">
         <div>
@@ -133,6 +332,17 @@ export default function OrdersTableRoster({
               Unsaved
             </span>
           )}
+
+          {/* Live Dynamic QR & OTP Mode Launcher Button */}
+          <button
+            type="button"
+            onClick={() => setIsQrModalOpen(true)}
+            className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 shadow-xs transition-all active:scale-[0.98]"
+            title="Launch Projector Screen Dynamic QR & OTP mode for classroom roll call"
+          >
+            <QrCode className="w-3.5 h-3.5 text-indigo-600" />
+            <span>Live QR &amp; OTP Mode</span>
+          </button>
 
           {onCommit && (
             <button
@@ -470,6 +680,20 @@ export default function OrdersTableRoster({
             Mark Absent
           </button>
         </div>
+      )}
+
+      {/* Dynamic QR & OTP Classroom Projector Modal */}
+      {isQrModalOpen && (
+        <DynamicQrAttendanceModal
+          course={activeCourse}
+          students={students}
+          onClose={() => setIsQrModalOpen(false)}
+          onApplyScannedStudents={(scanned) => {
+            scanned.forEach(s => {
+              onToggleStatus(s.id, 'PRESENT');
+            });
+          }}
+        />
       )}
     </div>
   );
