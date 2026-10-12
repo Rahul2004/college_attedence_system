@@ -38,155 +38,102 @@ export default function RightMetricsPanel({ students, course, onSelectDefaulterF
   const strokeDashoffset = semiCircumference - (semiCircumference * (overallRate / 100));
 
   return (
-    <aside className="w-full lg:w-80 space-y-6 shrink-0">
-      {/* 1. Gauge Meter Card (like "RECEIPT OF GOODS $2.2m" in Mate) */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs">
-        <div className="flex items-center justify-between text-xs mb-3">
-          <span className="font-bold tracking-wider uppercase text-slate-400 text-[10px]">
-            Cohort Compliance
+    <aside className="w-full lg:w-72 space-y-4 shrink-0">
+      {/* 1. Today's Attendance Metric */}
+      <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-xs">
+        <div className="flex items-center justify-between text-xs mb-2">
+          <span className="font-semibold text-slate-500 text-[11px] uppercase tracking-wider">
+            Today's Attendance
           </span>
-          <span className="text-slate-400 text-xs font-mono">{course.code}</span>
+          <span className="text-slate-400 font-mono text-xs">{course.code}</span>
         </div>
 
-        {/* Semi-circular Arch Meter */}
-        <div className="relative flex flex-col items-center justify-center pt-2 pb-1">
-          <svg className="w-48 h-28" viewBox="0 0 160 90">
-            {/* Background Arch */}
-            <path
-              d="M 20 80 A 60 60 0 0 1 140 80"
-              fill="none"
-              stroke="#F1F5F9"
-              strokeWidth="14"
-              strokeLinecap="round"
-            />
-            {/* Active Foreground Arch */}
-            <path
-              d="M 20 80 A 60 60 0 0 1 140 80"
-              fill="none"
-              stroke="#0F172A"
-              strokeWidth="14"
-              strokeLinecap="round"
-              strokeDasharray={semiCircumference}
-              strokeDashoffset={strokeDashoffset}
-              className="transition-all duration-700 ease-out"
-            />
-          </svg>
-
-          {/* Centered Metric Label */}
-          <div className="absolute top-10 text-center">
-            <span className="text-3xl font-extrabold text-slate-900 tracking-tight font-mono">
-              {overallRate}%
-            </span>
-            <span className="block text-[11px] font-medium text-slate-400 mt-0.5">
-              {presentCount} of {totalStudents} present
-            </span>
-          </div>
+        <div className="flex items-baseline gap-2 mb-2">
+          <span className="text-2xl font-bold text-slate-900 font-mono">{overallRate}%</span>
+          <span className="text-xs text-slate-500">({presentCount}/{totalStudents} present)</span>
         </div>
 
-        {/* Breakdown Row (like $864,600 shipments | $1.34m pickups) */}
-        <div className="grid grid-cols-2 gap-3 pt-3 border-t border-slate-100 text-xs mt-2">
-          <div>
-            <div className="flex items-center gap-1.5 text-slate-600 font-bold">
-              <span className="w-2 h-2 rounded-full bg-slate-900 inline-block" />
-              <span>{presentCount} Present</span>
-            </div>
-            <span className="text-[11px] text-slate-400 pl-3.5">
-              Today's Session
-            </span>
-          </div>
+        {/* Clean progress bar */}
+        <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden mb-3">
+          <div
+            className="bg-blue-600 h-full rounded-full transition-all duration-500"
+            style={{ width: `${overallRate}%` }}
+          />
+        </div>
 
-          <div>
-            <div className="flex items-center gap-1.5 text-slate-600 font-bold">
-              <span className="w-2 h-2 rounded-full bg-slate-300 inline-block" />
-              <span>{absentCount} Absent</span>
-            </div>
-            <span className="text-[11px] text-slate-400 pl-3.5">
-              Require follow-up
-            </span>
+        <div className="flex items-center justify-between text-xs text-slate-600 pt-2 border-t border-slate-100">
+          <div className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-emerald-500" />
+            <span>{presentCount} Present</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-slate-300" />
+            <span>{absentCount} Absent</span>
           </div>
         </div>
       </div>
 
-      {/* 2. Roster Status Bar (like "ORDERS STATUS: Paid 89% | Cancelled 8% | Refunded 3%") */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs">
-        <div className="flex items-center justify-between text-xs mb-3">
-          <span className="font-bold tracking-wider uppercase text-slate-400 text-[10px]">
-            Statutory Standing
+      {/* 2. 75% Compliance Card */}
+      <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-xs">
+        <div className="flex items-center justify-between text-xs mb-2.5">
+          <span className="font-semibold text-slate-500 text-[11px] uppercase tracking-wider">
+            75% Exam Eligibility
           </span>
-          <span className="text-slate-500 font-semibold text-xs">Active Term</span>
         </div>
 
-        {/* Multi-segment Horizontal Progress Bar */}
-        <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden flex mb-4">
-          <div
-            className="bg-emerald-600 h-full transition-all duration-500"
-            style={{ width: `${compliantPct}%` }}
-            title={`Eligible: ${compliantPct}%`}
-          />
-          <div
-            className="bg-rose-500 h-full transition-all duration-500"
-            style={{ width: `${deficitPct}%` }}
-            title={`Shortage: ${deficitPct}%`}
-          />
-        </div>
-
-        {/* Breakdown Items with % */}
         <div className="space-y-2 text-xs">
-          <div className="flex items-center justify-between">
-            <span className="flex items-center gap-1.5 text-slate-600">
-              <span className="w-2 h-2 rounded-sm bg-emerald-600 inline-block" />
-              Eligible (&ge; 75%)
-            </span>
-            <span className="font-bold font-mono text-slate-800">{compliantPct}%</span>
+          <div className="flex items-center justify-between p-2 rounded-lg bg-emerald-50 text-emerald-800">
+            <span className="font-medium">Eligible (&ge;75%)</span>
+            <span className="font-bold font-mono">{compliantCount} Students ({compliantPct}%)</span>
           </div>
 
-          <div className="flex items-center justify-between">
-            <span className="flex items-center gap-1.5 text-slate-600">
-              <span className="w-2 h-2 rounded-sm bg-rose-500 inline-block" />
-              Shortage Alert (&lt; 75%)
-            </span>
-            <span className="font-bold font-mono text-rose-600">{deficitPct}%</span>
+          <div
+            onClick={onSelectDefaulterFilter}
+            className="flex items-center justify-between p-2 rounded-lg bg-rose-50 text-rose-800 cursor-pointer hover:bg-rose-100 transition"
+          >
+            <span className="font-medium">Shortage (&lt;75%)</span>
+            <span className="font-bold font-mono">{defaulters.length} Students ({deficitPct}%)</span>
           </div>
         </div>
       </div>
 
-      {/* 3. Operational Overview Grid (like OVERVIEW $2,246.75 / 16 min / 0.32% in Mate) */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs">
-        <div className="flex items-center justify-between text-xs mb-3 pb-2 border-b border-slate-100">
-          <span className="font-bold tracking-wider uppercase text-slate-400 text-[10px]">
+      {/* 3. Operational Overview Grid */}
+      <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-xs">
+        <div className="flex items-center justify-between text-xs mb-2.5 pb-2 border-b border-slate-100">
+          <span className="font-semibold text-slate-500 text-[11px] uppercase tracking-wider">
             Academic Summary
           </span>
           <span className="text-slate-400 text-xs">This semester</span>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 text-xs">
+        <div className="grid grid-cols-2 gap-3 text-xs">
           <div>
-            <span className="text-slate-400 block text-[11px]">Conducted</span>
-            <span className="text-lg font-bold font-mono text-slate-900 mt-0.5 block">
+            <span className="text-slate-500 block text-[11px]">Conducted</span>
+            <span className="text-base font-bold font-mono text-slate-900 mt-0.5 block">
               {course.conductedClasses || 52}
             </span>
             <span className="text-[10px] text-slate-400">Total lectures</span>
           </div>
 
           <div>
-            <span className="text-slate-400 block text-[11px]">Enrolled</span>
-            <span className="text-lg font-bold font-mono text-slate-900 mt-0.5 block">
+            <span className="text-slate-500 block text-[11px]">Enrolled</span>
+            <span className="text-base font-bold font-mono text-slate-900 mt-0.5 block">
               {totalStudents}
             </span>
             <span className="text-[10px] text-slate-400">Class size</span>
           </div>
 
           <div>
-            <span className="text-slate-400 block text-[11px]">Avg. Attendance</span>
-            <span className="text-lg font-bold font-mono text-slate-900 mt-0.5 block">
+            <span className="text-slate-500 block text-[11px]">Avg. Attendance</span>
+            <span className="text-base font-bold font-mono text-slate-900 mt-0.5 block">
               81.4%
             </span>
             <span className="text-[10px] text-emerald-600 font-medium">+1.8% vs last week</span>
           </div>
 
           <div>
-            <span className="text-slate-400 block text-[11px]">Shortage Count</span>
-            <span className="text-lg font-bold font-mono text-rose-600 mt-0.5 block">
+            <span className="text-slate-500 block text-[11px]">Shortage Count</span>
+            <span className="text-base font-bold font-mono text-rose-600 mt-0.5 block">
               {defaulters.length}
             </span>
             <span className="text-[10px] text-rose-600 font-medium">Require advisory</span>
