@@ -14,12 +14,12 @@ import {
 import WhatsAppAlertModal from './WhatsAppAlertModal';
 import AdminDebarmentNoticeModal from './AdminDebarmentNoticeModal';
 
-export default function WarningDeficitEngine({ students, onDispatchAlert, course }) {
+export default function WarningDeficitEngine({ students = [], onDispatchAlert, course }) {
   const [issuedNotices, setIssuedNotices] = useState({});
   const [activeWhatsAppStudent, setActiveWhatsAppStudent] = useState(null);
   const [isDebarmentNoticeOpen, setIsDebarmentNoticeOpen] = useState(false);
 
-  const defaulters = students
+  const defaulters = (students || [])
     .map(student => {
       const isPresent = student.todayStatus === 'PRESENT';
       const effectiveAttended = isPresent 

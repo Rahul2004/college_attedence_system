@@ -9,8 +9,8 @@ import {
   ShieldCheck
 } from 'lucide-react';
 
-export default function BentoMetrics({ metrics }) {
-  const { totalStudents, totalClasses, presentToday, lowWarningCount } = metrics;
+export default function BentoMetrics({ metrics = {} }) {
+  const { totalStudents = 0, totalClasses = 0, presentToday = 0, lowWarningCount = 0 } = metrics || {};
   const attendanceRate = totalStudents > 0
     ? ((presentToday / totalStudents) * 100).toFixed(1)
     : '0.0';

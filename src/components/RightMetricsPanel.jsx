@@ -9,16 +9,17 @@ import {
   Award
 } from 'lucide-react';
 
-export default function RightMetricsPanel({ students, course, onSelectDefaulterFilter }) {
-  const totalStudents = students.length;
-  const presentCount = students.filter(s => s.todayStatus === 'PRESENT').length;
+export default function RightMetricsPanel({ students = [], course, onSelectDefaulterFilter }) {
+  const safeStudents = students || [];
+  const totalStudents = safeStudents.length;
+  const presentCount = safeStudents.filter(s => s.todayStatus === 'PRESENT').length;
   const absentCount = totalStudents - presentCount;
   const overallRate = totalStudents > 0
     ? Math.round((presentCount / totalStudents) * 100)
     : 0;
 
   // Defaulter count (< 75%)
-  const defaulters = students.filter(student => {
+  const defaulters = safeStudents.filter(student => {
     const effectiveAttended = student.todayStatus === 'PRESENT'
       ? student.attendedClasses + 1
       : student.attendedClasses;

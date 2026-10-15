@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Menu, PanelLeftClose, PanelLeftOpen, ShieldCheck, Calendar, Clock } from 'lucide-react';
 import MateSidebar from './components/MateSidebar';
 import OrdersTableRoster from './components/OrdersTableRoster';
+import AttendanceGrid from './components/AttendanceGrid';
 import StudentDetailCard from './components/StudentDetailCard';
 import RightMetricsPanel from './components/RightMetricsPanel';
 import StudentView from './components/StudentView';
@@ -181,8 +182,9 @@ export default function App() {
       }
 
       if (!isSupabaseConfigured || !supabase) {
-        setStudents([]);
-        setActiveDetailStudent(null);
+        // Fallback to rich mock students for local preview
+        setStudents(INITIAL_STUDENTS);
+        setActiveDetailStudent(INITIAL_STUDENTS[0] || null);
         setLoading(false);
         return;
       }
@@ -211,13 +213,13 @@ export default function App() {
           setStudents(formatted);
           setActiveDetailStudent(formatted[0]);
         } else {
-          setStudents([]);
-          setActiveDetailStudent(null);
+          setStudents(INITIAL_STUDENTS);
+          setActiveDetailStudent(INITIAL_STUDENTS[0] || null);
         }
       } catch (err) {
         console.warn('Students fetch notice:', err);
-        setStudents([]);
-        setActiveDetailStudent(null);
+        setStudents(INITIAL_STUDENTS);
+        setActiveDetailStudent(INITIAL_STUDENTS[0] || null);
       } finally {
         setLoading(false);
       }
@@ -621,6 +623,21 @@ export default function App() {
                       />
                     </div>
                   )}
+                </div>
+              )}
+
+              {activeTab === 'attendance-grid' && (
+                <div className="w-full">
+                  <AttendanceGrid
+                    students={students}
+                    onToggleStatus={handleToggleStatus}
+                    onMarkAll={handleMarkAll}
+                    selectedDate={selectedDate}
+                    onDateChange={setSelectedDate}
+                    onCommit={handleCommit}
+                    isCommitting={isCommitting}
+                    hasPendingChanges={pendingChanges.size > 0}
+                  />
                 </div>
               )}
 

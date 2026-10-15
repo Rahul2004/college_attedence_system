@@ -8,7 +8,7 @@ import {
   ExternalLink 
 } from 'lucide-react';
 
-export default function ExportReporting({ students, course }) {
+export default function ExportReporting({ students = [], course }) {
   const [downloadSuccess, setDownloadSuccess] = useState(null);
 
   const handleExportRosterCSV = () => {
@@ -23,7 +23,7 @@ export default function ExportReporting({ students, course }) {
       "Recovery Needed"
     ];
 
-    const rows = students.map(student => {
+    const rows = (students || []).map(student => {
       const isPresent = student.todayStatus === 'PRESENT';
       const effectiveAttended = isPresent ? student.attendedClasses + 1 : student.attendedClasses;
       const effectiveTotal = student.totalClasses + 1;

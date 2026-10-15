@@ -17,7 +17,7 @@ import {
 
 export default function DynamicQrAttendanceModal({ 
   course, 
-  students, 
+  students = [], 
   onClose, 
   onApplyScannedStudents 
 }) {

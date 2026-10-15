@@ -12,6 +12,7 @@ import {
   Award,
   Layers,
   GraduationCap,
+  CheckSquare,
   X,
   ChevronLeft,
   ChevronRight,
@@ -257,6 +258,22 @@ export default function MateSidebar({
                   <div className="flex items-center gap-2.5 min-w-0">
                     <Users className={`w-4 h-4 shrink-0 ${activeTab === 'roster' ? 'text-blue-400' : 'text-slate-400'}`} />
                     {isExpanded && <span className="truncate">Roll Call</span>}
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => onTabChange('attendance-grid')}
+                  title="Quick Attendance Grid Matrix"
+                  className={`w-full flex items-center ${isExpanded ? 'justify-between px-3' : 'justify-center px-2'} py-2 rounded-lg text-xs font-medium transition-all ${
+                    activeTab === 'attendance-grid'
+                      ? 'bg-blue-600/20 text-blue-300 font-semibold border border-blue-500/30'
+                      : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <CheckSquare className={`w-4 h-4 shrink-0 ${activeTab === 'attendance-grid' ? 'text-blue-400' : 'text-slate-400'}`} />
+                    {isExpanded && <span className="truncate">Quick Grid</span>}
                   </div>
                 </button>
 

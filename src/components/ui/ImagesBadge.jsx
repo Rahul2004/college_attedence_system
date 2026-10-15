@@ -42,3 +42,5 @@ export function ImagesBadge({ text, images = [], className = '', onClick }) {
     </div>
   );
 }
+
+export default ImagesBadge;

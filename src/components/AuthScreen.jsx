@@ -16,6 +16,8 @@ import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
 export default function AuthScreen({ onLogin }) {
   const FACULTY_PASSKEY = import.meta.env.VITE_FACULTY_PASSKEY || 'FACULTY@2026';
+  const ADMIN_EMAIL = (import.meta.env.VITE_ADMIN_EMAIL || 'admin@college.edu.in').toLowerCase();
+  const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || 'admin@1234';
 
   const [selectedRole, setSelectedRole] = useState('student'); // 'student' | 'faculty'
   const [facultyPasskey, setFacultyPasskey] = useState('');

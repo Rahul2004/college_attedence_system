@@ -29,6 +29,7 @@ import {
   QrCode
 } from 'lucide-react';
 import DynamicQrAttendanceModal from './DynamicQrAttendanceModal';
+import { ImagesBadge } from './ui/ImagesBadge';
 
 export default function OrdersTableRoster({
   students,
@@ -252,13 +253,24 @@ export default function OrdersTableRoster({
       {/* Top Header Row of the Table View: Title + Actions (like "Orders" + Import/Export) */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-6">
         <div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
               Students Roster
             </h1>
             <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200/80">
               {filteredStudents.length} Students
             </span>
+            {students.length > 0 && (
+              <ImagesBadge
+                text="Live Cohort"
+                images={[
+                  "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=64&h=64&fit=crop&crop=faces",
+                  "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=64&h=64&fit=crop&crop=faces",
+                  "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=64&h=64&fit=crop&crop=faces"
+                ]}
+                className="hidden sm:inline-flex scale-90"
+              />
+            )}
           </div>
           <p className="text-xs text-slate-500 mt-1">
             Real-time session records, statutory compliance, and batch attendance roll call.

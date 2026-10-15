@@ -3,7 +3,8 @@ import {
   UserCheck,
   GraduationCap,
   MapPin,
-  Layers
+  Layers,
+  Calendar
 } from 'lucide-react';
 
 export default function Header({ role, onRoleChange, course, isLiveDatabase = false }) {
