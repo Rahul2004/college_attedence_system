@@ -379,31 +379,48 @@ export function AcademicProvider({ children }) {
 
     const resolveRoleAndSetSession = async (currentSession) => {
       if (currentSession?.user) {
-        setSession(currentSession);
         let resolvedRole = null;
+        let resolvedStatus = currentSession.user.user_metadata?.status || 'active';
+
         try {
           const { data: profile } = await supabase
             .from('profiles')
-            .select('role')
+            .select('role, status')
             .eq('id', currentSession.user.id)
             .maybeSingle();
+
           if (profile?.role) resolvedRole = profile.role;
+          if (profile?.status) resolvedStatus = profile.status;
         } catch {}
 
         if (!resolvedRole) {
           if (currentSession.user?.email?.toLowerCase() === ADMIN_EMAIL) resolvedRole = 'admin';
           else resolvedRole = currentSession.user.user_metadata?.role || 'student';
         }
-        // Check if user has been revoked or removed by Administrator
+
         const userEmail = currentSession.user?.email?.toLowerCase();
+
+        // 1. Guard against Pending or Suspended accounts
+        if (resolvedStatus === 'pending' || resolvedStatus === 'suspended') {
+          await supabase.auth.signOut();
+          setSession(null);
+          setRole('student');
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('college_active_session');
+            localStorage.removeItem('college_active_role');
+          }
+          setLoading(false);
+          return;
+        }
+
+        // 2. Check if user has been revoked or removed by Administrator in local storage
         try {
           const rawUsers = localStorage.getItem('college_app_users');
           if (rawUsers && userEmail) {
             const parsedUsers = JSON.parse(rawUsers);
             if (Array.isArray(parsedUsers)) {
               const matched = parsedUsers.find(u => u.email?.toLowerCase() === userEmail);
-              if (matched && (matched.status === 'deleted' || matched.status === 'suspended')) {
-                // Revoked user: force logout immediately
+              if (matched && (matched.status === 'deleted' || matched.status === 'suspended' || matched.status === 'pending')) {
                 await supabase.auth.signOut();
                 setSession(null);
                 setRole('student');
@@ -418,6 +435,7 @@ export function AcademicProvider({ children }) {
           }
         } catch {}
 
+        setSession(currentSession);
         setRole(resolvedRole);
         if (typeof window !== 'undefined') {
           localStorage.setItem('college_active_role', resolvedRole);
