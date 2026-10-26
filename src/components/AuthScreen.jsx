@@ -566,20 +566,21 @@ export default function AuthScreen({ onLogin }) {
 
     try {
       if (supabase && isSupabaseConfigured) {
-        try {
-          await supabase.auth.updateUser({ password: newPassword });
-        } catch (err) {
-          console.warn('Supabase updateUser notice:', err);
-        }
+        const { error } = await supabase.auth.updateUser({ password: newPassword });
+        if (error) throw error;
+        // Sign out temporary recovery session so user explicitly logs in with their new password
+        await supabase.auth.signOut();
       }
 
       setEmail(resetEmail);
-      setPassword(newPassword);
-      setSuccessMsg('Password updated successfully! Please log in.');
+      setPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      setSuccessMsg('Your password has been updated successfully in Supabase! Please sign in with your new password.');
       setAuthMode('login');
       setIsSignUp(false);
     } catch (err) {
-      setErrorMsg(err.message || 'Failed to update password.');
+      setErrorMsg(err.message || 'Failed to update password. Please ensure password meets criteria and try again.');
     } finally {
       setLoading(false);
     }

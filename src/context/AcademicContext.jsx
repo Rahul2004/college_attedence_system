@@ -469,7 +469,12 @@ export function AcademicProvider({ children }) {
       setLoading(false);
     };
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, sess) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, sess) => {
+      // During password recovery, do NOT auto-login or redirect to dashboard!
+      // Let the user stay on the AuthScreen to choose their new password.
+      if (event === 'PASSWORD_RECOVERY') {
+        return;
+      }
       resolveRoleAndSetSession(sess);
     });
 
