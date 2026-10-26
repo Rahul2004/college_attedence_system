@@ -4,9 +4,22 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   email TEXT,
   role VARCHAR(10) NOT NULL DEFAULT 'student' CHECK (role IN ('faculty', 'student', 'admin')),
   status VARCHAR(20) NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'pending', 'suspended')),
+  full_name TEXT,
+  phone TEXT,
+  department TEXT,
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
+
+-- Safely add columns if profiles table already exists
+DO $$
+BEGIN
+  ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS full_name TEXT;
+  ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS phone TEXT;
+  ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS department TEXT;
+EXCEPTION
+  WHEN undefined_table THEN NULL;
+END $$;
 
 -- In case profiles table already exists, safely update role constraint
 DO $$
@@ -59,11 +72,13 @@ CREATE POLICY "Admins can update profiles"
     )
   );
 
--- 4. Prevent non-admin users from modifying their own or others' roles directly
-DROP POLICY IF EXISTS "Prevent direct client role modification" ON public.profiles;
-CREATE POLICY "Prevent direct client role modification"
+-- 4. Users can update their own personal details (name, phone, department)
+DROP POLICY IF EXISTS "Users can update own profile details" ON public.profiles;
+CREATE POLICY "Users can update own profile details"
   ON public.profiles FOR UPDATE
-  USING (false);
+  TO authenticated
+  USING (auth.uid() = id)
+  WITH CHECK (auth.uid() = id);
 
 -- 2. Security Trigger: Automatically and securely creates a profile whenever a user signs up.
 -- Enforces server-side sanitization and safe role defaulting.

@@ -9,75 +9,71 @@ import {
 
 export default function Header({ role, onRoleChange, course, isLiveDatabase = false }) {
   return (
-    <header className="sticky top-4 z-40 mb-8 rounded-2xl border border-slate-200/80 bg-white/80 p-4 sm:p-5 shadow-sm backdrop-blur-xl transition-all">
+    <header className="sticky top-4 z-40 mb-8 rounded-[24px] border border-black/[0.08] bg-white/70 backdrop-blur-2xl p-4 sm:p-5 shadow-[0_4px_24px_rgba(0,0,0,0.04)] transition-all duration-300 ease-[cubic-bezier(0.25,1,0.5,1)]">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         {/* Brand identity */}
         <div className="flex items-center gap-3.5">
-          <div className="w-11 h-11 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-600 text-white flex items-center justify-center font-bold text-lg shadow-md shadow-indigo-500/20 transition-all duration-200 hover:scale-[1.02]">
-            <Layers className="w-6 h-6" />
+          <div className="w-11 h-11 rounded-[14px] bg-[#1D1D1F] text-white flex items-center justify-center font-bold text-lg shadow-md transition-all duration-300 hover:scale-[1.04]">
+            <Layers className="w-5 h-5 text-white" />
           </div>
           <div>
             <div className="flex items-center gap-2.5">
-              <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900">
+              <h1 className="text-xl sm:text-2xl font-semibold tracking-tight text-[#1D1D1F]">
                 ATTEND
               </h1>
-              <span className="text-[11px] font-semibold text-indigo-700 bg-indigo-50 border border-indigo-100/80 px-2.5 py-0.5 rounded-full">
-                SaaS Enterprise
+              <span className="text-[11px] font-semibold text-[#0071E3] bg-[#E8F2FF] border border-[#0071E3]/20 px-2.5 py-0.5 rounded-full">
+                OS
               </span>
-              <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full flex items-center gap-1 transition-all duration-200 hover:shadow-md ${
+              <span className={`text-[10px] font-semibold px-2.5 py-0.5 rounded-full flex items-center gap-1.5 transition-all duration-200 ${
                 isLiveDatabase
-                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/80'
-                  : 'bg-amber-50 text-amber-700 border border-amber-200/80'
+                  ? 'bg-[#EBF9EE] text-[#34C759] border border-[#34C759]/20'
+                  : 'bg-[#FFF5E5] text-[#FF9500] border border-[#FF9500]/20'
               }`}>
-                <span className={`w-1.5 h-1.5 rounded-full ${isLiveDatabase ? 'bg-emerald-500' : 'bg-amber-500'}`}></span>
+                <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${isLiveDatabase ? 'bg-[#34C759]' : 'bg-[#FF9500]'}`}></span>
                 {isLiveDatabase ? 'Supabase Live' : 'Local Demo'}
               </span>
             </div>
-            <p className="text-xs text-slate-500 font-medium mt-0.5">
-              Academic Attendance Suite • <span className="font-semibold text-slate-700">{course.code}</span> ({course.name})
+            <p className="text-xs text-[#86868B] font-normal mt-0.5">
+              Academic Attendance Suite • <span className="font-medium text-[#1D1D1F]">{course.code}</span> ({course.name})
             </p>
           </div>
         </div>
 
         {/* Course Info & Role Switcher */}
         <div className="flex items-center flex-wrap gap-6 self-stretch md:self-auto justify-between md:justify-end">
-          <div className="hidden lg:flex items-center gap-6 text-xs text-slate-500 pr-6 border-r border-slate-200">
-            <div className="flex items-center gap-1.5 transition-colors duration-200 hover:text-slate-900">
-              <Calendar className="w-3.5 h-3.5 text-slate-400" />
-              <span>{course.date}</span>
-            </div>
-            <div className="flex items-center gap-1.5 transition-colors duration-200 hover:text-slate-900">
-              <MapPin className="w-3.5 h-3.5 text-slate-400" />
+          <div className="hidden lg:flex items-center gap-6 text-xs text-[#86868B] pr-6 border-r border-black/[0.08]">
+            <div className="flex items-center gap-1.5 transition-colors duration-200 hover:text-[#1D1D1F]">
+              <MapPin className="w-3.5 h-3.5 text-[#86868B]" />
               <span>{course.room}</span>
             </div>
           </div>
 
-          {/* Role Switcher Pill */}
-          <div className="flex items-center gap-1 p-1 bg-slate-100/80 rounded-xl border border-slate-200/60 shadow-inner">
-            <button
-              type="button"
-              onClick={() => onRoleChange('faculty')}
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 hover:scale-[1.01] ${
-                role === 'faculty'
-                  ? 'bg-white text-slate-900 shadow-sm'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
-              }`}
-            >
-              <UserCheck className={`w-3.5 h-3.5 ${role === 'faculty' ? 'text-indigo-600' : 'text-slate-400'} transition-transform duration-200 group-hover:scale-110`} />
-              Faculty View
-            </button>
-            <button
-              type="button"
-              onClick={() => onRoleChange('student')}
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 hover:scale-[1.01] ${
-                role === 'student'
-                  ? 'bg-white text-slate-900 shadow-sm'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
-              }`}
-            >
-              <GraduationCap className={`w-3.5 h-3.5 ${role === 'student' ? 'text-indigo-600' : 'text-slate-400'} transition-transform duration-200 group-hover:scale-110`} />
-              Student View
-            </button>
+          {/* Role & Session Identity Badge */}
+          <div className="flex items-center gap-2">
+            <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border ${
+              role === 'admin'
+                ? 'bg-purple-50 text-purple-700 border-purple-200'
+                : role === 'faculty'
+                ? 'bg-blue-50 text-blue-700 border-blue-200'
+                : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+            }`}>
+              {role === 'admin' ? (
+                <>
+                  <Layers className="w-3.5 h-3.5 text-purple-600" />
+                  Administrator
+                </>
+              ) : role === 'faculty' ? (
+                <>
+                  <UserCheck className="w-3.5 h-3.5 text-blue-600" />
+                  Faculty In-Charge
+                </>
+              ) : (
+                <>
+                  <GraduationCap className="w-3.5 h-3.5 text-emerald-600" />
+                  Student Member
+                </>
+              )}
+            </span>
           </div>
         </div>
       </div>

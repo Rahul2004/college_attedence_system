@@ -13,6 +13,7 @@ import {
 export default function AdminDebarmentNoticeModal({ 
   defaulters, 
   course, 
+  threshold = 75,
   onClose 
 }) {
   const currentDate = new Date().toLocaleDateString('en-IN', {
@@ -99,14 +100,14 @@ export default function AdminDebarmentNoticeModal({
               CONSOLIDATED NOTIFICATION &bull; EXAM DEBARMENT LIST (SESSION 2025–2026)
             </h2>
             <p className="text-xs font-sans text-slate-600 font-semibold mt-1">
-              Sub: Withholding of Admit Cards for candidates with Attendance Shortage &lt; 75.0%
+              Sub: Withholding of Admit Cards for candidates with Attendance Shortage &lt; {threshold.toFixed(1)}%
             </p>
           </div>
 
           {/* Legal Ordinance Citation */}
           <div className="text-xs text-slate-800 leading-relaxed space-y-2 font-sans bg-slate-50 p-4 rounded-xl border border-slate-200">
             <p>
-              In accordance with <strong>University Academic Ordinance Clause 4.2</strong> governing statutory minimum lecture attendance, candidates registered for the <strong>Even Semester Examinations 2026</strong> must have secured a minimum cumulative attendance of <strong>75.0%</strong> in aggregate and in each registered course.
+              In accordance with <strong>University Academic Ordinance Clause 4.2</strong> governing statutory minimum lecture attendance as regulated by Institutional Policy, candidates registered for the <strong>Even Semester Examinations 2026</strong> must have secured a minimum cumulative attendance of <strong>{threshold.toFixed(1)}%</strong> in aggregate and in each registered course.
             </p>
             <p>
               Following the final review by the Faculty Attendance Verification Board, the candidates specified below have failed to satisfy the statutory threshold. Consequently, their examination eligibility is <strong>WITHHELD</strong>, and they are <strong>DEBARRED</strong> from sitting in the upcoming End-Semester Theory and Practical examinations.

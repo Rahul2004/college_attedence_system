@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Calendar as CalendarIcon,
   ChevronLeft,
@@ -30,11 +30,20 @@ import {
   Paperclip,
   QrCode
 } from 'lucide-react';
-import StudentBunkCalculator from './StudentBunkCalculator';
 import StudentPunchModal from './StudentPunchModal';
+import StudentDisputeModal from './StudentDisputeModal';
 
-export default function StudentView({ student, activeTab = 'overview' }) {
+export default function StudentView({ 
+  student, 
+  activeTab = 'overview', 
+  threshold = 75,
+  leaves: propLeaves,
+  onApplyLeave: propOnApplyLeave,
+  onSelfPunch: propOnSelfPunch
+}) {
   const [selectedCourseCode, setSelectedCourseCode] = useState('CS-602');
+  const [studentSubTab, setStudentSubTab] = useState('attendance'); // 'attendance' | 'schedule' | 'records'
+  const [selectedDay, setSelectedDay] = useState('Monday'); // Active Day in Timetable
 
   // Leave application form state
   const [leaveCategory, setLeaveCategory] = useState('Medical');
@@ -43,14 +52,14 @@ export default function StudentView({ student, activeTab = 'overview' }) {
   const [leaveSubject, setLeaveSubject] = useState('CS-602: Database Management Systems (DBMS)');
   const [leaveReason, setLeaveReason] = useState('');
   const [leaveSubmitted, setLeaveSubmitted] = useState(false);
-  const [leavesList, setLeavesList] = useState([
+  const [internalLeavesList, setInternalLeavesList] = useState([
     {
       id: 'LV-8821',
       category: 'Medical Sick Leave',
       subject: 'CS-602 DBMS',
       dates: '12 Sep 2026 – 14 Sep 2026 (3 Days)',
       reason: 'Viral fever accompanied by severe fatigue. Medical certificate attached.',
-      status: 'Approved',
+      status: 'APPROVED',
       approvedBy: 'Prof. Rajesh Verma',
       dateApplied: '15 Sep 2026'
     },
@@ -60,29 +69,48 @@ export default function StudentView({ student, activeTab = 'overview' }) {
       subject: 'CS-601 Machine Learning',
       dates: '28 Sep 2026 (1 Day)',
       reason: 'Inter-College State Cricket Tournament representation for University.',
-      status: 'Approved',
+      status: 'APPROVED',
       approvedBy: 'Dr. S. K. Gupta',
       dateApplied: '25 Sep 2026'
     }
   ]);
   const [attachedDocName, setAttachedDocName] = useState('apollo_hospital_fitness_slip.pdf');
   const [isPunchModalOpen, setIsPunchModalOpen] = useState(false);
-  const [todayMarkedPresent, setTodayMarkedPresent] = useState(student.todayStatus === 'PRESENT');
+  const [isDisputeModalOpen, setIsDisputeModalOpen] = useState(false);
+  const [todayMarkedPresent, setTodayMarkedPresent] = useState(student?.todayStatus === 'PRESENT');
 
-  const isTodayPresent = todayMarkedPresent || student.todayStatus === 'PRESENT';
+  useEffect(() => {
+    setTodayMarkedPresent(student?.todayStatus === 'PRESENT');
+  }, [student?.todayStatus]);
+
+  const leavesList = propLeaves || internalLeavesList;
+
+  const reqRatio = threshold / 100;
+  const remRatio = 1 - reqRatio;
+
+  const safeStudent = student || {
+    id: 'stu-default',
+    name: 'Student Portal User',
+    rollNo: 'CS-601',
+    attendedClasses: 42,
+    totalClasses: 52,
+    todayStatus: 'ABSENT'
+  };
+
+  const isTodayPresent = todayMarkedPresent || safeStudent.todayStatus === 'PRESENT';
   const effectiveAttended = isTodayPresent
-    ? student.attendedClasses + 1
-    : student.attendedClasses;
-  const effectiveTotal = student.totalClasses + 1;
-  const percentage = Number(((effectiveAttended / effectiveTotal) * 100).toFixed(1));
-  const isDefaulter = percentage < 75.0;
+    ? (safeStudent.attendedClasses || 0) + 1
+    : (safeStudent.attendedClasses || 0);
+  const effectiveTotal = (safeStudent.totalClasses || 0) + 1;
+  const percentage = effectiveTotal > 0 ? Number(((effectiveAttended / effectiveTotal) * 100).toFixed(1)) : 0;
+  const isDefaulter = percentage < threshold;
 
   const recoveryClasses = isDefaulter
-    ? Math.max(0, Math.ceil((0.75 * effectiveTotal - effectiveAttended) / 0.25))
+    ? Math.max(0, Math.ceil((reqRatio * effectiveTotal - effectiveAttended) / (remRatio || 0.25)))
     : 0;
 
   const safeMissable = !isDefaulter
-    ? Math.max(0, Math.floor((effectiveAttended - 0.75 * effectiveTotal) / 0.75))
+    ? Math.max(0, Math.floor((effectiveAttended - reqRatio * effectiveTotal) / (reqRatio || 0.75)))
     : 0;
 
   // Real Indian College Subjects for B.Tech Semester VI
@@ -214,16 +242,24 @@ export default function StudentView({ student, activeTab = 'overview' }) {
 
     const newLeave = {
       id: `LV-${Math.floor(1000 + Math.random() * 9000)}`,
+      studentName: student?.name || 'Aarav Sharma',
+      rollNo: student?.rollNo || '0101CS221001',
+      semester: 'Semester VI',
       category: leaveCategory,
       subject: leaveSubject,
       dates: `${leaveStartDate} to ${leaveEndDate}`,
       reason: leaveReason.trim(),
-      status: 'Pending Verification',
+      status: 'PENDING',
       approvedBy: 'Under Faculty Review',
-      dateApplied: new Date().toLocaleDateString('en-IN')
+      appliedOn: new Date().toLocaleDateString('en-IN'),
+      contact: student?.phone || '+91 98765 43210'
     };
 
-    setLeavesList([newLeave, ...leavesList]);
+    if (propOnApplyLeave) {
+      propOnApplyLeave(newLeave);
+    } else {
+      setInternalLeavesList([newLeave, ...internalLeavesList]);
+    }
     setLeaveReason('');
     setLeaveSubmitted(true);
     setTimeout(() => setLeaveSubmitted(false), 4000);
@@ -251,7 +287,7 @@ export default function StudentView({ student, activeTab = 'overview' }) {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {indianSubjects.map(sub => {
-            const isUnder = sub.percentage < 75.0;
+            const isUnder = sub.percentage < threshold;
             return (
               <div key={sub.code} className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs flex flex-col justify-between hover:shadow-md transition-all">
                 <div>
@@ -264,7 +300,7 @@ export default function StudentView({ student, activeTab = 'overview' }) {
                         ? 'bg-rose-50 text-rose-700 border border-rose-200'
                         : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                     }`}>
-                      {isUnder ? 'Shortage Warning (< 75%)' : 'Exam Eligible'}
+                      {isUnder ? `Shortage Warning (< ${threshold}%)` : 'Exam Eligible'}
                     </span>
                   </div>
 
@@ -307,11 +343,6 @@ export default function StudentView({ student, activeTab = 'overview' }) {
             );
           })}
         </div>
-
-        {/* Bunk & Target Attendance Calculator */}
-        <div className="pt-4">
-          <StudentBunkCalculator student={student} subjects={indianSubjects} />
-        </div>
       </div>
     );
   }
@@ -319,49 +350,85 @@ export default function StudentView({ student, activeTab = 'overview' }) {
   // ================= 2. TAB: WEEKLY TIMETABLE SCHEDULE =================
   if (activeTab === 'schedule') {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 max-w-4xl mx-auto">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
+            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-[#1D1D1F]">
               Weekly Lecture Timetable
             </h2>
-            <p className="text-xs text-slate-500 mt-1">
-              Aryabhata Block • Department of Computer Science & Engineering
+            <p className="text-xs text-[#86868B] mt-1">
+              Aryabhata Block • Department of Computer Science &amp; Engineering
             </p>
           </div>
-          <span className="text-xs font-semibold px-3 py-1.5 rounded-xl bg-slate-100 text-slate-700 border border-slate-200">
-            Even Semester 2026 Timetable
+          <span className="text-xs font-medium px-3 py-1.5 rounded-full bg-white text-[#1D1D1F] border border-black/[0.08] shadow-xs">
+            Semester VI • 2026
           </span>
         </div>
 
-        <div className="space-y-4">
+        {/* Segmented Day Picker */}
+        <div className="flex items-center p-1 bg-[#E8E8ED]/80 backdrop-blur-md rounded-full max-w-md mx-auto border border-black/[0.04] text-xs font-medium">
           {timetableDays.map(td => (
-            <div key={td.day} className="bg-white rounded-2xl border border-slate-200/80 p-4 sm:p-5 shadow-xs">
-              <div className="flex items-center gap-2 mb-3 pb-2.5 border-b border-slate-100">
-                <CalendarIcon className="w-4 h-4 text-indigo-600" />
-                <h3 className="font-bold text-sm text-slate-900 tracking-tight">
-                  {td.day}
+            <button
+              key={td.day}
+              type="button"
+              onClick={() => setSelectedDay(td.day)}
+              className={`flex-1 py-1.5 rounded-full text-center transition-all duration-200 ${
+                selectedDay === td.day
+                  ? 'bg-white text-[#1D1D1F] font-semibold shadow-xs'
+                  : 'text-[#6E6E73] hover:text-[#1D1D1F]'
+              }`}
+            >
+              {td.day.substring(0, 3)}
+            </button>
+          ))}
+        </div>
+
+        {/* Selected Day's Classes - Clean Minimalist Cards */}
+        {(() => {
+          const activeDayObj = timetableDays.find(d => d.day === selectedDay) || timetableDays[0];
+          return (
+            <div className="bg-white rounded-[24px] border border-black/[0.06] p-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)] space-y-3 animate-in fade-in duration-200">
+              <div className="flex items-center justify-between pb-3 border-b border-black/[0.06]">
+                <h3 className="font-semibold text-sm text-[#1D1D1F]">
+                  {activeDayObj.day} Schedule
                 </h3>
+                <span className="text-xs text-[#86868B]">
+                  {activeDayObj.slots.length} Sessions Scheduled
+                </span>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-                {td.slots.map((slot, idx) => (
-                  <div key={idx} className="p-3 rounded-xl bg-slate-50 border border-slate-100 hover:bg-indigo-50/50 hover:border-indigo-100 transition-colors">
-                    <span className="text-[10px] font-mono font-bold text-indigo-600 block">
-                      {slot.time}
-                    </span>
-                    <span className="font-bold text-xs text-slate-900 block mt-1 truncate" title={slot.name}>
-                      {slot.code}: {slot.name}
-                    </span>
-                    <span className="text-[10px] text-slate-500 block mt-0.5 truncate">
-                      {slot.room} • {slot.faculty}
+              <div className="space-y-2.5">
+                {activeDayObj.slots.map((slot, idx) => (
+                  <div
+                    key={idx}
+                    className="p-4 rounded-2xl bg-[#F5F5F7] border border-black/[0.04] hover:bg-[#E8F2FF] hover:border-[#0071E3]/20 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                  >
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-mono font-semibold text-[#0071E3] bg-white px-2 py-0.5 rounded-md border border-black/[0.04]">
+                          {slot.time}
+                        </span>
+                        <span className="font-mono text-xs font-semibold text-[#1D1D1F]">
+                          {slot.code}
+                        </span>
+                      </div>
+                      <h4 className="font-semibold text-sm text-[#1D1D1F] mt-1">
+                        {slot.name}
+                      </h4>
+                      <p className="text-xs text-[#86868B] mt-0.5">
+                        {slot.faculty}
+                      </p>
+                    </div>
+
+                    <span className="self-start sm:self-center text-xs font-medium px-3 py-1 rounded-full bg-white text-[#1D1D1F] border border-black/[0.06] shadow-xs">
+                      {slot.room}
                     </span>
                   </div>
                 ))}
               </div>
             </div>
-          ))}
-        </div>
+          );
+        })()}
       </div>
     );
   }
@@ -455,14 +522,30 @@ export default function StudentView({ student, activeTab = 'overview' }) {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Reason & Document Summary
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs font-semibold text-slate-700">
+                    Reason &amp; Document Summary
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const sampleAiReason = leaveCategory.includes('Medical')
+                        ? 'Diagnosed with acute viral fever and gastroenteritis. Advised bed rest by Medical Officer, Govt. Hospital. Fitness certificate attached.'
+                        : leaveCategory.includes('Hackathon')
+                        ? 'Selected for Smart India Hackathon (SIH) National Grand Finale at IIT Roorkee. Dean authorization letter attached.'
+                        : 'Representing university in Inter-Collegiate State Level Athletics Meet. Sports Department OD permission enclosed.';
+                      setLeaveReason(sampleAiReason);
+                    }}
+                    className="inline-flex items-center gap-1 text-[11px] font-bold text-purple-600 hover:text-purple-700 bg-purple-50 hover:bg-purple-100 px-2 py-0.5 rounded-md transition-colors cursor-pointer"
+                  >
+                    <span>✨ AI Auto-Draft</span>
+                  </button>
+                </div>
                 <textarea
                   rows="3"
                   value={leaveReason}
                   onChange={e => setLeaveReason(e.target.value)}
-                  placeholder="Detail reason, doctor prescription ref, or event name..."
+                  placeholder="Detail reason, doctor prescription ref, or click ✨ AI Auto-Draft..."
                   className="w-full text-xs text-slate-800 bg-slate-50 border border-slate-200 rounded-xl p-3 outline-none focus:ring-2 focus:ring-indigo-500/20"
                   required
                 />
@@ -528,9 +611,11 @@ export default function StudentView({ student, activeTab = 'overview' }) {
                       {item.category}
                     </h4>
                   </div>
-                  <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${
-                    item.status === 'Approved'
+                  <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider ${
+                    item.status === 'APPROVED' || item.status === 'Approved'
                       ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                      : item.status === 'REJECTED' || item.status === 'Rejected'
+                      ? 'bg-rose-50 text-rose-700 border border-rose-200'
                       : 'bg-amber-50 text-amber-700 border border-amber-200'
                   }`}>
                     {item.status}
@@ -544,7 +629,7 @@ export default function StudentView({ student, activeTab = 'overview' }) {
                 </div>
 
                 <div className="pt-2 border-t border-slate-100 text-[11px] text-slate-400 flex items-center justify-between">
-                  <span>Applied on {item.dateApplied}</span>
+                  <span>Applied on {item.appliedOn || item.dateApplied}</span>
                   <span className="text-slate-600 font-medium">Reviewer: {item.approvedBy}</span>
                 </div>
               </div>
@@ -600,11 +685,11 @@ export default function StudentView({ student, activeTab = 'overview' }) {
               <div className="grid grid-cols-2 gap-2">
                 <div>
                   <span className="text-slate-400 block text-[11px]">Candidate Name:</span>
-                  <strong className="text-slate-900 font-bold text-sm">{student.name}</strong>
+                  <strong className="text-slate-900 font-bold text-sm">{safeStudent.name}</strong>
                 </div>
                 <div>
                   <span className="text-slate-400 block text-[11px]">University Roll No:</span>
-                  <strong className="font-mono text-slate-900 font-bold text-sm">{student.rollNo}</strong>
+                  <strong className="font-mono text-slate-900 font-bold text-sm">{safeStudent.rollNo}</strong>
                 </div>
               </div>
 
@@ -640,7 +725,7 @@ export default function StudentView({ student, activeTab = 'overview' }) {
                 {isDefaulter ? 'DEBARRED (SHORTAGE)' : 'VERIFIED & CLEARED'}
               </span>
               <span className="text-[10px] text-slate-500 font-mono mt-1">
-                Attendance: {percentage}% (Min: 75%)
+                Attendance: {percentage}% (Min: {threshold}%)
               </span>
             </div>
           </div>
@@ -668,9 +753,9 @@ export default function StudentView({ student, activeTab = 'overview' }) {
                       <td className="py-2 px-3 text-slate-500">18 May 2026 (09:30 AM)</td>
                       <td className="py-2 px-3 text-right">
                         <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                          sub.percentage >= 75.0 ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'
+                          sub.percentage >= threshold ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'
                         }`}>
-                          {sub.percentage >= 75.0 ? 'Cleared' : 'Withheld'}
+                          {sub.percentage >= threshold ? 'Cleared' : 'Withheld'}
                         </span>
                       </td>
                     </tr>
@@ -699,206 +784,282 @@ export default function StudentView({ student, activeTab = 'overview' }) {
   // ================= 5. DEFAULT TAB: OVERVIEW DASHBOARD =================
   return (
     <div className="space-y-6">
-      {/* 2-Column Student Experience layout matching Ace Academy */}
-      <div className="flex flex-col lg:flex-row items-start gap-6">
-        {/* Left Column: Hero Welcome Banner + My Courses Cards + Academic Certifications */}
-        <div className="flex-1 min-w-0 space-y-6 w-full">
-          {/* 1. Large Blue Welcome Banner (like "Welcome back, Diane!" in reference) */}
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-500 text-white p-7 sm:p-8 shadow-lg shadow-indigo-600/15">
-            <div className="relative z-10 max-w-md">
-              <span className="text-xs font-semibold text-blue-200 uppercase tracking-wider block">
-                {student.department} • Semester VI
+      {/* 1. Hero Welcome Banner */}
+      <div className="relative overflow-hidden rounded-[24px] bg-gradient-to-r from-[#0071E3] via-[#0077ED] to-[#0047AB] text-white p-6 sm:p-8 shadow-[0_12px_32px_rgba(0,113,227,0.2)]">
+        <div className="relative z-10 max-w-xl">
+          <span className="text-[11px] font-semibold text-white/80 uppercase tracking-wider block">
+            {student.department} • Semester VI
+          </span>
+          <h2 className="text-2xl sm:text-3xl font-bold mt-1 tracking-tight text-white">
+            Welcome back, {student.name.split(' ')[0]}!
+          </h2>
+          <p className="text-xs sm:text-sm text-white/90 mt-2 font-normal leading-relaxed">
+            {isDefaulter
+              ? `Your current attendance is ${percentage}%. You need ${recoveryClasses} consecutive attended classes to restore statutory exam eligibility.`
+              : `You have maintained an excellent ${percentage}% cumulative attendance, safely above the 75% institutional threshold.`}
+          </p>
+
+          <div className="mt-5 flex flex-wrap items-center gap-3">
+            <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-md px-3.5 py-1.5 rounded-full text-xs font-medium text-white border border-white/20">
+              <span className={`w-2 h-2 rounded-full ${isTodayPresent ? 'bg-[#34C759]' : 'bg-[#FF9500] animate-pulse'}`} />
+              <span>
+                Today: {isTodayPresent ? 'Marked Present' : 'Marked Absent'}
               </span>
-              <h2 className="text-2xl sm:text-3xl font-extrabold mt-1 tracking-tight text-white">
-                Welcome back, {student.name.split(' ')[0]}!
-              </h2>
-              <p className="text-xs sm:text-sm text-blue-100 mt-2 font-medium leading-relaxed">
-                {isDefaulter
-                  ? `Your current attendance is ${percentage}%. You need ${recoveryClasses} consecutive attended classes to restore statutory exam eligibility.`
-                  : `You've achieved ${percentage}% cumulative attendance, well above the 75% examination threshold! You can safely miss up to ${safeMissable} classes.`}
-              </p>
-
-              <div className="mt-5 flex flex-wrap items-center gap-3">
-                <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-md px-3.5 py-1.5 rounded-full text-xs font-semibold text-white border border-white/20">
-                  <span className={`w-2 h-2 rounded-full ${isTodayPresent ? 'bg-emerald-400' : 'bg-amber-400 animate-pulse'}`} />
-                  <span>
-                    Today's Status: {isTodayPresent ? 'Marked Present' : 'Marked Absent'}
-                  </span>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => setIsPunchModalOpen(true)}
-                  className="inline-flex items-center gap-1.5 bg-white text-indigo-700 hover:bg-blue-50 px-3.5 py-1.5 rounded-full text-xs font-bold shadow-md transition-all active:scale-[0.98]"
-                >
-                  <QrCode className="w-3.5 h-3.5" />
-                  <span>{isTodayPresent ? 'Self Check-in Verified ✓' : 'Punch Attendance (OTP / QR)'}</span>
-                </button>
-              </div>
             </div>
 
-            {/* 3D Graduation Cap Decorative Graphic */}
-            <div className="absolute right-4 -bottom-3 sm:bottom-0 opacity-80 sm:opacity-100 pointer-events-none">
-              <div className="w-36 h-36 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-xs">
-                <GraduationCap className="w-20 h-20 text-white/90 transform -rotate-12" />
-              </div>
-            </div>
+            <button
+              type="button"
+              onClick={() => setIsPunchModalOpen(true)}
+              className="inline-flex items-center gap-1.5 bg-white text-[#0071E3] hover:bg-white/95 px-4 py-1.5 rounded-full text-xs font-semibold shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98]"
+            >
+              <QrCode className="w-3.5 h-3.5" />
+              <span>{isTodayPresent ? 'Verified Check-in ✓' : 'Scan Smart QR'}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setIsDisputeModalOpen(true)}
+              className="inline-flex items-center gap-1.5 bg-white/20 hover:bg-white/30 text-white px-3.5 py-1.5 rounded-full text-xs font-semibold backdrop-blur-md border border-white/25 transition-all hover:scale-[1.02] active:scale-[0.98]"
+              title="Dispute an incorrect absent mark"
+            >
+              <AlertTriangle className="w-3.5 h-3.5 text-amber-300" />
+              <span>Dispute Attendance</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Decorative Graphic */}
+        <div className="absolute right-4 -bottom-4 opacity-40 sm:opacity-90 pointer-events-none">
+          <div className="w-36 h-36 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-xs">
+            <GraduationCap className="w-20 h-20 text-white/90 transform -rotate-12" />
+          </div>
+        </div>
+      </div>
+
+      {/* 2. Modern Segmented Control Sub-Tabs (Clean Mobile & Desktop Switcher) */}
+      <div className="flex items-center p-1 bg-[#E8E8ED]/80 backdrop-blur-md rounded-full max-w-xl mx-auto border border-black/[0.04] text-xs font-medium">
+        <button
+          type="button"
+          onClick={() => setStudentSubTab('attendance')}
+          className={`flex-1 py-2 rounded-full text-center transition-all duration-250 ease-[cubic-bezier(0.25,1,0.5,1)] ${
+            studentSubTab === 'attendance'
+              ? 'bg-white text-[#1D1D1F] font-semibold shadow-[0_2px_8px_rgba(0,0,0,0.08)]'
+              : 'text-[#6E6E73] hover:text-[#1D1D1F]'
+          }`}
+        >
+          My Attendance
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setStudentSubTab('schedule')}
+          className={`flex-1 py-2 rounded-full text-center transition-all duration-250 ease-[cubic-bezier(0.25,1,0.5,1)] ${
+            studentSubTab === 'schedule'
+              ? 'bg-white text-[#1D1D1F] font-semibold shadow-[0_2px_8px_rgba(0,0,0,0.08)]'
+              : 'text-[#6E6E73] hover:text-[#1D1D1F]'
+          }`}
+        >
+          Schedule
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setStudentSubTab('records')}
+          className={`flex-1 py-2 rounded-full text-center transition-all duration-250 ease-[cubic-bezier(0.25,1,0.5,1)] ${
+            studentSubTab === 'records'
+              ? 'bg-white text-[#1D1D1F] font-semibold shadow-[0_2px_8px_rgba(0,0,0,0.08)]'
+              : 'text-[#6E6E73] hover:text-[#1D1D1F]'
+          }`}
+        >
+          Hall Ticket
+        </button>
+      </div>
+
+      {/* 3. Dedicated Clean Views Per Sub-Tab */}
+
+      {/* TAB A: MY ATTENDANCE */}
+      {studentSubTab === 'attendance' && (
+        <div className="space-y-6 animate-in fade-in duration-200">
+          <div className="flex items-center justify-between">
+            <h3 className="text-base font-semibold text-[#1D1D1F] tracking-tight">
+              Registered Subjects &amp; Attendance
+            </h3>
+            <span className="text-xs text-[#86868B] font-medium">
+              {indianSubjects.length} Active Courses
+            </span>
           </div>
 
-          {/* 2. Subjects Section (Indian College Curriculum) */}
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold text-slate-900 tracking-tight">
-                Registered Subjects &amp; Attendance
-              </h3>
-              <span className="text-xs font-semibold text-slate-500">
-                {indianSubjects.length} Registered Courses
-              </span>
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {indianSubjects.map(course => {
+              const isSelected = selectedCourseCode === course.code;
+              const isUnder = course.percentage < threshold;
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {indianSubjects.slice(0, 3).map(course => {
-                const isSelected = selectedCourseCode === course.code;
-                const isUnder = course.percentage < 75.0;
-
-                return (
-                  <div
-                    key={course.code}
-                    onClick={() => setSelectedCourseCode(course.code)}
-                    className={`cursor-pointer rounded-2xl p-5 transition-all flex flex-col justify-between border bg-white ${
-                      isSelected
-                        ? 'border-indigo-600 shadow-md ring-2 ring-indigo-500/10'
-                        : 'border-slate-200/80 hover:border-slate-300 shadow-xs'
-                    }`}
-                  >
-                    <div>
-                      {/* Icon Container */}
-                      <div className="w-12 h-12 rounded-2xl bg-indigo-50/80 border border-indigo-100/80 flex items-center justify-center text-indigo-600 mb-3 shadow-xs font-mono font-bold text-xs">
+              return (
+                <div
+                  key={course.code}
+                  onClick={() => setSelectedCourseCode(course.code)}
+                  className={`cursor-pointer rounded-[22px] p-5 transition-all duration-300 flex flex-col justify-between border bg-white ${
+                    isSelected
+                      ? 'border-[#0071E3] shadow-[0_12px_28px_rgba(0,113,227,0.12)] ring-2 ring-[#0071E3]/20'
+                      : 'border-black/[0.06] hover:border-[#0071E3]/40 shadow-xs'
+                  }`}
+                >
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-xs font-mono font-semibold px-2.5 py-1 rounded-full bg-[#F5F5F7] text-[#1D1D1F] border border-black/[0.04]">
                         {course.code}
-                      </div>
-
-                      <h4 className="font-bold text-sm text-slate-900 leading-snug">
-                        {course.name}
-                      </h4>
-                      <p className="text-[11px] text-slate-400 mt-0.5">
-                        {course.faculty}
-                      </p>
+                      </span>
+                      <span className={`text-[10px] font-semibold px-2.5 py-0.5 rounded-full ${
+                        isUnder
+                          ? 'bg-[#FFECEB] text-[#FF3B30] border border-red-100'
+                          : 'bg-[#EBF9EE] text-[#34C759] border border-green-100'
+                      }`}>
+                        {isUnder ? 'Deficit Warning' : 'Eligible'}
+                      </span>
                     </div>
 
-                    <div className="mt-5 pt-3 border-t border-slate-100">
-                      {/* Progress Bar */}
-                      <div className="flex items-center justify-between text-xs mb-1.5">
-                        <span className="text-slate-400 text-[11px]">
-                          {course.attended}/{course.total} classes
-                        </span>
-                        <span className={`font-mono font-bold text-xs ${isUnder ? 'text-rose-600' : 'text-slate-900'}`}>
-                          {course.percentage}%
-                        </span>
-                      </div>
-                      <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                        <div
-                          className={`h-full rounded-full transition-all duration-500 ${
-                            isUnder ? 'bg-rose-500' : 'bg-blue-600'
-                          }`}
-                          style={{ width: `${Math.min(100, course.percentage)}%` }}
-                        />
-                      </div>
+                    <h4 className="font-semibold text-sm text-[#1D1D1F] leading-snug">
+                      {course.name}
+                    </h4>
+                    <p className="text-xs text-[#86868B] mt-0.5">
+                      {course.faculty}
+                    </p>
+                  </div>
+
+                  <div className="mt-5 pt-3 border-t border-black/[0.05]">
+                    <div className="flex items-center justify-between text-xs mb-1.5">
+                      <span className="text-[#86868B]">
+                        {course.attended}/{course.total} attended
+                      </span>
+                      <span className={`font-mono font-semibold ${isUnder ? 'text-[#FF3B30]' : 'text-[#34C759]'}`}>
+                        {course.percentage}%
+                      </span>
+                    </div>
+                    <div className="w-full bg-[#F5F5F7] rounded-full h-2 overflow-hidden border border-black/[0.04]">
+                      <div
+                        className={`h-full rounded-full transition-all duration-500 ${
+                          isUnder ? 'bg-[#FF3B30]' : 'bg-[#34C759]'
+                        }`}
+                        style={{ width: `${Math.min(100, course.percentage)}%` }}
+                      />
                     </div>
                   </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* 3. Achievements & Statutory Certificates */}
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold text-slate-900 tracking-tight">
-                Exam Standing &amp; Hall Ticket
-              </h3>
-              <span className="text-xs font-semibold text-slate-500">Academic Records</span>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="rounded-2xl border border-amber-200/80 bg-amber-50/50 p-5 flex items-center justify-between">
-                <div className="space-y-1">
-                  <span className="text-[11px] font-bold text-amber-700 uppercase tracking-wider block">
-                    Statutory Compliance
-                  </span>
-                  <h4 className="font-bold text-sm text-slate-900">
-                    Semester Exam Hall Ticket
-                  </h4>
-                  <p className="text-xs text-slate-500">
-                    {isDefaulter ? 'Pending clearance (< 75%)' : 'Verified & Eligible for Exams'}
-                  </p>
                 </div>
-                <div className="w-12 h-12 rounded-2xl bg-amber-100/80 text-amber-700 flex items-center justify-center shrink-0">
-                  <Award className="w-6 h-6" />
-                </div>
-              </div>
-
-              <div className="rounded-2xl border border-indigo-200/80 bg-indigo-50/50 p-5 flex items-center justify-between">
-                <div className="space-y-1">
-                  <span className="text-[11px] font-bold text-indigo-700 uppercase tracking-wider block">
-                    Institutional Record
-                  </span>
-                  <h4 className="font-bold text-sm text-slate-900">
-                    Semester VI Attendance Clearance
-                  </h4>
-                  <p className="text-xs text-slate-500">
-                    {effectiveAttended} of {effectiveTotal} Lectures Accounted
-                  </p>
-                </div>
-                <div className="w-12 h-12 rounded-2xl bg-indigo-100/80 text-indigo-700 flex items-center justify-center shrink-0">
-                  <CheckCircle2 className="w-6 h-6" />
-                </div>
-              </div>
-            </div>
+              );
+            })}
           </div>
         </div>
+      )}
 
-        {/* Right Column: Mini Timetable Calendar + Upcoming Lectures */}
-        <div className="w-full lg:w-80 shrink-0 space-y-6">
-          <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs">
-            <h3 className="font-bold text-sm text-slate-900 tracking-tight mb-3">
-              Today's Schedule
+      {/* TAB B: SCHEDULE */}
+      {studentSubTab === 'schedule' && (
+        <div className="max-w-2xl mx-auto space-y-4 animate-in fade-in duration-200">
+          <div className="flex items-center justify-between">
+            <h3 className="text-base font-semibold text-[#1D1D1F]">
+              Today's Lecture Schedule
             </h3>
-            <div className="space-y-2 text-xs">
-              <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-                <span className="text-[10px] font-mono font-bold text-indigo-600 block">09:15 AM – 10:15 AM</span>
-                <span className="font-semibold text-slate-800">CS-601: Machine Learning &amp; AI</span>
-                <span className="text-[10px] text-slate-400 block">LT-201 • Dr. S. K. Gupta</span>
+            <span className="text-xs text-[#86868B]">Semester VI Timetable</span>
+          </div>
+
+          <div className="bg-white rounded-[24px] border border-black/[0.06] p-5 shadow-xs space-y-3">
+            <div className="p-3.5 rounded-2xl bg-[#F5F5F7] border border-black/[0.04] flex items-center justify-between">
+              <div>
+                <span className="text-[10px] font-mono font-semibold text-[#0071E3] block">09:15 AM – 10:15 AM</span>
+                <span className="font-semibold text-sm text-[#1D1D1F] block mt-0.5">CS-601: Machine Learning &amp; AI</span>
+                <span className="text-xs text-[#86868B]">LT-201 • Dr. S. K. Gupta</span>
               </div>
-              <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-                <span className="text-[10px] font-mono font-bold text-indigo-600 block">10:15 AM – 11:15 AM</span>
-                <span className="font-semibold text-slate-800">CS-602: DBMS</span>
-                <span className="text-[10px] text-slate-400 block">LT-204 • Prof. Rajesh Verma</span>
+              <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-[#E8F2FF] text-[#0071E3]">
+                Room LT-201
+              </span>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-[#F5F5F7] border border-black/[0.04] flex items-center justify-between">
+              <div>
+                <span className="text-[10px] font-mono font-semibold text-[#0071E3] block">10:15 AM – 11:15 AM</span>
+                <span className="font-semibold text-sm text-[#1D1D1F] block mt-0.5">CS-602: Database Management Systems</span>
+                <span className="text-xs text-[#86868B]">LT-204 • Prof. Rajesh Verma</span>
               </div>
-              <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-                <span className="text-[10px] font-mono font-bold text-indigo-600 block">02:30 PM – 04:30 PM</span>
-                <span className="font-semibold text-slate-800">CS-605P: Web &amp; Cloud Lab</span>
-                <span className="text-[10px] text-slate-400 block">Lab-4 • Er. Rahul Saxena</span>
+              <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-[#E8F2FF] text-[#0071E3]">
+                Room LT-204
+              </span>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-[#F5F5F7] border border-black/[0.04] flex items-center justify-between">
+              <div>
+                <span className="text-[10px] font-mono font-semibold text-[#0071E3] block">02:30 PM – 04:30 PM</span>
+                <span className="font-semibold text-sm text-[#1D1D1F] block mt-0.5">CS-605P: Web &amp; Cloud Lab</span>
+                <span className="text-xs text-[#86868B]">Lab-4 • Er. Rahul Saxena</span>
+              </div>
+              <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-[#EBF9EE] text-[#34C759]">
+                Lab 4
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB C: RECORDS & HALL TICKET */}
+      {studentSubTab === 'records' && (
+        <div className="max-w-2xl mx-auto space-y-4 animate-in fade-in duration-200">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="rounded-[24px] border border-[#FF9500]/30 bg-[#FFF5E5] p-6 flex items-center justify-between shadow-xs">
+              <div className="space-y-1">
+                <span className="text-[10px] font-semibold text-[#FF9500] uppercase tracking-wider block">
+                  Statutory Compliance
+                </span>
+                <h4 className="font-semibold text-base text-[#1D1D1F]">
+                  Semester Exam Hall Ticket
+                </h4>
+                <p className="text-xs text-[#86868B]">
+                  {isDefaulter ? `Pending clearance (< ${threshold}%)` : 'Verified & Eligible for Exams'}
+                </p>
+              </div>
+              <div className="w-12 h-12 rounded-2xl bg-white text-[#FF9500] flex items-center justify-center shrink-0 shadow-xs">
+                <Award className="w-6 h-6" />
+              </div>
+            </div>
+
+            <div className="rounded-[24px] border border-[#0071E3]/20 bg-[#E8F2FF] p-6 flex items-center justify-between shadow-xs">
+              <div className="space-y-1">
+                <span className="text-[10px] font-semibold text-[#0071E3] uppercase tracking-wider block">
+                  Institutional Record
+                </span>
+                <h4 className="font-semibold text-base text-[#1D1D1F]">
+                  Attendance Clearance
+                </h4>
+                <p className="text-xs text-[#86868B]">
+                  {effectiveAttended} of {effectiveTotal} Lectures Accounted
+                </p>
+              </div>
+              <div className="w-12 h-12 rounded-2xl bg-white text-[#0071E3] flex items-center justify-center shrink-0 shadow-xs">
+                <CheckCircle2 className="w-6 h-6" />
               </div>
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Bunk Calculator in Student Overview */}
-      <div className="w-full">
-        <StudentBunkCalculator student={student} subjects={indianSubjects} />
-      </div>
+      )}
 
       {/* Student Self-Attendance Check-in Modal */}
       {isPunchModalOpen && (
         <StudentPunchModal
-          student={student}
+          student={safeStudent}
           onClose={() => setIsPunchModalOpen(false)}
           onPunchSuccess={() => {
             setTodayMarkedPresent(true);
+            if (propOnSelfPunch) {
+              propOnSelfPunch();
+            }
           }}
         />
       )}
+
+      {/* Student Attendance Dispute Modal */}
+      <StudentDisputeModal
+        isOpen={isDisputeModalOpen}
+        onClose={() => setIsDisputeModalOpen(false)}
+        student={safeStudent}
+        subjects={indianSubjects}
+      />
     </div>
   );
 }

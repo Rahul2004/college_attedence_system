@@ -14,6 +14,7 @@ import {
 export default function WhatsAppAlertModal({ 
   defaulter, 
   course, 
+  threshold = 75,
   onClose, 
   onDispatched 
 }) {
@@ -40,7 +41,7 @@ Dear Parent / Guardian of *${studentName}* (Roll No: *${rollNo}*),
 This is an urgent academic notice regarding your ward's attendance in *${courseCode}: ${courseName}*.
 
 • Current Attendance: *${attendanceRate}%*
-• Mandatory University Threshold: *75.0%*
+• Mandatory University Threshold: *${threshold.toFixed(1)}%*
 • Status: *CRITICAL SHORTAGE (Risk of Exam Debarment)*
 
 Your ward is required to attend the next *${recoveryNeeded} consecutive lectures* without fail to restore statutory clearance.
@@ -58,7 +59,7 @@ Ref: NIT/ATTN-ALERT/${rollNo}/${new Date().getFullYear()}`;
 यह आपके सुपुत्र/सुपुत्री की *${courseCode}: ${courseName}* विषय में उपस्थिति संबंधी महत्वपूर्ण सूचना है।
 
 • वर्तमान उपस्थिति: *${attendanceRate}%*
-• विश्वविद्यालय अनिवार्य न्यूनतम सीमा: *75.0%*
+• विश्वविद्यालय अनिवार्य न्यूनतम सीमा: *${threshold.toFixed(1)}%*
 • स्थिति: *गंभीर कमी (परीक्षा से वंचित होने का जोखिम)*
 
 परीक्षा में बैठने की अनुमति हेतु आपके बच्चे को आगामी *${recoveryNeeded} कक्षाएं* लगातार उपस्थित रहनी होंगी।

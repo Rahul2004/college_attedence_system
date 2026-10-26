@@ -73,30 +73,30 @@ export default function AnalyticsDashboard() {
 
   return (
     <div className="space-y-6 mb-8">
-      <div className="bg-white rounded-2xl border border-slate-200/80 p-4 sm:p-6 shadow-sm">
+      <div className="bg-white rounded-[24px] border border-black/[0.08] p-5 sm:p-7 shadow-[0_4px_24px_rgba(0,0,0,0.03)]">
         {/* Header and Toggle */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 sm:pb-5 border-b border-slate-100 gap-3 sm:gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 sm:pb-5 border-b border-black/[0.06] gap-3 sm:gap-4">
           <div>
             <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+              <div className="w-8 h-8 rounded-xl bg-[#E8F2FF] text-[#0071E3] flex items-center justify-center shrink-0">
                 <BarChart3 className="w-4 h-4" />
               </div>
-              <h2 className="text-base sm:text-xl font-bold text-slate-900 leading-snug">
-                Attendance Trends & Demographic Benchmarks
+              <h2 className="text-base sm:text-xl font-semibold text-[#1D1D1F] tracking-tight">
+                Attendance Trends &amp; Demographic Benchmarks
               </h2>
             </div>
-            <p className="text-[11px] sm:text-xs text-slate-500 mt-1 pl-9 sm:pl-10">
+            <p className="text-xs text-[#86868B] mt-1 pl-10.5">
               Historical compliance cycles and cross-department turnout metrics.
             </p>
           </div>
 
-          <div className="flex items-center p-1 bg-slate-100/80 rounded-xl border border-slate-200/60 self-start sm:self-auto w-full sm:w-auto">
+          <div className="flex items-center p-1 bg-[#E8E8ED]/80 backdrop-blur-md rounded-full self-start sm:self-auto w-full sm:w-auto border border-black/[0.04]">
             <button
               type="button"
               onClick={() => setTimeframe('WEEKLY')}
-              className={`flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-center ${timeframe === 'WEEKLY'
-                  ? 'bg-white text-slate-900 shadow-sm'
-                  : 'text-slate-600 hover:text-slate-900'
+              className={`flex-1 sm:flex-initial px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 text-center ${timeframe === 'WEEKLY'
+                  ? 'bg-white text-[#1D1D1F] shadow-xs'
+                  : 'text-[#6E6E73] hover:text-[#1D1D1F]'
               }`}
             >
               Weekly Trajectory
@@ -104,9 +104,9 @@ export default function AnalyticsDashboard() {
             <button
               type="button"
               onClick={() => setTimeframe('MONTHLY')}
-              className={`flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-center ${timeframe === 'MONTHLY'
-                  ? 'bg-white text-slate-900 shadow-sm'
-                  : 'text-slate-600 hover:text-slate-900'
+              className={`flex-1 sm:flex-initial px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 text-center ${timeframe === 'MONTHLY'
+                  ? 'bg-white text-[#1D1D1F] shadow-xs'
+                  : 'text-[#6E6E73] hover:text-[#1D1D1F]'
               }`}
             >
               Monthly Summary

@@ -31,96 +31,71 @@ export default function MateSidebar({
   isSidebarOpen = false,
   onMobileClose,
   isExpanded = true,
-  onToggleExpand
+  onToggleExpand,
+  onOpenProfile
 }) {
+  // On mobile/drawer (when opened via 3-line hamburger menu), always render full expanded labels & text
+  const effectiveExpanded = isSidebarOpen || isExpanded;
+
   return (
     <>
-      {/* Mobile Backdrop Overlay */}
+      {/* Universal Backdrop Overlay when 3-line drawer is active */}
       {isSidebarOpen && (
         <div
           onClick={onMobileClose}
-          className="fixed inset-0 bg-black/60 backdrop-blur-xs z-40 md:hidden transition-opacity duration-300"
+          className="fixed inset-0 bg-black/60 backdrop-blur-xs z-40 transition-opacity duration-300"
         />
       )}
 
-      {/* Main Sidebar Container:
-          - Mobile: fixed drawer (-translate-x-full to translate-x-0)
-          - Desktop: smooth width transition between w-64 (expanded) and w-20 (compact)
-      */}
+      {/* Slide-out Navigation Drawer Container */}
       <aside
         className={`
-          fixed md:static inset-y-0 left-0 z-50
-          ${isExpanded ? 'w-64' : 'w-20'}
-          shrink-0 bg-slate-950 text-slate-300
-          flex flex-col justify-between py-5 px-3 min-h-screen border-r border-slate-800/80
-          transition-all duration-300 ease-in-out
-          ${isSidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full md:translate-x-0'}
+          fixed inset-y-0 left-0 z-50
+          w-72 max-w-[85vw] sm:w-72
+          shrink-0 bg-white/95 backdrop-blur-2xl text-[#1D1D1F]
+          flex flex-col justify-between py-5 px-3 min-h-screen border-r border-black/[0.08]
+          transition-all duration-300 ease-[cubic-bezier(0.25,1,0.5,1)]
+          ${isSidebarOpen ? 'translate-x-0 shadow-[0_30px_60px_rgba(0,0,0,0.3)]' : '-translate-x-full pointer-events-none'}
         `}
       >
         <div className="space-y-6">
-          {/* Brand Header: Academia + Toggle Button */}
-          <div className="flex items-center justify-between px-1.5">
-            <div className={`flex items-center gap-2.5 overflow-hidden transition-all duration-300 ${!isExpanded ? 'justify-center w-full' : ''}`}>
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-blue-500 flex items-center justify-center text-white shadow-md shadow-indigo-600/30 shrink-0">
-                <GraduationCap className="w-5 h-5" />
+          {/* Brand Header */}
+          <div className="flex items-center justify-between px-2">
+            <div className="flex items-center gap-3 overflow-hidden">
+              <div className="w-9 h-9 rounded-xl bg-[#1D1D1F] text-white flex items-center justify-center shadow-sm shrink-0 transition-transform duration-200 hover:scale-105">
+                <GraduationCap className="w-4 h-4 text-white" />
               </div>
-              {isExpanded && (
-                <div className="min-w-0 transition-opacity duration-200">
-                  <span className="font-extrabold text-white text-base tracking-tight block leading-none truncate">
-                    Academia
-                  </span>
-                  <span className="text-[10px] text-slate-400 font-medium block mt-1 truncate">
-                    {role === 'admin' ? 'Institutional Admin' : role === 'faculty' ? 'Faculty Operations' : 'Student Workspace'}
-                  </span>
-                </div>
-              )}
+              <div className="min-w-0">
+                <span className="font-semibold text-[#1D1D1F] text-[15px] tracking-tight block leading-tight">
+                  AttendOS
+                </span>
+                <span className="text-[11px] text-[#86868B] font-medium block truncate">
+                  {role === 'admin' ? 'Administration' : role === 'faculty' ? 'Faculty Portal' : 'Student Portal'}
+                </span>
+              </div>
             </div>
 
-            {/* Desktop Chevron Collapse / Expand Button in Sidebar Header */}
-            {onToggleExpand && (
-              <button
-                type="button"
-                onClick={onToggleExpand}
-                className="hidden md:flex p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-900 transition-colors shrink-0"
-                title={isExpanded ? "Collapse Sidebar" : "Expand Sidebar"}
-                aria-label="Toggle Sidebar"
-              >
-                {isExpanded ? (
-                  <ChevronLeft className="w-4 h-4" />
-                ) : (
-                  <ChevronRight className="w-4 h-4" />
-                )}
-              </button>
-            )}
-
-            {/* Mobile Close Button */}
+            {/* Close Drawer Button (X) */}
             <button
               type="button"
               onClick={onMobileClose}
-              className="md:hidden p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-900 transition-colors"
-              aria-label="Close Mobile Sidebar"
+              className="p-1.5 rounded-lg text-[#86868B] hover:text-[#1D1D1F] hover:bg-black/[0.04] transition-colors cursor-pointer"
+              title="Close Menu"
+              aria-label="Close Navigation Menu"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
-          {/* Dynamic Context Header: Course or Roll No or Admin Scope */}
+          {/* Dynamic Context Pill */}
           <div className="px-1">
             <div
-              className={`flex items-center gap-2 bg-slate-900 border border-slate-800/80 px-2.5 py-1.5 rounded-xl text-xs text-slate-400 overflow-hidden ${
-                !isExpanded ? 'justify-center py-2' : ''
-              }`}
-              title={role === 'admin' ? 'All Departments & Systems' : role === 'student' ? `Roll: ${currentStudent?.rollNo || 'CS-401'}` : `Course: ${course.code}`}
+              className="flex items-center gap-2 bg-[#F5F5F7] border border-black/[0.04] px-3 py-2 rounded-xl text-xs text-[#86868B] overflow-hidden"
+              title={role === 'admin' ? 'University System' : role === 'student' ? `Roll: ${currentStudent?.rollNo || 'CS-401'}` : `Course: ${course?.code || 'Active Subject'}`}
             >
-              {isExpanded ? (
-                <span className="text-[11px] truncate">
-                  {role === 'admin' ? '✦ University System' : role === 'student' ? `Roll: ${currentStudent?.rollNo || 'CS-401'}` : `⌘ Course: ${course.code}`}
-                </span>
-              ) : (
-                <span className="font-mono text-[11px] font-bold text-slate-300">
-                  {role === 'admin' ? 'ADM' : role === 'student' ? 'CS' : course.code.split('-')[0]}
-                </span>
-              )}
+              <span className="text-xs font-medium text-[#1D1D1F] truncate">
+                {role === 'admin' ? '★ University System' : role === 'student' ? `Roll: ${currentStudent?.rollNo || 'CS-401'}` : `Course: ${course?.code || 'Active Subject'}`}
+              </span>
             </div>
           </div>
 
@@ -129,23 +104,23 @@ export default function MateSidebar({
             {role === 'admin' ? (
               /* ================= ADMIN NAVIGATION ================= */
               <>
-                <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                  {isExpanded ? 'Administration' : '•••'}
+                <div className="px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-ink-subtle font-display">
+                  {effectiveExpanded ? 'Administration' : '•••'}
                 </div>
 
                 <button
                   type="button"
                   onClick={() => onTabChange('admin')}
                   title="Institutional Executive Suite"
-                  className={`w-full flex items-center ${isExpanded ? 'justify-between px-3' : 'justify-center px-2'} py-2 rounded-lg text-xs font-medium transition-all ${
+                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-sk-btn text-xs font-bold transition-all ${
                     activeTab === 'admin'
-                      ? 'bg-purple-600/20 text-purple-300 font-semibold border border-purple-500/30'
-                      : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                      ? 'bg-berry-soft text-berry-deep border border-berry/30 shadow-xs'
+                      : 'text-ink-muted hover:text-ink hover:bg-surface-sunken'
                   }`}
                 >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <ShieldCheck className={`w-4 h-4 shrink-0 ${activeTab === 'admin' ? 'text-purple-400' : 'text-slate-400'}`} />
-                    {isExpanded && <span className="truncate">Admin Dashboard</span>}
+                  <div className="flex items-center gap-3 min-w-0">
+                    <ShieldCheck className={`w-4 h-4 shrink-0 ${activeTab === 'admin' ? 'text-berry' : 'text-ink-muted'}`} />
+                    {effectiveExpanded && <span className="truncate">Admin Dashboard</span>}
                   </div>
                 </button>
 
@@ -153,35 +128,35 @@ export default function MateSidebar({
                   type="button"
                   onClick={() => onTabChange('academic-setup')}
                   title="Master Curriculum & Programs"
-                  className={`w-full flex items-center ${isExpanded ? 'justify-between px-3' : 'justify-center px-2'} py-2 rounded-lg text-xs font-medium transition-all ${
+                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-sk-btn text-xs font-bold transition-all ${
                     activeTab === 'academic-setup'
-                      ? 'bg-purple-600/20 text-purple-300 font-semibold border border-purple-500/30'
-                      : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                      ? 'bg-berry-soft text-berry-deep border border-berry/30 shadow-xs'
+                      : 'text-ink-muted hover:text-ink hover:bg-surface-sunken'
                   }`}
                 >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <BookOpen className={`w-4 h-4 shrink-0 ${activeTab === 'academic-setup' ? 'text-purple-400' : 'text-slate-400'}`} />
-                    {isExpanded && <span className="truncate">Academic Setup</span>}
+                  <div className="flex items-center gap-3 min-w-0">
+                    <BookOpen className={`w-4 h-4 shrink-0 ${activeTab === 'academic-setup' ? 'text-berry' : 'text-ink-muted'}`} />
+                    {effectiveExpanded && <span className="truncate">Academic Setup</span>}
                   </div>
                 </button>
 
-                <div className="pt-2 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                  {isExpanded ? 'Monitoring & Reports' : '•••'}
+                <div className="pt-2 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-ink-subtle font-display">
+                  {effectiveExpanded ? 'Monitoring & Reports' : '•••'}
                 </div>
 
                 <button
                   type="button"
                   onClick={() => onTabChange('roster')}
                   title="Universal Attendance Audit"
-                  className={`w-full flex items-center ${isExpanded ? 'justify-between px-3' : 'justify-center px-2'} py-2 rounded-lg text-xs font-medium transition-all ${
+                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-sk-btn text-xs font-bold transition-all ${
                     activeTab === 'roster'
-                      ? 'bg-slate-900 text-white font-semibold border border-slate-700'
-                      : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                      ? 'bg-sky-soft text-sky-deep border border-sky/30 shadow-xs'
+                      : 'text-ink-muted hover:text-ink hover:bg-surface-sunken'
                   }`}
                 >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <Users className={`w-4 h-4 shrink-0 ${activeTab === 'roster' ? 'text-blue-400' : 'text-slate-400'}`} />
-                    {isExpanded && <span className="truncate">Attendance Audit</span>}
+                  <div className="flex items-center gap-3 min-w-0">
+                    <Users className={`w-4 h-4 shrink-0 ${activeTab === 'roster' ? 'text-sky' : 'text-ink-muted'}`} />
+                    {effectiveExpanded && <span className="truncate">Attendance Audit</span>}
                   </div>
                 </button>
 
@@ -189,15 +164,15 @@ export default function MateSidebar({
                   type="button"
                   onClick={() => onTabChange('analytics')}
                   title="Campus-Wide Analytics"
-                  className={`w-full flex items-center ${isExpanded ? 'justify-between px-3' : 'justify-center px-2'} py-2 rounded-lg text-xs font-medium transition-all ${
+                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-sk-btn text-xs font-bold transition-all ${
                     activeTab === 'analytics'
-                      ? 'bg-slate-900 text-white font-semibold border border-slate-700'
-                      : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                      ? 'bg-sky-soft text-sky-deep border border-sky/30 shadow-xs'
+                      : 'text-ink-muted hover:text-ink hover:bg-surface-sunken'
                   }`}
                 >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <BarChart3 className={`w-4 h-4 shrink-0 ${activeTab === 'analytics' ? 'text-blue-400' : 'text-slate-400'}`} />
-                    {isExpanded && <span className="truncate">Analytics</span>}
+                  <div className="flex items-center gap-3 min-w-0">
+                    <BarChart3 className={`w-4 h-4 shrink-0 ${activeTab === 'analytics' ? 'text-sky' : 'text-ink-muted'}`} />
+                    {effectiveExpanded && <span className="truncate">Analytics</span>}
                   </div>
                 </button>
 
@@ -205,18 +180,18 @@ export default function MateSidebar({
                   type="button"
                   onClick={() => onTabChange('warnings')}
                   title="Exam Debarment Board"
-                  className={`w-full flex items-center ${isExpanded ? 'justify-between px-3' : 'justify-center px-2'} py-2 rounded-lg text-xs font-medium transition-all relative ${
+                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-sk-btn text-xs font-bold transition-all relative ${
                     activeTab === 'warnings'
-                      ? 'bg-slate-900 text-white font-semibold border border-slate-700'
-                      : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                      ? 'bg-coral-soft text-coral-deep border border-coral/30 shadow-xs'
+                      : 'text-ink-muted hover:text-ink hover:bg-surface-sunken'
                   }`}
                 >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <ShieldAlert className={`w-4 h-4 shrink-0 ${activeTab === 'warnings' ? 'text-rose-400' : 'text-slate-400'}`} />
-                    {isExpanded && <span className="truncate">Debarment List</span>}
+                  <div className="flex items-center gap-3 min-w-0">
+                    <ShieldAlert className={`w-4 h-4 shrink-0 ${activeTab === 'warnings' ? 'text-coral' : 'text-ink-muted'}`} />
+                    {effectiveExpanded && <span className="truncate">Debarment List</span>}
                   </div>
                   {lowWarningCount > 0 && (
-                    <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30">
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-coral text-white">
                       {lowWarningCount}
                     </span>
                   )}
@@ -226,38 +201,38 @@ export default function MateSidebar({
                   type="button"
                   onClick={() => onTabChange('reports')}
                   title="Accreditation & University Reports"
-                  className={`w-full flex items-center ${isExpanded ? 'justify-between px-3' : 'justify-center px-2'} py-2 rounded-lg text-xs font-medium transition-all ${
+                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-sk-btn text-xs font-bold transition-all ${
                     activeTab === 'reports'
-                      ? 'bg-slate-900 text-white font-semibold border border-slate-700'
-                      : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                      ? 'bg-sky-soft text-sky-deep border border-sky/30 shadow-xs'
+                      : 'text-ink-muted hover:text-ink hover:bg-surface-sunken'
                   }`}
                 >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <Download className={`w-4 h-4 shrink-0 ${activeTab === 'reports' ? 'text-blue-400' : 'text-slate-400'}`} />
-                    {isExpanded && <span className="truncate">Reports</span>}
+                  <div className="flex items-center gap-3 min-w-0">
+                    <Download className={`w-4 h-4 shrink-0 ${activeTab === 'reports' ? 'text-sky' : 'text-ink-muted'}`} />
+                    {effectiveExpanded && <span className="truncate">Reports</span>}
                   </div>
                 </button>
               </>
             ) : role === 'faculty' ? (
               /* ================= FACULTY NAVIGATION ================= */
               <>
-                <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                  {isExpanded ? 'Classroom' : '•••'}
+                <div className="px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-ink-subtle font-display">
+                  {effectiveExpanded ? 'Classroom' : '•••'}
                 </div>
 
                 <button
                   type="button"
                   onClick={() => onTabChange('roster')}
                   title="Class Roll Call (Mark Attendance)"
-                  className={`w-full flex items-center ${isExpanded ? 'justify-between px-3' : 'justify-center px-2'} py-2 rounded-lg text-xs font-medium transition-all ${
+                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-sk-btn text-xs font-bold transition-all ${
                     activeTab === 'roster'
-                      ? 'bg-blue-600/20 text-blue-300 font-semibold border border-blue-500/30'
-                      : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                      ? 'bg-sky-soft text-sky-deep border border-sky/30 shadow-xs'
+                      : 'text-ink-muted hover:text-ink hover:bg-surface-sunken'
                   }`}
                 >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <Users className={`w-4 h-4 shrink-0 ${activeTab === 'roster' ? 'text-blue-400' : 'text-slate-400'}`} />
-                    {isExpanded && <span className="truncate">Roll Call</span>}
+                  <div className="flex items-center gap-3 min-w-0">
+                    <Users className={`w-4 h-4 shrink-0 ${activeTab === 'roster' ? 'text-sky' : 'text-ink-muted'}`} />
+                    {effectiveExpanded && <span className="truncate">Roll Call</span>}
                   </div>
                 </button>
 
@@ -265,15 +240,15 @@ export default function MateSidebar({
                   type="button"
                   onClick={() => onTabChange('attendance-grid')}
                   title="Quick Attendance Grid Matrix"
-                  className={`w-full flex items-center ${isExpanded ? 'justify-between px-3' : 'justify-center px-2'} py-2 rounded-lg text-xs font-medium transition-all ${
+                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-sk-btn text-xs font-bold transition-all ${
                     activeTab === 'attendance-grid'
-                      ? 'bg-blue-600/20 text-blue-300 font-semibold border border-blue-500/30'
-                      : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                      ? 'bg-sky-soft text-sky-deep border border-sky/30 shadow-xs'
+                      : 'text-ink-muted hover:text-ink hover:bg-surface-sunken'
                   }`}
                 >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <CheckSquare className={`w-4 h-4 shrink-0 ${activeTab === 'attendance-grid' ? 'text-blue-400' : 'text-slate-400'}`} />
-                    {isExpanded && <span className="truncate">Quick Grid</span>}
+                  <div className="flex items-center gap-3 min-w-0">
+                    <CheckSquare className={`w-4 h-4 shrink-0 ${activeTab === 'attendance-grid' ? 'text-sky' : 'text-ink-muted'}`} />
+                    {effectiveExpanded && <span className="truncate">Quick Grid</span>}
                   </div>
                 </button>
 
@@ -281,35 +256,35 @@ export default function MateSidebar({
                   type="button"
                   onClick={() => onTabChange('leave')}
                   title="Student Leave Approvals"
-                  className={`w-full flex items-center ${isExpanded ? 'justify-between px-3' : 'justify-center px-2'} py-2 rounded-lg text-xs font-medium transition-all ${
+                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-sk-btn text-xs font-bold transition-all ${
                     activeTab === 'leave'
-                      ? 'bg-blue-600/20 text-blue-300 font-semibold border border-blue-500/30'
-                      : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                      ? 'bg-sky-soft text-sky-deep border border-sky/30 shadow-xs'
+                      : 'text-ink-muted hover:text-ink hover:bg-surface-sunken'
                   }`}
                 >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <FileText className={`w-4 h-4 shrink-0 ${activeTab === 'leave' ? 'text-blue-400' : 'text-slate-400'}`} />
-                    {isExpanded && <span className="truncate">Leave Approvals</span>}
+                  <div className="flex items-center gap-3 min-w-0">
+                    <FileText className={`w-4 h-4 shrink-0 ${activeTab === 'leave' ? 'text-sky' : 'text-ink-muted'}`} />
+                    {effectiveExpanded && <span className="truncate">Leave Approvals</span>}
                   </div>
                 </button>
 
-                <div className="pt-2 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                  {isExpanded ? 'Insights' : '•••'}
+                <div className="pt-2 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-ink-subtle font-display">
+                  {effectiveExpanded ? 'Insights' : '•••'}
                 </div>
 
                 <button
                   type="button"
                   onClick={() => onTabChange('analytics')}
                   title="Subject Analytics & Delivery"
-                  className={`w-full flex items-center ${isExpanded ? 'justify-between px-3' : 'justify-center px-2'} py-2 rounded-lg text-xs font-medium transition-all ${
+                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-sk-btn text-xs font-bold transition-all ${
                     activeTab === 'analytics'
-                      ? 'bg-slate-900 text-white font-semibold border border-slate-700'
-                      : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                      ? 'bg-sky-soft text-sky-deep border border-sky/30 shadow-xs'
+                      : 'text-ink-muted hover:text-ink hover:bg-surface-sunken'
                   }`}
                 >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <BarChart3 className={`w-4 h-4 shrink-0 ${activeTab === 'analytics' ? 'text-blue-400' : 'text-slate-400'}`} />
-                    {isExpanded && <span className="truncate">Subject Analytics</span>}
+                  <div className="flex items-center gap-3 min-w-0">
+                    <BarChart3 className={`w-4 h-4 shrink-0 ${activeTab === 'analytics' ? 'text-sky' : 'text-ink-muted'}`} />
+                    {effectiveExpanded && <span className="truncate">Subject Analytics</span>}
                   </div>
                 </button>
 
@@ -317,18 +292,18 @@ export default function MateSidebar({
                   type="button"
                   onClick={() => onTabChange('warnings')}
                   title="Shortage Watchlist"
-                  className={`w-full flex items-center ${isExpanded ? 'justify-between px-3' : 'justify-center px-2'} py-2 rounded-lg text-xs font-medium transition-all relative ${
+                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-sk-btn text-xs font-bold transition-all relative ${
                     activeTab === 'warnings'
-                      ? 'bg-slate-900 text-white font-semibold border border-slate-700'
-                      : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                      ? 'bg-coral-soft text-coral-deep border border-coral/30 shadow-xs'
+                      : 'text-ink-muted hover:text-ink hover:bg-surface-sunken'
                   }`}
                 >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <ShieldAlert className={`w-4 h-4 shrink-0 ${activeTab === 'warnings' ? 'text-rose-400' : 'text-slate-400'}`} />
-                    {isExpanded && <span className="truncate">Defaulter Watchlist</span>}
+                  <div className="flex items-center gap-3 min-w-0">
+                    <ShieldAlert className={`w-4 h-4 shrink-0 ${activeTab === 'warnings' ? 'text-coral' : 'text-ink-muted'}`} />
+                    {effectiveExpanded && <span className="truncate">Defaulter Watchlist</span>}
                   </div>
                   {lowWarningCount > 0 && (
-                    <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30">
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-coral text-white">
                       {lowWarningCount}
                     </span>
                   )}
@@ -338,38 +313,38 @@ export default function MateSidebar({
                   type="button"
                   onClick={() => onTabChange('reports')}
                   title="Subject Attendance Register"
-                  className={`w-full flex items-center ${isExpanded ? 'justify-between px-3' : 'justify-center px-2'} py-2 rounded-lg text-xs font-medium transition-all ${
+                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-sk-btn text-xs font-bold transition-all ${
                     activeTab === 'reports'
-                      ? 'bg-slate-900 text-white font-semibold border border-slate-700'
-                      : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                      ? 'bg-sky-soft text-sky-deep border border-sky/30 shadow-xs'
+                      : 'text-ink-muted hover:text-ink hover:bg-surface-sunken'
                   }`}
                 >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <Download className={`w-4 h-4 shrink-0 ${activeTab === 'reports' ? 'text-blue-400' : 'text-slate-400'}`} />
-                    {isExpanded && <span className="truncate">Attendance Register</span>}
+                  <div className="flex items-center gap-3 min-w-0">
+                    <Download className={`w-4 h-4 shrink-0 ${activeTab === 'reports' ? 'text-sky' : 'text-ink-muted'}`} />
+                    {effectiveExpanded && <span className="truncate">Attendance Register</span>}
                   </div>
                 </button>
               </>
             ) : (
               /* ================= STUDENT NAVIGATION ================= */
               <>
-                <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                  {isExpanded ? 'Student Portal' : '•••'}
+                <div className="px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-ink-subtle font-display">
+                  {effectiveExpanded ? 'Student Portal' : '•••'}
                 </div>
 
                 <button
                   type="button"
                   onClick={() => onTabChange('overview')}
                   title="My Attendance Dashboard"
-                  className={`w-full flex items-center ${isExpanded ? 'justify-between px-3' : 'justify-center px-2'} py-2 rounded-lg text-xs font-medium transition-all ${
+                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-sk-btn text-xs font-bold transition-all ${
                     activeTab === 'overview'
-                      ? 'bg-blue-600/20 text-blue-300 font-semibold border border-blue-500/30'
-                      : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                      ? 'bg-sky-soft text-sky-deep border border-sky/30 shadow-xs'
+                      : 'text-ink-muted hover:text-ink hover:bg-surface-sunken'
                   }`}
                 >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <LayoutDashboard className={`w-4 h-4 shrink-0 ${activeTab === 'overview' ? 'text-blue-400' : 'text-slate-400'}`} />
-                    {isExpanded && <span className="truncate">My Dashboard</span>}
+                  <div className="flex items-center gap-3 min-w-0">
+                    <LayoutDashboard className={`w-4 h-4 shrink-0 ${activeTab === 'overview' ? 'text-sky' : 'text-ink-muted'}`} />
+                    {effectiveExpanded && <span className="truncate">My Dashboard</span>}
                   </div>
                 </button>
 
@@ -377,15 +352,15 @@ export default function MateSidebar({
                   type="button"
                   onClick={() => onTabChange('courses')}
                   title="Subject Attendance"
-                  className={`w-full flex items-center ${isExpanded ? 'justify-between px-3' : 'justify-center px-2'} py-2 rounded-lg text-xs font-medium transition-all ${
+                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-sk-btn text-xs font-bold transition-all ${
                     activeTab === 'courses'
-                      ? 'bg-blue-600/20 text-blue-300 font-semibold border border-blue-500/30'
-                      : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                      ? 'bg-sky-soft text-sky-deep border border-sky/30 shadow-xs'
+                      : 'text-ink-muted hover:text-ink hover:bg-surface-sunken'
                   }`}
                 >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <BookOpen className={`w-4 h-4 shrink-0 ${activeTab === 'courses' ? 'text-blue-400' : 'text-slate-400'}`} />
-                    {isExpanded && <span className="truncate">Subjects &amp; Credits</span>}
+                  <div className="flex items-center gap-3 min-w-0">
+                    <BookOpen className={`w-4 h-4 shrink-0 ${activeTab === 'courses' ? 'text-sky' : 'text-ink-muted'}`} />
+                    {effectiveExpanded && <span className="truncate">Subjects &amp; Credits</span>}
                   </div>
                 </button>
 
@@ -393,15 +368,15 @@ export default function MateSidebar({
                   type="button"
                   onClick={() => onTabChange('schedule')}
                   title="Class Timetable"
-                  className={`w-full flex items-center ${isExpanded ? 'justify-between px-3' : 'justify-center px-2'} py-2 rounded-lg text-xs font-medium transition-all ${
+                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-sk-btn text-xs font-bold transition-all ${
                     activeTab === 'schedule'
-                      ? 'bg-blue-600/20 text-blue-300 font-semibold border border-blue-500/30'
-                      : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                      ? 'bg-sky-soft text-sky-deep border border-sky/30 shadow-xs'
+                      : 'text-ink-muted hover:text-ink hover:bg-surface-sunken'
                   }`}
                 >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <Calendar className={`w-4 h-4 shrink-0 ${activeTab === 'schedule' ? 'text-blue-400' : 'text-slate-400'}`} />
-                    {isExpanded && <span className="truncate">Class Timetable</span>}
+                  <div className="flex items-center gap-3 min-w-0">
+                    <Calendar className={`w-4 h-4 shrink-0 ${activeTab === 'schedule' ? 'text-sky' : 'text-ink-muted'}`} />
+                    {effectiveExpanded && <span className="truncate">Class Timetable</span>}
                   </div>
                 </button>
 
@@ -409,15 +384,15 @@ export default function MateSidebar({
                   type="button"
                   onClick={() => onTabChange('leave')}
                   title="Leave & Medical Excuses"
-                  className={`w-full flex items-center ${isExpanded ? 'justify-between px-3' : 'justify-center px-2'} py-2 rounded-lg text-xs font-medium transition-all ${
+                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-sk-btn text-xs font-bold transition-all ${
                     activeTab === 'leave'
-                      ? 'bg-blue-600/20 text-blue-300 font-semibold border border-blue-500/30'
-                      : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                      ? 'bg-sky-soft text-sky-deep border border-sky/30 shadow-xs'
+                      : 'text-ink-muted hover:text-ink hover:bg-surface-sunken'
                   }`}
                 >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <FileText className={`w-4 h-4 shrink-0 ${activeTab === 'leave' ? 'text-blue-400' : 'text-slate-400'}`} />
-                    {isExpanded && <span className="truncate">Leave Application</span>}
+                  <div className="flex items-center gap-3 min-w-0">
+                    <FileText className={`w-4 h-4 shrink-0 ${activeTab === 'leave' ? 'text-sky' : 'text-ink-muted'}`} />
+                    {effectiveExpanded && <span className="truncate">Leave Application</span>}
                   </div>
                 </button>
 
@@ -425,15 +400,15 @@ export default function MateSidebar({
                   type="button"
                   onClick={() => onTabChange('certificates')}
                   title="Hall Ticket & Exam Eligibility"
-                  className={`w-full flex items-center ${isExpanded ? 'justify-between px-3' : 'justify-center px-2'} py-2 rounded-lg text-xs font-medium transition-all ${
+                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-sk-btn text-xs font-bold transition-all ${
                     activeTab === 'certificates'
-                      ? 'bg-blue-600/20 text-blue-300 font-semibold border border-blue-500/30'
-                      : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                      ? 'bg-sun-soft text-sun-deep border border-sun/30 shadow-xs'
+                      : 'text-ink-muted hover:text-ink hover:bg-surface-sunken'
                   }`}
                 >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <Award className={`w-4 h-4 shrink-0 ${activeTab === 'certificates' ? 'text-blue-400' : 'text-slate-400'}`} />
-                    {isExpanded && <span className="truncate">Exam Hall Ticket</span>}
+                  <div className="flex items-center gap-3 min-w-0">
+                    <Award className={`w-4 h-4 shrink-0 ${activeTab === 'certificates' ? 'text-sun-deep' : 'text-ink-muted'}`} />
+                    {effectiveExpanded && <span className="truncate">Exam Hall Ticket</span>}
                   </div>
                 </button>
               </>
@@ -442,58 +417,70 @@ export default function MateSidebar({
         </div>
 
         {/* Bottom Profile & Role Information */}
-        <div className="space-y-3.5 pt-4 border-t border-slate-900 px-1">
+        <div className="space-y-3 pt-4 border-t border-outline px-1">
           {/* Verified Database Role Badge */}
-          {isExpanded ? (
-            <div className="py-1 px-2.5 bg-slate-900 rounded-xl border border-slate-800 text-[11px] font-semibold flex items-center justify-between">
-              <span className="text-slate-400 text-[10px] uppercase tracking-wider font-bold">Access</span>
-              <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
+          {effectiveExpanded ? (
+            <div className="py-1 px-3 bg-surface-sunken rounded-full border border-outline text-xs font-bold flex items-center justify-between">
+              <span className="text-ink-subtle text-[10px] uppercase tracking-wider">Access</span>
+              <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
                 role === 'admin'
-                  ? 'bg-purple-600/30 text-purple-300 border border-purple-500/40'
+                  ? 'bg-berry-soft text-berry-deep border border-purple-200'
                   : role === 'faculty'
-                  ? 'bg-indigo-600/30 text-indigo-300 border border-indigo-500/40'
-                  : 'bg-emerald-600/30 text-emerald-300 border border-emerald-500/40'
+                  ? 'bg-sky-soft text-sky-deep border border-sky-200'
+                  : 'bg-leaf-soft text-leaf-deep border border-green-200'
               }`}>
                 {role === 'admin' ? 'Admin' : role === 'faculty' ? 'Faculty' : 'Student'}
               </span>
             </div>
           ) : (
             <div className="flex justify-center" title={`Access: ${role}`}>
-              <span className={`w-2.5 h-2.5 rounded-full ${role === 'admin' ? 'bg-purple-500' : role === 'faculty' ? 'bg-indigo-500' : 'bg-emerald-500'}`} />
+              <span className={`w-3 h-3 rounded-full ${role === 'admin' ? 'bg-berry' : role === 'faculty' ? 'bg-sky' : 'bg-leaf'}`} />
             </div>
           )}
 
-          {/* Dynamic User Profile Card */}
-          <div className={`flex items-center ${!isExpanded ? 'justify-center' : 'gap-2.5'}`} title={role === 'admin' ? 'Rahul (Administrator)' : role === 'student' ? (currentStudent?.name || 'Alexander Wright') : 'Prof. R. Vance'}>
-            <div className="w-8 h-8 rounded-full bg-slate-800 text-slate-200 font-bold text-xs flex items-center justify-center border border-slate-700 shrink-0">
+          {/* Dynamic User Profile Card - Skylearn Style with Profile Settings Launcher */}
+          <div
+            onClick={() => onOpenProfile?.()}
+            className={`flex items-center ${!effectiveExpanded ? 'justify-center' : 'gap-2.5'} p-1.5 rounded-xl hover:bg-black/[0.04] cursor-pointer transition-all group`}
+            title="Open Profile & Account Settings"
+          >
+            <div className="w-9 h-9 rounded-full bg-indigo-50 text-indigo-700 font-extrabold text-xs flex items-center justify-center border-2 border-white shadow-xs shrink-0 group-hover:scale-105 transition-transform">
               {role === 'admin'
-                ? 'RK'
+                ? 'AD'
                 : role === 'student' 
-                ? (currentStudent?.name?.split(' ').map(n => n[0]).join('').substring(0, 2) || 'AW')
-                : 'RV'
+                ? (currentStudent?.name?.split(' ').map(n => n[0]).join('').substring(0, 2) || 'ST')
+                : (session?.user?.user_metadata?.name?.split(' ').map(n => n[0]).join('').substring(0, 2) || 'FA')
               }
             </div>
-            {isExpanded && (
+            {effectiveExpanded && (
               <div className="min-w-0 flex-1">
-                <span className="text-xs font-semibold text-white block truncate">
-                  {role === 'admin' ? 'System Administrator' : role === 'student' ? (currentStudent?.name || 'Alexander Wright') : 'Prof. R. Vance'}
+                <span className="text-xs font-bold text-ink block truncate font-display group-hover:text-indigo-600 transition-colors">
+                  {role === 'admin' 
+                    ? (session?.user?.user_metadata?.name || 'Administrator') 
+                    : role === 'student' 
+                    ? (currentStudent?.name || 'Student') 
+                    : (session?.user?.user_metadata?.name || 'Faculty In-Charge')}
                 </span>
-                <span className="text-[10px] text-slate-500 block truncate font-mono">
-                  {role === 'admin' ? (session?.user?.email || 'admin@college.edu.in') : role === 'student' ? `${currentStudent?.rollNo || 'CS-401'} • 2nd Year` : 'Department Chair'}
+                <span className="text-[11px] text-ink-subtle block truncate font-sans">
+                  {role === 'admin' 
+                    ? (session?.user?.email || 'admin@college.edu.in') 
+                    : role === 'student' 
+                    ? (currentStudent?.rollNo ? `Roll: ${currentStudent.rollNo}` : (session?.user?.email || 'Student Portal')) 
+                    : (session?.user?.email || 'Faculty Portal')}
                 </span>
               </div>
             )}
           </div>
 
-          {/* Sign Out Button */}
+          {/* Sign Out Button - Skylearn Coral Accent */}
           <button
             type="button"
             onClick={() => onLogout?.()}
             title="Sign Out"
-            className={`w-full flex items-center ${!isExpanded ? 'justify-center px-1' : 'justify-center gap-1.5 px-2'} text-[11px] font-semibold text-rose-400 hover:text-rose-300 hover:bg-rose-950/30 py-1.5 rounded-lg transition-colors border border-transparent hover:border-rose-900/50`}
+            className={`w-full flex items-center ${!effectiveExpanded ? 'justify-center px-1' : 'justify-center gap-1.5 px-3'} text-xs font-bold text-coral hover:text-coral-deep hover:bg-coral-soft/50 py-2 rounded-sk-btn transition-colors border border-coral/20`}
           >
             <LogOut className="w-3.5 h-3.5 shrink-0" />
-            {isExpanded && <span>Sign Out</span>}
+            {effectiveExpanded && <span>Sign Out</span>}
           </button>
         </div>
       </aside>

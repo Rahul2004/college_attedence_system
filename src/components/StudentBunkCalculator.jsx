@@ -43,15 +43,16 @@ export default function StudentBunkCalculator({ student, subjects }) {
     : 0;
 
   const targetRatio = targetPercentage / 100;
+  const denominator = Math.max(0.01, 1 - targetRatio);
 
   // 1. If below target: Classes needed without missing
   const classesNeededToAttend = currentPercentage < targetPercentage
-    ? Math.max(0, Math.ceil((targetRatio * currentTotal - currentAttended) / (1 - targetRatio)))
+    ? Math.max(0, Math.ceil((targetRatio * currentTotal - currentAttended) / denominator))
     : 0;
 
   // 2. If above target: Safe bunkable classes
   const safeClassesToBunk = currentPercentage >= targetPercentage
-    ? Math.max(0, Math.floor((currentAttended - targetRatio * currentTotal) / targetRatio))
+    ? Math.max(0, Math.floor((currentAttended - targetRatio * currentTotal) / (targetRatio || 0.75)))
     : 0;
 
   const handleSimulateAttend = () => {

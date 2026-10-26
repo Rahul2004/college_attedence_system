@@ -13,12 +13,16 @@ import {
 } from 'lucide-react';
 import { INDIAN_COLLEGE_PROGRAMS } from '../data/mockData';
 
-export default function AdminAcademicSetup() {
+export default function AdminAcademicSetup({ programs: propPrograms, onUpdateSubject }) {
   const [selectedProgramId, setSelectedProgramId] = useState('btech-cse');
   const [selectedSemNumber, setSelectedSemNumber] = useState('VI');
   const [searchQuery, setSearchQuery] = useState('');
+  const [editingSubject, setEditingSubject] = useState(null);
+  const [editFaculty, setEditFaculty] = useState('');
+  const [editRoom, setEditRoom] = useState('');
 
-  const currentProgram = INDIAN_COLLEGE_PROGRAMS.find(p => p.id === selectedProgramId) || INDIAN_COLLEGE_PROGRAMS[0];
+  const programs = propPrograms || INDIAN_COLLEGE_PROGRAMS;
+  const currentProgram = programs.find(p => p.id === selectedProgramId) || programs[0];
   const currentSem = currentProgram?.semesters?.find(s => s.semNumber === selectedSemNumber) || currentProgram?.semesters?.[0];
   const subjects = currentSem?.subjects || [];
 
@@ -27,6 +31,26 @@ export default function AdminAcademicSetup() {
     sub.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
     sub.faculty.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const handleStartEdit = (sub) => {
+    setEditingSubject(sub);
+    setEditFaculty(sub.faculty);
+    setEditRoom(sub.room);
+  };
+
+  const handleSaveEdit = (e) => {
+    e.preventDefault();
+    if (!editingSubject) return;
+
+    if (onUpdateSubject) {
+      onUpdateSubject(selectedProgramId, selectedSemNumber, editingSubject.code, {
+        faculty: editFaculty,
+        room: editRoom
+      });
+    }
+
+    setEditingSubject(null);
+  };
 
   return (
     <div className="space-y-6">
@@ -53,7 +77,7 @@ export default function AdminAcademicSetup() {
           Select Degree Program &amp; Department
         </label>
         <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin">
-          {INDIAN_COLLEGE_PROGRAMS.map(prog => {
+          {programs.map(prog => {
             const isSelected = prog.id === selectedProgramId;
             return (
               <button
@@ -155,7 +179,8 @@ export default function AdminAcademicSetup() {
                 <th className="py-3 px-3.5">Assigned Faculty</th>
                 <th className="py-3 px-3.5">Credits</th>
                 <th className="py-3 px-3.5">Hall / Room</th>
-                <th className="py-3 px-3.5 text-right">Timetable Slot</th>
+                <th className="py-3 px-3.5">Timetable Slot</th>
+                <th className="py-3 px-3.5 text-center">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -173,13 +198,84 @@ export default function AdminAcademicSetup() {
                     </span>
                   </td>
                   <td className="py-3 px-3.5 text-slate-600">{sub.room}</td>
-                  <td className="py-3 px-3.5 text-right font-mono text-slate-500 text-[11px]">{sub.defaultSlot}</td>
+                  <td className="py-3 px-3.5 font-mono text-slate-500 text-[11px]">{sub.defaultSlot}</td>
+                  <td className="py-3 px-3.5 text-center">
+                    <button
+                      type="button"
+                      onClick={() => handleStartEdit(sub)}
+                      className="p-1 rounded-lg text-slate-400 hover:text-purple-600 hover:bg-purple-50 transition-colors"
+                      title="Edit assigned faculty and classroom"
+                    >
+                      <Edit2 className="w-3.5 h-3.5" />
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       </div>
+
+      {/* Edit Subject Modal */}
+      {editingSubject && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-slate-950/80 backdrop-blur-md">
+          <div className="bg-white rounded-3xl shadow-2xl border border-slate-200/90 w-full max-w-md overflow-hidden flex flex-col text-xs">
+            <div className="bg-slate-900 text-white px-6 py-4 flex items-center justify-between border-b border-slate-800">
+              <div>
+                <h3 className="font-bold text-sm text-white">Edit Curriculum Allocation</h3>
+                <span className="text-[11px] text-purple-300 font-mono">{editingSubject.code}: {editingSubject.name}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setEditingSubject(null)}
+                className="p-1 rounded-lg text-slate-400 hover:text-white"
+              >
+                &times;
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEdit} className="p-6 space-y-4">
+              <div>
+                <label className="font-semibold text-slate-700 block mb-1">Assigned Faculty Member</label>
+                <input
+                  type="text"
+                  required
+                  value={editFaculty}
+                  onChange={e => setEditFaculty(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500/20 font-medium text-slate-900"
+                />
+              </div>
+
+              <div>
+                <label className="font-semibold text-slate-700 block mb-1">Lecture Hall / Classroom Room</label>
+                <input
+                  type="text"
+                  required
+                  value={editRoom}
+                  onChange={e => setEditRoom(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500/20 font-medium text-slate-900"
+                />
+              </div>
+
+              <div className="pt-2 flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setEditingSubject(null)}
+                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold shadow-md shadow-purple-600/20 transition-all"
+                >
+                  Update &amp; Sync
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

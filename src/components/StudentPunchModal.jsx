@@ -22,8 +22,16 @@ export default function StudentPunchModal({
 
   const handlePunch = (e) => {
     e.preventDefault();
-    if (otpInput.trim().length !== 4) {
-      setErrorMsg('Please enter the 4-digit OTP shown on the classroom screen.');
+    const cleanOtp = otpInput.trim();
+    if (cleanOtp.length !== 4) {
+      setErrorMsg('Please enter the complete 4-digit OTP shown on the classroom screen.');
+      return;
+    }
+
+    const activeOtp = typeof window !== 'undefined' ? localStorage.getItem('active_classroom_otp') : null;
+    // If active session OTP is broadcast, validate against it (or accept standard 4-digit numeric code)
+    if (activeOtp && cleanOtp !== activeOtp) {
+      setErrorMsg(`Invalid OTP "${cleanOtp}". Code has either expired or does not match active projector session.`);
       return;
     }
 
@@ -36,7 +44,7 @@ export default function StudentPunchModal({
       if (onPunchSuccess) {
         onPunchSuccess();
       }
-    }, 1000);
+    }, 800);
   };
 
   return (

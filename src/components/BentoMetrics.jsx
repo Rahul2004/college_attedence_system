@@ -6,90 +6,109 @@ import {
   TrendingUp, 
   ArrowUpRight, 
   CheckCircle2,
-  ShieldCheck
+  ShieldCheck,
+  Sparkles
 } from 'lucide-react';
 
-export default function BentoMetrics({ metrics = {} }) {
+export default function BentoMetrics({ metrics = {}, threshold = 75 }) {
   const { totalStudents = 0, totalClasses = 0, presentToday = 0, lowWarningCount = 0 } = metrics || {};
   const attendanceRate = totalStudents > 0
     ? ((presentToday / totalStudents) * 100).toFixed(1)
     : '0.0';
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
       {/* Metric 1: Total Classes */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm hover:shadow-md transition-all duration-200 hover:scale-[1.01] flex flex-col justify-between">
-        <div className="flex items-start justify-between">
+      <div className="group relative overflow-hidden bg-white/80 backdrop-blur-xl rounded-[24px] border border-black/[0.06] p-7 shadow-[0_4px_24px_rgba(0,0,0,0.03)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-400 ease-[cubic-bezier(0.25,1,0.5,1)] flex flex-col justify-between">
+        <div className="absolute top-0 right-0 -mr-8 -mt-8 w-28 h-28 bg-[#0071E3]/5 rounded-full blur-2xl group-hover:bg-[#0071E3]/10 transition-all duration-500"></div>
+
+        <div className="flex items-start justify-between relative z-10">
           <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-              Course Statistics
-            </p>
-            <h3 className="text-sm font-semibold text-slate-700 mt-1 transition-colors duration-200">Conducted Classes</h3>
+            <span className="text-[11px] font-semibold text-[#86868B] uppercase tracking-wider">
+              Curriculum Insights
+            </span>
+            <h3 className="text-base font-semibold text-[#1D1D1F] tracking-tight mt-0.5">
+              Conducted Classes
+            </h3>
           </div>
-          <div className="w-11 h-11 rounded-xl bg-slate-100 flex items-center justify-center text-slate-700 border border-slate-200/60">
-            <BookOpen className="w-5 h-5 text-indigo-600" />
+          <div className="w-11 h-11 rounded-2xl bg-[#F5F5F7] group-hover:bg-[#E8F2FF] flex items-center justify-center text-[#1D1D1F] group-hover:text-[#0071E3] transition-all duration-300">
+            <BookOpen className="w-5 h-5 transition-transform duration-300 group-hover:scale-110" />
           </div>
         </div>
 
-        <div className="mt-6 flex items-baseline gap-4">
-          <span className="text-4xl font-extrabold text-slate-900 tracking-tight">
+        <div className="mt-8 flex items-baseline gap-3 relative z-10">
+          <span className="text-4xl sm:text-5xl font-semibold text-[#1D1D1F] tracking-tight">
             {totalClasses}
           </span>
-          <span className="text-xs font-medium text-slate-500">
-            Recorded Lectures
+          <span className="text-xs font-medium text-[#86868B]">
+            Recorded Sessions
           </span>
         </div>
 
-        <div className="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500 transition-all duration-200">
+        <div className="mt-6 pt-4 border-t border-black/[0.05] flex items-center justify-between text-xs text-[#86868B] relative z-10">
           <span>Active Cohort</span>
-          <span className="font-semibold text-slate-800">{totalStudents} Students Enrolled</span>
+          <span className="font-semibold text-[#1D1D1F] bg-[#F5F5F7] px-3 py-1 rounded-full border border-black/[0.04]">
+            {totalStudents} Enrolled
+          </span>
         </div>
       </div>
 
       {/* Metric 2: Present Today */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm hover:shadow-md transition-all duration-200 hover:scale-[1.01] flex flex-col justify-between">
-        <div className="flex items-start justify-between">
+      <div className="group relative overflow-hidden bg-white/80 backdrop-blur-xl rounded-[24px] border border-black/[0.06] p-7 shadow-[0_4px_24px_rgba(0,0,0,0.03)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-400 ease-[cubic-bezier(0.25,1,0.5,1)] flex flex-col justify-between">
+        <div className="absolute top-0 right-0 -mr-8 -mt-8 w-28 h-28 bg-[#34C759]/5 rounded-full blur-2xl group-hover:bg-[#34C759]/10 transition-all duration-500"></div>
+
+        <div className="flex items-start justify-between relative z-10">
           <div>
-            <p className="text-xs font-semibold text-emerald-700 uppercase tracking-wider">
-              Today's Attendance Summary
-            </p>
-            <h3 className="text-sm font-semibold text-slate-700 mt-1">Present Today</h3>
+            <span className="text-[11px] font-semibold text-[#86868B] uppercase tracking-wider">
+              Live Attendance
+            </span>
+            <h3 className="text-base font-semibold text-[#1D1D1F] tracking-tight mt-0.5">
+              Present Today
+            </h3>
           </div>
-          <div className="w-11 h-11 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 border border-emerald-100">
-            <Users className="w-5 h-5" />
+          <div className="w-11 h-11 rounded-2xl bg-[#F5F5F7] group-hover:bg-[#EBF9EE] flex items-center justify-center text-[#1D1D1F] group-hover:text-[#34C759] transition-all duration-300">
+            <Users className="w-5 h-5 transition-transform duration-300 group-hover:scale-110" />
           </div>
         </div>
 
-        <div className="mt-6 flex items-baseline gap-4">
-          <span className="text-4xl font-extrabold text-emerald-600 tracking-tight">
+        <div className="mt-8 flex items-baseline gap-3 relative z-10">
+          <span className="text-4xl sm:text-5xl font-semibold text-[#1D1D1F] tracking-tight">
             {presentToday}
           </span>
-          <span className="text-xs font-semibold text-slate-600">
-            / {totalStudents} attending ({attendanceRate}%)
+          <span className="text-xs font-medium text-[#34C759] bg-[#EBF9EE] px-2.5 py-0.5 rounded-full">
+            {attendanceRate}% rate
           </span>
         </div>
 
-        <div className="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500 transition-all duration-200">
-          <span>Absent Count</span>
-          <span className="font-semibold text-rose-600">
-            {totalStudents - presentToday} Students Absent
+        <div className="mt-6 pt-4 border-t border-black/[0.05] flex items-center justify-between text-xs text-[#86868B] relative z-10">
+          <span>Absenteeism</span>
+          <span className="font-semibold text-[#FF3B30] bg-[#FFECEB] px-3 py-1 rounded-full border border-red-100">
+            {totalStudents - presentToday} Absent
           </span>
         </div>
       </div>
 
       {/* Metric 3: Low Warnings (< 75%) */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm hover:shadow-md transition-all duration-200 hover:scale-[1.01] flex flex-col justify-between">
-        <div className="flex items-start justify-between">
+      <div className="group relative overflow-hidden bg-white/80 backdrop-blur-xl rounded-[24px] border border-black/[0.06] p-7 shadow-[0_4px_24px_rgba(0,0,0,0.03)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-400 ease-[cubic-bezier(0.25,1,0.5,1)] flex flex-col justify-between">
+        <div className={`absolute top-0 right-0 -mr-8 -mt-8 w-28 h-28 rounded-full blur-2xl transition-all duration-500 ${
+          lowWarningCount > 0 ? 'bg-[#FF3B30]/5 group-hover:bg-[#FF3B30]/10' : 'bg-[#34C759]/5 group-hover:bg-[#34C759]/10'
+        }`}></div>
+
+        <div className="flex items-start justify-between relative z-10">
           <div>
-            <p className="text-xs font-semibold text-rose-700 uppercase tracking-wider">
-              Shortage Alerts
-            </p>
-            <h3 className="text-sm font-semibold text-slate-700 mt-1">Below Minimum (&lt; 75%)</h3>
+            <span className={`text-[11px] font-semibold uppercase tracking-wider ${
+              lowWarningCount > 0 ? 'text-[#FF3B30]' : 'text-[#34C759]'
+            }`}>
+              {lowWarningCount > 0 ? 'Debarment Risk' : 'Cohort Health'}
+            </span>
+            <h3 className="text-base font-semibold text-[#1D1D1F] tracking-tight mt-0.5">
+              Below Threshold (&lt; {threshold}%)
+            </h3>
           </div>
-          <div className={`w-11 h-11 rounded-xl flex items-center justify-center border ${
+          <div className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 ${
             lowWarningCount > 0 
-              ? 'bg-rose-50 text-rose-600 border-rose-100' 
-              : 'bg-emerald-50 text-emerald-600 border-emerald-100'
+              ? 'bg-[#FFECEB] text-[#FF3B30] group-hover:scale-105' 
+              : 'bg-[#EBF9EE] text-[#34C759] group-hover:scale-105'
           }`}>
             {lowWarningCount > 0 ? (
               <AlertTriangle className="w-5 h-5" />
@@ -99,20 +118,26 @@ export default function BentoMetrics({ metrics = {} }) {
           </div>
         </div>
 
-        <div className="mt-6 flex items-baseline gap-4">
-          <span className={`text-4xl font-extrabold tracking-tight ${
-            lowWarningCount > 0 ? 'text-rose-600' : 'text-emerald-600'
+        <div className="mt-8 flex items-baseline gap-3 relative z-10">
+          <span className={`text-4xl sm:text-5xl font-semibold tracking-tight ${
+            lowWarningCount > 0 ? 'text-[#FF3B30]' : 'text-[#34C759]'
           }`}>
             {lowWarningCount}
           </span>
-          <span className="text-xs font-medium text-slate-500">
-            {lowWarningCount === 1 ? 'Student with shortage' : 'Students with shortage'}
+          <span className="text-xs font-medium text-[#86868B]">
+            {lowWarningCount > 0 ? 'Students in Deficit' : 'Optimal Standing'}
           </span>
         </div>
 
-        <div className="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500 transition-all duration-200">
-          <span>Minimum Attendance Rule</span>
-          <span className="font-semibold text-slate-800">75.0% Required</span>
+        <div className="mt-6 pt-4 border-t border-black/[0.05] flex items-center justify-between text-xs text-[#86868B] relative z-10">
+          <span>Action Required</span>
+          <span className={`font-semibold px-3 py-1 rounded-full border ${
+            lowWarningCount > 0
+              ? 'text-[#FF3B30] bg-[#FFECEB] border-red-100'
+              : 'text-[#34C759] bg-[#EBF9EE] border-emerald-100'
+          }`}>
+            {lowWarningCount > 0 ? 'Send Warning SMS' : 'No Critical Flags'}
+          </span>
         </div>
       </div>
     </div>

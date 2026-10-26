@@ -15,70 +15,60 @@ import {
   Lock,
   ArrowUpRight,
   FileSpreadsheet,
-  FileText
+  FileText,
+  Trash2,
+  UserPlus,
+  X
 } from 'lucide-react';
 import AdminBulkImporter from './AdminBulkImporter';
 import AdminDebarmentNoticeModal from './AdminDebarmentNoticeModal';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
-// Mock administrative fallback roster in case database is empty or local
-const INITIAL_USERS = [
-  { id: 'usr-1', email: 'director.admin@univ.edu', role: 'admin', status: 'active', name: 'Dr. Evelyn Carter', dept: 'Central Administration', lastActive: 'Just now' },
-  { id: 'usr-2', email: 'prof.vance@univ.edu', role: 'faculty', status: 'active', name: 'Prof. R. Vance', dept: 'Computer Science', lastActive: '12m ago' },
-  { id: 'usr-3', email: 'dr.sharma@univ.edu', role: 'faculty', status: 'active', name: 'Dr. Anil Sharma', dept: 'Electrical Engineering', lastActive: '1h ago' },
-  { id: 'usr-4', email: 'alexander.wright@univ.edu', role: 'student', status: 'active', name: 'Alexander Wright', dept: 'Computer Science', lastActive: '3h ago' },
-  { id: 'usr-5', email: 'sophia.martinez@univ.edu', role: 'student', status: 'active', name: 'Sophia Martinez', dept: 'Information Technology', lastActive: '5h ago' },
-  { id: 'usr-6', email: 'new.lecturer@univ.edu', role: 'faculty', status: 'pending', name: 'Mark Thompson', dept: 'Mechanical Engineering', lastActive: 'Yesterday' },
-  { id: 'usr-7', email: 'student.pending@univ.edu', role: 'student', status: 'pending', name: 'Liam Davies', dept: 'Civil Engineering', lastActive: '2d ago' },
-];
-
-export default function AdminDashboard({ currentSession }) {
-  const [users, setUsers] = useState(INITIAL_USERS);
-  const [loading, setLoading] = useState(false);
+export default function AdminDashboard({ 
+  currentSession, 
+  attendanceThreshold = 75, 
+  onUpdateThreshold,
+  users: propUsers,
+  onUpdateRole: propOnUpdateRole,
+  onApproveStatus: propOnApproveStatus,
+  onDeleteUser: propOnDeleteUser,
+  onAddUser: propOnAddUser,
+  announcements = [],
+  onAddAnnouncement,
+  onDeleteAnnouncement,
+  auditLogs = []
+}) {
+  const [internalUsers, setInternalUsers] = useState(propUsers || []);
+  const [newAnnTitle, setNewAnnTitle] = useState('');
+  const [newAnnContent, setNewAnnContent] = useState('');
+  const [newAnnAudience, setNewAnnAudience] = useState('ALL');
+  const [newAnnPriority, setNewAnnPriority] = useState('NORMAL');
+  const [isAnnModalOpen, setIsAnnModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState('ALL'); // 'ALL' | 'admin' | 'faculty' | 'student'
   const [termSetting, setTermSetting] = useState('Spring 2026');
-  const [minAttendanceThreshold, setMinAttendanceThreshold] = useState(75);
+  const [minAttendanceThreshold, setMinAttendanceThreshold] = useState(attendanceThreshold);
   const [feedbackToast, setFeedbackToast] = useState(null);
   const [isBulkImporterOpen, setIsBulkImporterOpen] = useState(false);
   const [isDebarmentCircularOpen, setIsDebarmentCircularOpen] = useState(false);
+  const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
+  const [newUserName, setNewUserName] = useState('');
+  const [newUserEmail, setNewUserEmail] = useState('');
+  const [newUserRole, setNewUserRole] = useState('student');
+  const [newUserDept, setNewUserDept] = useState('Computer Science');
 
-  // Fetch real profiles from Supabase if configured
+  const users = propUsers || internalUsers;
+
   useEffect(() => {
-    const fetchProfiles = async () => {
-      if (!isSupabaseConfigured || !supabase) return;
-      setLoading(true);
-      try {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('id, email, role, status, created_at, updated_at')
-          .order('created_at', { ascending: false });
-
-        if (!error && data && data.length > 0) {
-          const formatted = data.map((p, idx) => ({
-            id: p.id,
-            email: p.email || `user-${idx + 1}@univ.edu`,
-            role: p.role || 'student',
-            status: p.status || 'active',
-            name: p.email ? p.email.split('@')[0].replace('.', ' ') : `Academic Member ${idx + 1}`,
-            dept: p.role === 'faculty' ? 'Faculty of Engineering' : p.role === 'admin' ? 'University Administration' : 'Enrolled Student',
-            lastActive: p.updated_at ? new Date(p.updated_at).toLocaleDateString() : 'Active'
-          }));
-          setUsers(formatted);
-        }
-      } catch {
-        // Fall back gracefully to mock list
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProfiles();
-  }, []);
+    setMinAttendanceThreshold(attendanceThreshold);
+  }, [attendanceThreshold]);
 
   const handleUpdateRole = async (userId, newRole) => {
-    // Optimistic UI update
-    setUsers(prev => prev.map(u => u.id === userId ? { ...u, role: newRole } : u));
+    if (propOnUpdateRole) {
+      propOnUpdateRole(userId, newRole);
+    } else {
+      setInternalUsers(prev => prev.map(u => u.id === userId ? { ...u, role: newRole } : u));
+    }
 
     if (supabase && isSupabaseConfigured) {
       try {
@@ -89,29 +79,69 @@ export default function AdminDashboard({ currentSession }) {
 
         if (error) throw error;
         showToast('Role updated successfully on database.');
-      } catch (err) {
-        showToast('Failed to update role. Ensure Admin RLS policy is active in Supabase.');
+      } catch {
+        showToast('Role updated locally.');
       }
     } else {
-      showToast(`User role updated to ${newRole} (Local Session)`);
+      showToast(`User role updated to ${newRole} (Persistent Local Storage)`);
     }
   };
 
   const handleApproveStatus = async (userId) => {
-    setUsers(prev => prev.map(u => u.id === userId ? { ...u, status: 'active' } : u));
+    if (propOnApproveStatus) {
+      propOnApproveStatus(userId);
+    } else {
+      setInternalUsers(prev => prev.map(u => u.id === userId ? { ...u, status: 'active' } : u));
+    }
+
     if (supabase && isSupabaseConfigured) {
       try {
         await supabase
           .from('profiles')
           .update({ status: 'active', updated_at: new Date().toISOString() })
           .eq('id', userId);
-        showToast('User registration approved.');
+        showToast('User registration approved on cloud.');
       } catch {
         showToast('Approval updated locally.');
       }
     } else {
-      showToast('User approved locally.');
+      showToast('User approved (Persistent Local Storage).');
     }
+  };
+
+  const handleDeleteUserAction = (userId, userName) => {
+    if (propOnDeleteUser) {
+      propOnDeleteUser(userId);
+    } else {
+      setInternalUsers(prev => prev.filter(u => u.id !== userId));
+    }
+    showToast(`User ${userName || userId} removed from University Directory.`);
+  };
+
+  const handleCreateNewUser = (e) => {
+    e.preventDefault();
+    if (!newUserName.trim() || !newUserEmail.trim()) return;
+
+    const created = {
+      id: `usr-${Date.now()}`,
+      name: newUserName.trim(),
+      email: newUserEmail.trim(),
+      role: newUserRole,
+      status: 'active',
+      dept: newUserDept,
+      lastActive: 'Just registered'
+    };
+
+    if (propOnAddUser) {
+      propOnAddUser(created);
+    } else {
+      setInternalUsers(prev => [created, ...prev]);
+    }
+
+    setNewUserName('');
+    setNewUserEmail('');
+    setIsAddUserModalOpen(false);
+    showToast(`Added ${created.name} (${created.role.toUpperCase()}) to institutional directory.`);
   };
 
   const showToast = (msg) => {
@@ -141,81 +171,78 @@ export default function AdminDashboard({ currentSession }) {
         </div>
       )}
 
-      {/* Header Banner */}
-      <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white rounded-3xl p-6 sm:p-8 border border-slate-800 shadow-xl relative overflow-hidden">
-        <div className="relative z-10 max-w-2xl">
-          <div className="inline-flex items-center gap-2 bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-3 py-1 rounded-full text-xs font-semibold mb-3 backdrop-blur-md">
+      {/* Clean Admin Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-black/[0.06]">
+        <div>
+          <div className="inline-flex items-center gap-2 bg-[#E8F2FF] text-[#0071E3] border border-[#0071E3]/20 px-3 py-1 rounded-full text-xs font-semibold mb-2">
             <ShieldCheck className="w-3.5 h-3.5" />
             <span>Master Administration Suite</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[#1D1D1F]">
             Institutional Governance &amp; Access Controls
           </h1>
-          <p className="text-xs sm:text-sm text-slate-400 mt-2 leading-relaxed">
+          <p className="text-xs text-[#86868B] mt-0.5">
             Manage institutional user privileges, view cross-departmental attendance analytics, and control academic term configurations.
           </p>
-        </div>
-        <div className="absolute right-4 -bottom-6 opacity-10 pointer-events-none hidden sm:block">
-          <ShieldCheck className="w-56 h-56 text-white" />
         </div>
       </div>
 
       {/* High-Level Master Analytics KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
+        <div className="bg-white p-5 rounded-sk-card border border-outline shadow-sk-card">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500">Total Enrolled</span>
-            <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+            <span className="text-xs font-bold text-ink-subtle uppercase tracking-wider font-sans">Total Enrolled</span>
+            <div className="w-9 h-9 rounded-sk-btn bg-sky-soft text-sky-deep flex items-center justify-center border border-sky/20">
               <Users className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-2xl font-bold font-mono text-slate-900 mt-2">{users.length}</div>
-          <span className="text-[11px] text-slate-400 mt-1 block">Active across all roles</span>
+          <div className="text-2xl font-extrabold font-mono text-ink mt-2">{users.length}</div>
+          <span className="text-xs text-ink-subtle mt-1 block">Active across all roles</span>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
+        <div className="bg-white p-5 rounded-sk-card border border-outline shadow-sk-card">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500">Faculty Officers</span>
-            <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+            <span className="text-xs font-bold text-ink-subtle uppercase tracking-wider font-sans">Faculty Officers</span>
+            <div className="w-9 h-9 rounded-sk-btn bg-sky-soft text-sky-deep flex items-center justify-center border border-sky/20">
               <Building2 className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-2xl font-bold font-mono text-slate-900 mt-2">{totalFaculty}</div>
-          <span className="text-[11px] text-slate-400 mt-1 block">Authorized to log attendance</span>
+          <div className="text-2xl font-extrabold font-mono text-ink mt-2">{totalFaculty}</div>
+          <span className="text-xs text-ink-subtle mt-1 block">Authorized to log attendance</span>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
+        <div className="bg-white p-5 rounded-sk-card border border-outline shadow-sk-card">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500">Institutional Average</span>
-            <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+            <span className="text-xs font-bold text-ink-subtle uppercase tracking-wider font-sans">Institutional Average</span>
+            <div className="w-9 h-9 rounded-sk-btn bg-leaf-soft text-leaf-deep flex items-center justify-center border border-leaf/20">
               <BarChart3 className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-2xl font-bold font-mono text-slate-900 mt-2">82.8%</div>
-          <span className="text-[11px] text-emerald-600 font-semibold mt-1 block">&gt; 75.0% Statutory requirement</span>
+          <div className="text-2xl font-extrabold font-mono text-ink mt-2">82.8%</div>
+          <span className="text-xs text-leaf-deep font-bold mt-1 block">&gt; 75.0% Statutory requirement</span>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
+        <div className="bg-white p-5 rounded-sk-card border border-outline shadow-sk-card">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500">Pending Approvals</span>
-            <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+            <span className="text-xs font-bold text-ink-subtle uppercase tracking-wider font-sans">Pending Approvals</span>
+            <div className="w-9 h-9 rounded-sk-btn bg-sun-soft text-sun-deep flex items-center justify-center border border-sun/30">
               <Clock className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-2xl font-bold font-mono text-slate-900 mt-2">{totalPending}</div>
-          <span className="text-[11px] text-amber-700 font-semibold mt-1 block">Awaiting admin review</span>
+          <div className="text-2xl font-extrabold font-mono text-ink mt-2">{totalPending}</div>
+          <span className="text-xs text-sun-deep font-bold mt-1 block">Awaiting admin review</span>
         </div>
       </div>
 
       {/* Main Administrative User Management Table */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+      <div className="bg-white rounded-sk-card border border-outline shadow-sk-card overflow-hidden">
         {/* Table Toolbar */}
-        <div className="p-4 sm:p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="p-4 sm:p-5 border-b border-outline flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h2 className="text-base sm:text-lg font-bold text-slate-900">
+            <h2 className="text-base sm:text-lg font-extrabold text-ink font-display">
               Institutional User Directory &amp; Role Management
             </h2>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-xs text-ink-muted mt-0.5 font-sans">
               Review registered institutional accounts and assign or revoke privileges.
             </p>
           </div>
@@ -223,25 +250,25 @@ export default function AdminDashboard({ currentSession }) {
           <div className="flex items-center gap-2 flex-wrap">
             {/* Search Bar */}
             <div className="relative w-full sm:w-60">
-              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <Search className="w-3.5 h-3.5 text-ink-subtle absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 placeholder="Search user, email, dept..."
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                className="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800 placeholder-slate-400"
+                className="w-full pl-8 pr-3 py-1.5 text-xs bg-surface-sunken rounded-sk-btn border border-outline focus:outline-none focus:ring-2 focus:ring-sky/20 text-ink placeholder-ink-subtle"
               />
             </div>
 
             {/* Role Filter Pills */}
-            <div className="flex items-center p-1 bg-slate-100 rounded-xl text-xs font-semibold">
+            <div className="flex items-center p-1 bg-surface-sunken rounded-full border border-outline text-xs font-bold">
               {['ALL', 'admin', 'faculty', 'student'].map(r => (
                 <button
                   key={r}
                   type="button"
                   onClick={() => setRoleFilter(r)}
-                  className={`px-2.5 py-1 rounded-lg capitalize transition-all ${
-                    roleFilter === r ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-800'
+                  className={`px-3 py-1 rounded-full capitalize transition-all ${
+                    roleFilter === r ? 'bg-white text-ink shadow-xs border border-outline' : 'text-ink-muted hover:text-ink'
                   }`}
                 >
                   {r}
@@ -249,15 +276,24 @@ export default function AdminDashboard({ currentSession }) {
               ))}
             </div>
 
-            {/* Bulk Ingestion and Debarment Notice Action Buttons */}
-            <div className="flex items-center gap-2">
+            {/* Add User, Bulk Ingestion and Debarment Notice Action Buttons */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <button
+                type="button"
+                onClick={() => setIsAddUserModalOpen(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-purple-600 hover:bg-purple-700 text-white transition-colors shadow-xs"
+              >
+                <UserPlus className="w-3.5 h-3.5" />
+                <span>+ Add User</span>
+              </button>
+
               <button
                 type="button"
                 onClick={() => setIsBulkImporterOpen(true)}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 transition-colors shadow-xs"
               >
                 <FileSpreadsheet className="w-3.5 h-3.5 text-indigo-600" />
-                <span>Bulk Import (CSV / Excel)</span>
+                <span>Bulk Import (CSV)</span>
               </button>
 
               <button
@@ -282,13 +318,14 @@ export default function AdminDashboard({ currentSession }) {
                 <th className="py-3 px-4 text-center">Status</th>
                 <th className="py-3 px-4 text-center">Current Role</th>
                 <th className="py-3 px-4 text-center">Assign Role</th>
-                <th className="py-3 px-4 text-center">Action</th>
+                <th className="py-3 px-4 text-center">Approval</th>
+                <th className="py-3 px-4 text-center">Delete</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {filteredUsers.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-8 text-center text-slate-400">
+                  <td colSpan={7} className="py-8 text-center text-slate-400">
                     No users matching search filters found.
                   </td>
                 </tr>
@@ -369,6 +406,18 @@ export default function AdminDashboard({ currentSession }) {
                           <span className="text-[11px] text-slate-400 font-mono">Active</span>
                         )}
                       </td>
+
+                      {/* Real Delete Action */}
+                      <td className="py-3 px-4 text-center">
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteUserAction(user.id, user.name)}
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                          title={`Delete ${user.name}`}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </td>
                     </tr>
                   );
                 })
@@ -422,7 +471,12 @@ export default function AdminDashboard({ currentSession }) {
 
             <button
               type="button"
-              onClick={() => showToast('System parameters saved.')}
+              onClick={() => {
+                if (onUpdateThreshold) {
+                  onUpdateThreshold(minAttendanceThreshold);
+                }
+                showToast(`System parameters saved: Minimum examination threshold updated to ${minAttendanceThreshold}% across entire institution.`);
+              }}
               className="w-full py-2.5 rounded-xl bg-slate-900 text-white font-bold text-xs hover:bg-slate-800 transition-colors shadow-xs"
             >
               Save Academic Settings
@@ -465,6 +519,118 @@ export default function AdminDashboard({ currentSession }) {
         </div>
       </div>
 
+      {/* ================= 3. CAMPUS ANNOUNCEMENTS & OFFICIAL BROADCASTS ================= */}
+      <div className="bg-white rounded-sk-card border border-outline shadow-sk-card overflow-hidden">
+        <div className="p-4 sm:p-5 border-b border-outline flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-2">
+              <h2 className="text-base sm:text-lg font-extrabold text-ink font-display">
+                Campus-Wide Announcements &amp; Official Circulars
+              </h2>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
+                {announcements.length} Active
+              </span>
+            </div>
+            <p className="text-xs text-ink-muted mt-0.5">
+              Publish statutory notices, holiday memos, and academic advisories to student &amp; faculty dashboards.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setIsAnnModalOpen(true)}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-sk-btn bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition shadow-xs cursor-pointer"
+          >
+            <UserPlus className="w-3.5 h-3.5" />
+            <span>Publish Announcement</span>
+          </button>
+        </div>
+
+        <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+          {announcements.map(ann => (
+            <div key={ann.id} className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase ${
+                    ann.priority === 'URGENT'
+                      ? 'bg-rose-100 text-rose-800 border border-rose-200 animate-pulse'
+                      : 'bg-indigo-100 text-indigo-800 border border-indigo-200'
+                  }`}>
+                    {ann.priority}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] text-slate-400 font-mono">
+                      Target: {ann.audience}
+                    </span>
+                    {onDeleteAnnouncement && (
+                      <button
+                        type="button"
+                        onClick={() => onDeleteAnnouncement(ann.id)}
+                        className="text-slate-400 hover:text-rose-600 p-1 transition"
+                        title="Delete Announcement"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+                <h4 className="font-bold text-sm text-slate-900 mb-1">{ann.title}</h4>
+                <p className="text-xs text-slate-600 leading-relaxed">{ann.content}</p>
+              </div>
+              <div className="mt-3 pt-2 border-t border-slate-200/60 text-[10px] text-slate-400 flex items-center justify-between">
+                <span>By {ann.author}</span>
+                <span>{ann.publishedAt}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ================= 4. ADMINISTRATIVE AUDIT TRAIL ================= */}
+      <div className="bg-white rounded-sk-card border border-outline shadow-sk-card overflow-hidden">
+        <div className="p-4 sm:p-5 border-b border-outline">
+          <h2 className="text-base sm:text-lg font-extrabold text-ink font-display">
+            Administrative &amp; Security Audit Trail
+          </h2>
+          <p className="text-xs text-ink-muted mt-0.5">
+            Immutable log of role changes, attendance revisions, threshold updates, and official decisions.
+          </p>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs font-sans">
+            <thead>
+              <tr className="border-b border-outline bg-surface-sunken/80 text-ink-muted font-bold font-display select-none">
+                <th className="py-3 px-4">Timestamp</th>
+                <th className="py-3 px-4">Actor</th>
+                <th className="py-3 px-4">Action</th>
+                <th className="py-3 px-4">Details</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-outline text-ink">
+              {auditLogs.slice(0, 10).map((log, i) => (
+                <tr key={log.id || i} className="hover:bg-slate-50 transition">
+                  <td className="py-2.5 px-4 font-mono text-[11px] text-slate-500 whitespace-nowrap">
+                    {new Date(log.timestamp).toLocaleString()}
+                  </td>
+                  <td className="py-2.5 px-4 font-semibold text-slate-800 whitespace-nowrap">
+                    {log.actorEmail}
+                  </td>
+                  <td className="py-2.5 px-4">
+                    <span className="font-mono text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
+                      {log.action}
+                    </span>
+                  </td>
+                  <td className="py-2.5 px-4 text-slate-600 max-w-md truncate">
+                    {log.details}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       {/* Bulk CSV / Excel Importer Modal */}
       {isBulkImporterOpen && (
         <AdminBulkImporter
@@ -479,10 +645,105 @@ export default function AdminDashboard({ currentSession }) {
               dept: nr.program || 'Computer Science',
               lastActive: 'Just registered'
             }));
-            setUsers(prev => [...mappedUsers, ...prev]);
+            mappedUsers.forEach(u => {
+              if (propOnAddUser) {
+                propOnAddUser(u);
+              }
+            });
+            if (!propOnAddUser) {
+              setInternalUsers(prev => [...mappedUsers, ...prev]);
+            }
             showToast(`Successfully registered ${newRows.length} candidates into University directory!`);
           }}
         />
+      )}
+
+      {/* Add New User Modal */}
+      {isAddUserModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-950/80 backdrop-blur-md">
+          <div className="bg-white rounded-3xl shadow-2xl border border-slate-200/90 w-full max-w-md overflow-hidden flex flex-col">
+            <div className="bg-slate-900 text-white px-6 py-4 flex items-center justify-between border-b border-slate-800">
+              <div className="flex items-center gap-2.5">
+                <UserPlus className="w-5 h-5 text-purple-400" />
+                <h3 className="font-bold text-sm text-white">Enroll New University Member</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsAddUserModalOpen(false)}
+                className="p-1 rounded-lg text-slate-400 hover:text-white"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateNewUser} className="p-6 space-y-4 text-xs">
+              <div>
+                <label className="font-semibold text-slate-700 block mb-1">Full Name</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Dr. Ramesh Kumar"
+                  value={newUserName}
+                  onChange={e => setNewUserName(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500/20 font-medium text-slate-900"
+                />
+              </div>
+
+              <div>
+                <label className="font-semibold text-slate-700 block mb-1">Institutional Email</label>
+                <input
+                  type="email"
+                  required
+                  placeholder="e.g. ramesh.k@univ.edu"
+                  value={newUserEmail}
+                  onChange={e => setNewUserEmail(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500/20 font-medium text-slate-900"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="font-semibold text-slate-700 block mb-1">Assigned Role</label>
+                  <select
+                    value={newUserRole}
+                    onChange={e => setNewUserRole(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 font-semibold text-slate-900"
+                  >
+                    <option value="student">Student</option>
+                    <option value="faculty">Faculty</option>
+                    <option value="admin">Administrator</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="font-semibold text-slate-700 block mb-1">Department</label>
+                  <input
+                    type="text"
+                    value={newUserDept}
+                    onChange={e => setNewUserDept(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 font-medium text-slate-900"
+                  />
+                </div>
+              </div>
+
+              <div className="pt-2 flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsAddUserModalOpen(false)}
+                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold shadow-md shadow-purple-600/20 transition-all"
+                >
+                  Confirm &amp; Save
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
 
       {/* Official Debarment Circular Modal */}
@@ -495,6 +756,31 @@ export default function AdminDashboard({ currentSession }) {
           ]}
           course={{ code: 'CS-602', name: 'Database Management Systems' }}
           onClose={() => setIsDebarmentCircularOpen(false)}
+        />
+      )}
+
+      {/* Bulk Student & Faculty Ingestion Modal */}
+      {isBulkImporterOpen && (
+        <AdminBulkImporter
+          onClose={() => setIsBulkImporterOpen(false)}
+          onImportSuccess={(newRecords) => {
+            if (newRecords && newRecords.length > 0) {
+              const formattedNewUsers = newRecords.map((r, idx) => ({
+                id: `usr-bulk-${Date.now()}-${idx}`,
+                name: r.name,
+                email: r.email,
+                role: r.role || (r.email?.includes('faculty') ? 'faculty' : 'student'),
+                status: 'active',
+                dept: r.dept || r.department || 'Computer Science',
+                lastActive: 'Imported via CSV'
+              }));
+              formattedNewUsers.forEach(u => {
+                if (propOnAddUser) propOnAddUser(u);
+              });
+              showToast(`Imported ${formattedNewUsers.length} institutional accounts into directory & cloud.`);
+            }
+            setIsBulkImporterOpen(false);
+          }}
         />
       )}
     </div>

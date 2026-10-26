@@ -29,10 +29,19 @@ export default function DynamicQrAttendanceModal({
 
   // Generate new OTP and refresh QR payload every 30 seconds
   useEffect(() => {
+    // Publish initial OTP for active session
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('active_classroom_otp', otpCode);
+    }
+
     const timer = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 1) {
-          setOtpCode(Math.floor(1000 + Math.random() * 9000).toString());
+          const nextOtp = Math.floor(1000 + Math.random() * 9000).toString();
+          setOtpCode(nextOtp);
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('active_classroom_otp', nextOtp);
+          }
           return 30;
         }
         return prev - 1;
@@ -228,10 +237,29 @@ export default function DynamicQrAttendanceModal({
                 <div className="absolute left-0 right-0 h-1 bg-gradient-to-r from-transparent via-rose-500 to-transparent shadow-lg shadow-rose-500 animate-pulse pointer-events-none top-1/2 transform -translate-y-1/2" />
               </div>
 
-              {/* Expiring Countdown Circular Indicator */}
-              <div className="absolute -bottom-4 bg-slate-900 text-white px-4 py-1.5 rounded-full border border-slate-700 shadow-md text-xs font-bold flex items-center gap-2">
-                <RefreshCw className={`w-3.5 h-3.5 text-indigo-400 ${timeLeft < 5 ? 'animate-spin' : ''}`} />
-                <span>Refreshes in {timeLeft}s</span>
+              {/* Expiring Countdown Circular Indicator with dynamic visual progress */}
+              <div className="absolute -bottom-4 bg-slate-900 text-white pl-3 pr-4 py-1.5 rounded-full border border-slate-700 shadow-md text-xs font-bold flex items-center gap-2">
+                <div className="relative w-4 h-4 flex items-center justify-center">
+                  <svg className="w-full h-full -rotate-90" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2.5" className="text-slate-700 fill-none" />
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="9"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeDasharray={56.5}
+                      strokeDashoffset={56.5 - (56.5 * timeLeft) / 30}
+                      strokeLinecap="round"
+                      className={`fill-none transition-all duration-1000 ${
+                        timeLeft <= 5 ? 'text-rose-400' : 'text-indigo-400'
+                      }`}
+                    />
+                  </svg>
+                </div>
+                <span className={timeLeft <= 5 ? 'text-rose-400 font-extrabold animate-pulse' : ''}>
+                  Refreshes in {timeLeft}s
+                </span>
               </div>
             </div>
 

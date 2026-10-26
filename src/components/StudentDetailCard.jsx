@@ -12,80 +12,110 @@ import {
   TrendingUp,
   FileText
 } from 'lucide-react';
+import AppleActivityRings from './ui/AppleActivityRings';
+import AppleWalletStudentId from './ui/AppleWalletStudentId';
 
-export default function StudentDetailCard({ student, onClose, onToggleStatus }) {
+export default function StudentDetailCard({ student, onClose, onToggleStatus, threshold = 75 }) {
   if (!student) return null;
 
-  const isPresent = student.todayStatus === 'PRESENT';
+  const [activeTab, setActiveTab] = React.useState('rings');
+  const reqRatio = threshold / 100;
+  const remRatio = 1 - reqRatio;
+
+  const isPresent = student?.todayStatus === 'PRESENT';
   const effectiveAttended = isPresent
-    ? student.attendedClasses + 1
-    : student.attendedClasses;
-  const effectiveTotal = student.totalClasses + 1;
-  const percentage = Number(((effectiveAttended / effectiveTotal) * 100).toFixed(1));
-  const isDefaulter = percentage < 75.0;
+    ? (student?.attendedClasses || 0) + 1
+    : (student?.attendedClasses || 0);
+  const effectiveTotal = (student?.totalClasses || 0) + 1;
+  const percentage = effectiveTotal > 0 ? Number(((effectiveAttended / effectiveTotal) * 100).toFixed(1)) : 0;
+  const isDefaulter = percentage < threshold;
 
   const recoveryClasses = isDefaulter
-    ? Math.max(0, Math.ceil((0.75 * effectiveTotal - effectiveAttended) / 0.25))
+    ? Math.max(0, Math.ceil((reqRatio * effectiveTotal - effectiveAttended) / (remRatio || 0.25)))
     : 0;
 
   const safeMissable = !isDefaulter
-    ? Math.max(0, Math.floor((effectiveAttended - 0.75 * effectiveTotal) / 0.75))
+    ? Math.max(0, Math.floor((effectiveAttended - reqRatio * effectiveTotal) / (reqRatio || 0.75)))
     : 0;
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xl p-5 text-slate-800 w-full animate-in fade-in zoom-in-95 duration-150">
-      {/* Card Header (like #Order #4567 header in reference) */}
-      <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
+    <div className="bg-white/85 backdrop-blur-2xl rounded-[28px] border border-black/[0.08] shadow-[0_24px_60px_rgba(0,0,0,0.12)] p-6 text-[#1D1D1F] w-full animate-in fade-in zoom-in-95 duration-200">
+      {/* Card Header */}
+      <div className="flex items-center justify-between pb-3.5 border-b border-black/[0.06]">
         <div className="flex items-center gap-2">
-          <span className="font-mono text-xs font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded-md">
-            Student #{student.rollNo}
+          <span className="font-mono text-xs font-semibold text-[#1D1D1F] bg-[#F5F5F7] px-2.5 py-1 rounded-full border border-black/[0.04]">
+            #{student.rollNo}
           </span>
-          <span className="text-[11px] text-slate-400 font-medium">CS-602</span>
+          <span className="text-[11px] text-[#86868B] font-medium">Profile View</span>
         </div>
 
-        <div className="flex items-center gap-1.5 text-slate-400">
+        <div className="flex items-center gap-1.5 text-[#86868B]">
           <button
             type="button"
             onClick={onClose}
-            className="p-1 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-900 transition-colors"
+            className="p-1.5 hover:bg-black/[0.04] rounded-full text-[#86868B] hover:text-[#1D1D1F] transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
       </div>
 
-      {/* Student Meta Details */}
-      <div className="py-3 border-b border-slate-100 flex items-start gap-3">
-        <div className="w-10 h-10 rounded-full bg-slate-100 text-slate-800 font-bold flex items-center justify-center border border-slate-200 shrink-0 text-sm">
-          {student.name.split(' ').map(n => n[0]).join('').substring(0, 2)}
-        </div>
-        <div className="min-w-0 flex-1">
-          <h4 className="font-bold text-sm text-slate-900 truncate">
-            {student.name}
-          </h4>
-          <div className="flex items-center gap-1.5 text-xs text-slate-500 mt-0.5">
-            <Mail className="w-3 h-3 text-slate-400 shrink-0" />
-            <span className="truncate">{student.email || `${student.rollNo.toLowerCase()}@univ.edu`}</span>
-          </div>
-          <div className="flex items-center gap-1.5 text-xs text-slate-500 mt-0.5">
-            <Phone className="w-3 h-3 text-slate-400 shrink-0" />
-            <span>{student.phone || '+1 (555) 382-9102'}</span>
-          </div>
-        </div>
+      {/* Navigation tabs: Activity Rings | Digital Pass | Academic Standing */}
+      <div className="flex items-center gap-2 p-1 bg-[#F5F5F7] rounded-full mt-4 text-xs font-medium">
+        <button
+          type="button"
+          onClick={() => setActiveTab('rings')}
+          className={`flex-1 py-1.5 rounded-full text-center transition-all ${
+            activeTab === 'rings' ? 'bg-white shadow-xs text-[#1D1D1F] font-semibold' : 'text-[#86868B]'
+          }`}
+        >
+          Activity Rings
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('wallet')}
+          className={`flex-1 py-1.5 rounded-full text-center transition-all ${
+            activeTab === 'wallet' ? 'bg-white shadow-xs text-[#1D1D1F] font-semibold' : 'text-[#86868B]'
+          }`}
+        >
+          Digital Pass
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('stats')}
+          className={`flex-1 py-1.5 rounded-full text-center transition-all ${
+            activeTab === 'stats' ? 'bg-white shadow-xs text-[#1D1D1F] font-semibold' : 'text-[#86868B]'
+          }`}
+        >
+          Details
+        </button>
       </div>
 
-      {/* Navigation tabs inside card: Attendance | History | Notes */}
-      <div className="flex items-center gap-4 text-xs font-semibold text-slate-500 border-b border-slate-100 pt-2.5 pb-2">
-        <button className="text-slate-900 border-b-2 border-slate-900 pb-2 -mb-2">
-          Academic Standing
-        </button>
-        <button className="hover:text-slate-800">
-          Course Log
-        </button>
-        <button className="hover:text-slate-800">
-          Advisories
-        </button>
-      </div>
+      {/* Active Tab View */}
+      {activeTab === 'rings' && (
+        <div className="py-4">
+          <AppleActivityRings
+            theoryPercent={percentage}
+            labPercent={Math.min(100, Math.round(percentage * 1.05))}
+            punctualityPercent={Math.max(60, Math.round(percentage * 0.95))}
+            size={130}
+          />
+        </div>
+      )}
+
+      {activeTab === 'wallet' && (
+        <div className="flex justify-center py-2">
+          <AppleWalletStudentId
+            student={{
+              name: student.name,
+              rollNo: student.rollNo,
+              department: student.department || 'Computer Science & Engineering',
+              attendance: percentage
+            }}
+            threshold={threshold}
+          />
+        </div>
+      )}
 
       {/* Stats Breakdown */}
       <div className="py-3.5 space-y-3">

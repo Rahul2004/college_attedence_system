@@ -8,8 +8,11 @@ import {
   ExternalLink 
 } from 'lucide-react';
 
-export default function ExportReporting({ students = [], course }) {
+export default function ExportReporting({ students = [], course, threshold = 75 }) {
   const [downloadSuccess, setDownloadSuccess] = useState(null);
+
+  const reqRatio = threshold / 100;
+  const remRatio = 1 - reqRatio;
 
   const handleExportRosterCSV = () => {
     const headers = [
@@ -24,29 +27,30 @@ export default function ExportReporting({ students = [], course }) {
     ];
 
     const rows = (students || []).map(student => {
-      const isPresent = student.todayStatus === 'PRESENT';
-      const effectiveAttended = isPresent ? student.attendedClasses + 1 : student.attendedClasses;
-      const effectiveTotal = student.totalClasses + 1;
-      const percentage = ((effectiveAttended / effectiveTotal) * 100).toFixed(1);
-      const isDefaulter = Number(percentage) < 75.0;
+      const isPresent = student?.todayStatus === 'PRESENT';
+      const effectiveAttended = isPresent ? (student?.attendedClasses || 0) + 1 : (student?.attendedClasses || 0);
+      const effectiveTotal = (student?.totalClasses || 0) + 1;
+      const percentage = effectiveTotal > 0 ? ((effectiveAttended / effectiveTotal) * 100).toFixed(1) : '0.0';
+      const isDefaulter = Number(percentage) < threshold;
       const recoveryNeeded = isDefaulter 
-        ? Math.max(0, Math.ceil((0.75 * effectiveTotal - effectiveAttended) / 0.25)) 
+        ? Math.max(0, Math.ceil((reqRatio * effectiveTotal - effectiveAttended) / (remRatio || 0.25))) 
         : 0;
 
       return [
-        `"${student.rollNo}"`,
-        `"${student.name}"`,
-        `"${student.todayStatus}"`,
+        `"${student?.rollNo || 'N/A'}"`,
+        `"${student?.name || 'Student'}"`,
+        `"${student?.todayStatus || 'ABSENT'}"`,
         effectiveAttended,
         effectiveTotal,
         `"${percentage}%"`,
-        isDefaulter ? '"DEFICIT (<75%)"' : '"COMPLIANT"',
+        isDefaulter ? `"DEFICIT (<${threshold}%)"` : '"COMPLIANT"',
         recoveryNeeded
       ];
     });
 
     const csvContent = [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
-    triggerDownload(csvContent, `Attendance_Roster_${course.code}_${new Date().toISOString().split('T')[0]}.csv`);
+    const courseCode = course?.code || 'CS-602';
+    triggerDownload(csvContent, `Attendance_Roster_${courseCode}_${new Date().toISOString().split('T')[0]}.csv`);
   };
 
   const handleExportDefaultersCSV = () => {
@@ -61,35 +65,37 @@ export default function ExportReporting({ students = [], course }) {
       "Required Lectures"
     ];
 
-    const defaulters = students.filter(student => {
-      const isPresent = student.todayStatus === 'PRESENT';
-      const effectiveAttended = isPresent ? student.attendedClasses + 1 : student.attendedClasses;
-      const effectiveTotal = student.totalClasses + 1;
-      const percentage = (effectiveAttended / effectiveTotal) * 100;
-      return percentage < 75.0;
+    const defaulters = (students || []).filter(student => {
+      const isPresent = student?.todayStatus === 'PRESENT';
+      const effectiveAttended = isPresent ? (student?.attendedClasses || 0) + 1 : (student?.attendedClasses || 0);
+      const effectiveTotal = (student?.totalClasses || 0) + 1;
+      const percentage = effectiveTotal > 0 ? (effectiveAttended / effectiveTotal) * 100 : 0;
+      return percentage < threshold;
     });
 
+    const courseCode = course?.code || 'CS-602';
+
     const rows = defaulters.map((student, idx) => {
-      const isPresent = student.todayStatus === 'PRESENT';
-      const effectiveAttended = isPresent ? student.attendedClasses + 1 : student.attendedClasses;
-      const effectiveTotal = student.totalClasses + 1;
-      const percentage = ((effectiveAttended / effectiveTotal) * 100).toFixed(1);
-      const recoveryNeeded = Math.max(0, Math.ceil((0.75 * effectiveTotal - effectiveAttended) / 0.25));
+      const isPresent = student?.todayStatus === 'PRESENT';
+      const effectiveAttended = isPresent ? (student?.attendedClasses || 0) + 1 : (student?.attendedClasses || 0);
+      const effectiveTotal = (student?.totalClasses || 0) + 1;
+      const percentage = effectiveTotal > 0 ? ((effectiveAttended / effectiveTotal) * 100).toFixed(1) : '0.0';
+      const recoveryNeeded = Math.max(0, Math.ceil((reqRatio * effectiveTotal - effectiveAttended) / (remRatio || 0.25)));
 
       return [
         `"DEBAR-${1000 + idx}"`,
-        `"${student.rollNo}"`,
-        `"${student.name}"`,
-        `"${course.code}"`,
+        `"${student?.rollNo || 'N/A'}"`,
+        `"${student?.name || 'Student'}"`,
+        `"${courseCode}"`,
         `"${percentage}%"`,
-        '"75.0%"',
-        `"-${(75.0 - Number(percentage)).toFixed(1)}%"`,
+        `"${threshold.toFixed(1)}%"`,
+        `"-${(threshold - Number(percentage)).toFixed(1)}%"`,
         recoveryNeeded
       ];
     });
 
     const csvContent = [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
-    triggerDownload(csvContent, `Defaulters_Warning_Report_${course.code}_${new Date().toISOString().split('T')[0]}.csv`);
+    triggerDownload(csvContent, `Shortage_Notice_${courseCode}_${new Date().toISOString().split('T')[0]}.csv`);
   };
 
   const handlePrint = () => {

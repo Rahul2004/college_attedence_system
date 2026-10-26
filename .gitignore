@@ -8,26 +8,37 @@ dist/
 dist-ssr/
 *.local
 
-# Environment variables & secrets
+# Environment variables & secrets (CRITICAL: Never commit secrets to GitHub)
 .env
 .env.local
 .env.production
 .env.staging
 .env.*.local
+*.ps1
+test_api.ps1
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
+# AI, MCP, Agent & Tooling metadata (Strictly excluded from Git)
+.agents/
+.claude/
+.remember/
+.mcp.json
+mcp_config.json
+hooks.json
+.gemini/
+.agy/
+/graft/
+/rea/
+/figma-prototype-plugin/
+/mcp-server-guide/
+
+# IDE & Editor metadata
+.vscode/
+.idea/
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
-
-# OS metadata
 .DS_Store
 Thumbs.db
-
-# graft's local graph cache — regenerable, not committed (run `graft build`).
-/graft/
+.ignore
