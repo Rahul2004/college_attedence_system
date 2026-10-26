@@ -410,14 +410,28 @@ export default function AuthScreen({ onLogin }) {
         throw new Error('Supabase is not configured.');
       }
 
-      // Supabase email signup confirmation type is 'signup'
-      const { data, error } = await supabase.auth.verifyOtp({
+      // Supabase email signup confirmation type is 'signup' (or 'email' if signInWithOtp)
+      let verifyRes = await supabase.auth.verifyOtp({
         email: targetEmail,
         token,
         type: 'signup'
       });
 
-      if (error) throw error;
+      if (verifyRes.error) {
+        // Fallback check: if sent as email OTP token
+        const fallbackRes = await supabase.auth.verifyOtp({
+          email: targetEmail,
+          token,
+          type: 'email'
+        });
+        if (!fallbackRes.error) {
+          verifyRes = fallbackRes;
+        } else {
+          throw verifyRes.error;
+        }
+      }
+
+      const { data } = verifyRes;
 
       if (data?.session) {
         const userRole = signupPendingData?.role || 'student';
