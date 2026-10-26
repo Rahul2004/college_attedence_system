@@ -2,10 +2,20 @@ import React from 'react';
 import FacultyLeaveApprovals from '../../components/FacultyLeaveApprovals';
 import { useAcademic } from '../../context/AcademicContext';
 
-import { saveLeavesToCloud } from '../../lib/syncService';
+import { saveLeavesToCloud, saveUsersToCloud } from '../../lib/syncService';
+import { supabase, isSupabaseConfigured } from '../../lib/supabase';
 
 export default function LeaveApprovalsPage() {
-  const { activeCourse, leaves, setLeaves, disputes, handleResolveDispute, setToast } = useAcademic();
+  const { 
+    activeCourse, 
+    leaves, 
+    setLeaves, 
+    disputes, 
+    handleResolveDispute, 
+    users, 
+    setUsers, 
+    setToast 
+  } = useAcademic();
 
   const handleUpdateLeaveStatus = async (leaveId, newStatus) => {
     const updated = leaves.map(l => l.id === leaveId ? { ...l, status: newStatus } : l);
@@ -21,6 +31,30 @@ export default function LeaveApprovalsPage() {
     setTimeout(() => setToast({ type: null, message: '' }), 4000);
   };
 
+  const handleApproveUser = async (userId) => {
+    const updated = users.map(u => u.id === userId ? { ...u, status: 'active' } : u);
+    setUsers(updated);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('college_app_users', JSON.stringify(updated));
+    }
+
+    if (supabase && isSupabaseConfigured) {
+      try {
+        await supabase
+          .from('profiles')
+          .update({ status: 'active', updated_at: new Date().toISOString() })
+          .eq('id', userId);
+      } catch {}
+    }
+
+    await saveUsersToCloud(updated);
+    setToast({
+      type: 'success',
+      message: `Student registration approved! Student can now log in to the portal.`
+    });
+    setTimeout(() => setToast({ type: null, message: '' }), 4000);
+  };
+
   return (
     <div className="w-full">
       <FacultyLeaveApprovals
@@ -29,6 +63,8 @@ export default function LeaveApprovalsPage() {
         onUpdateLeaveStatus={handleUpdateLeaveStatus}
         disputes={disputes}
         onResolveDispute={handleResolveDispute}
+        users={users}
+        onApproveUser={handleApproveUser}
       />
     </div>
   );

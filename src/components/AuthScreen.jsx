@@ -137,7 +137,25 @@ export default function AuthScreen({ onLogin }) {
       return;
     }
 
-    if (password.length < 6) {
+    // Institutional Password Complexity Rules for Registration
+    if (isSignUp) {
+      if (password.length < 8) {
+        setErrorMsg('Password must be at least 8 characters long.');
+        return;
+      }
+      if (!/[A-Z]/.test(password)) {
+        setErrorMsg('Password must include at least one uppercase letter (A-Z).');
+        return;
+      }
+      if (!/[0-9]/.test(password)) {
+        setErrorMsg('Password must include at least one number (0-9).');
+        return;
+      }
+      if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password)) {
+        setErrorMsg('Password must include at least one special symbol (!@#$%^&*).');
+        return;
+      }
+    } else if (password.length < 6) {
       setErrorMsg('Password must be at least 6 characters.');
       return;
     }
@@ -189,8 +207,8 @@ export default function AuthScreen({ onLogin }) {
           return;
         }
 
-        // Faculty registers as 'pending' awaiting Admin approval, Students register as 'active'
-        const initialStatus = selectedRole === 'faculty' ? 'pending' : 'active';
+        // Both Student and Faculty accounts start as 'pending' awaiting Admin/Faculty approval
+        const initialStatus = 'pending';
 
         // 1. Initiate Supabase sign up with credentials
         const { data, error } = await supabase.auth.signUp({
@@ -209,15 +227,12 @@ export default function AuthScreen({ onLogin }) {
 
         // If email confirmation is disabled on Supabase and session returned immediately
         if (data?.session) {
-          if (selectedRole === 'faculty') {
-            await supabase.auth.signOut();
-            setSuccessMsg('Faculty account created! Awaiting Admin approval before portal access.');
-            setIsSignUp(false);
-            setPassword('');
-            setFacultyPasskey('');
-            return;
-          }
-          onLogin(selectedRole, data.session);
+          await supabase.auth.signOut();
+          const targetApproval = selectedRole === 'student' ? 'Faculty or Administration' : 'Administration';
+          setSuccessMsg(`Account created! Your registration is currently PENDING. Please wait for the ${targetApproval} to approve your account.`);
+          setIsSignUp(false);
+          setPassword('');
+          setFacultyPasskey('');
           return;
         }
 
@@ -303,10 +318,11 @@ export default function AuthScreen({ onLogin }) {
             }
           } catch {}
 
-          // Check if faculty account is pending approval by admin
-          if (userRole === 'faculty' && userStatus === 'pending') {
+          // Check if account is pending approval by Faculty or Admin
+          if (userStatus === 'pending') {
             await supabase.auth.signOut();
-            setErrorMsg('Your Faculty account is pending approval by the College Administrator. Please contact the Admin Office.');
+            const reviewer = userRole === 'student' ? 'Faculty or College Administrator' : 'College Administrator';
+            setErrorMsg(`Your ${userRole.toUpperCase()} account is currently PENDING approval. Please wait for the ${reviewer} to approve your registration.`);
             return;
           }
 
@@ -477,16 +493,14 @@ export default function AuthScreen({ onLogin }) {
 
       if (data?.session) {
         const userRole = signupPendingData?.role || 'student';
-        if (userRole === 'faculty') {
-          await supabase.auth.signOut();
-          setSuccessMsg('Email verified! Your Faculty registration is PENDING approval by the College Administrator.');
-          setAuthMode('login');
-          setIsSignUp(false);
-          return;
-        }
-        executeSmoothLogin(userRole, data.session);
+        await supabase.auth.signOut();
+        const reviewer = userRole === 'student' ? 'Faculty or Administration' : 'College Administration';
+        setSuccessMsg(`Email verified! Your ${userRole.toUpperCase()} account is currently PENDING approval. Please wait for the ${reviewer} to activate your access.`);
+        setAuthMode('login');
+        setIsSignUp(false);
+        return;
       } else {
-        setSuccessMsg('Email verified successfully! You can now sign in.');
+        setSuccessMsg('Email verified successfully! Your account is pending approval by Faculty or Administration.');
         setAuthMode('login');
         setIsSignUp(false);
       }
@@ -515,9 +529,10 @@ export default function AuthScreen({ onLogin }) {
       if (profile?.status) userStatus = profile.status;
     } catch {}
 
-    if (userRole === 'faculty' && userStatus === 'pending') {
+    if (userStatus === 'pending') {
       await supabase.auth.signOut();
-      setErrorMsg('Your Faculty account is pending approval by the College Administrator.');
+      const reviewer = userRole === 'student' ? 'Faculty or College Administrator' : 'College Administrator';
+      setErrorMsg(`Your ${userRole ? userRole.toUpperCase() : 'account'} is currently PENDING approval. Please wait for the ${reviewer} to approve your registration.`);
       setAuthMode('login');
       return;
     }
@@ -874,6 +889,31 @@ export default function AuthScreen({ onLogin }) {
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
+                {isSignUp && (
+                  <div className="mt-2 p-2.5 bg-surface-sunken rounded-sk-btn border border-outline text-[11px] text-ink-muted space-y-1">
+                    <div className="font-semibold text-ink text-[11px] mb-1">Password Requirements:</div>
+                    <div className="flex items-center gap-1.5">
+                      <span className={password.length >= 8 ? 'text-emerald-600 font-bold' : 'text-slate-400'}>
+                        {password.length >= 8 ? '✓' : '•'} At least 8 characters
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <span className={/[A-Z]/.test(password) ? 'text-emerald-600 font-bold' : 'text-slate-400'}>
+                        {/[A-Z]/.test(password) ? '✓' : '•'} At least 1 uppercase letter (A-Z)
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <span className={/[0-9]/.test(password) ? 'text-emerald-600 font-bold' : 'text-slate-400'}>
+                        {/[0-9]/.test(password) ? '✓' : '•'} At least 1 number (0-9)
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <span className={/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password) ? 'text-emerald-600 font-bold' : 'text-slate-400'}>
+                        {/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password) ? '✓' : '•'} At least 1 special character (!@#$%^&*)
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -962,6 +1002,7 @@ export default function AuthScreen({ onLogin }) {
                   setIsAdminPortal(!isAdminPortal);
                   if (!isAdminPortal) {
                     setSelectedRole('admin');
+                    setIsSignUp(false); // Admin portal has no signup
                   } else {
                     setSelectedRole('student');
                   }
@@ -975,20 +1016,22 @@ export default function AuthScreen({ onLogin }) {
               </button>
             </div>
 
-            <div className="text-center text-xs text-ink-muted pt-2 border-t border-outline">
-              {isSignUp ? 'Already have an account? ' : "Don't have an account? "}
-              <button
-                type="button"
-                onClick={() => {
-                  setIsSignUp(!isSignUp);
-                  setErrorMsg('');
-                  setSuccessMsg('');
-                }}
-                className="font-bold text-sky-deep hover:text-sky hover:underline"
-              >
-                {isSignUp ? 'Sign in' : 'Sign up'}
-              </button>
-            </div>
+            {!isAdminPortal && (
+              <div className="text-center text-xs text-ink-muted pt-2 border-t border-outline">
+                {isSignUp ? 'Already have an account? ' : "Don't have an account? "}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsSignUp(!isSignUp);
+                    setErrorMsg('');
+                    setSuccessMsg('');
+                  }}
+                  className="font-bold text-sky-deep hover:text-sky hover:underline"
+                >
+                  {isSignUp ? 'Sign in' : 'Sign up'}
+                </button>
+              </div>
+            )}
           </form>
         )}
 

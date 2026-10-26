@@ -17,9 +17,11 @@ export default function FacultyLeaveApprovals({
   leaves: propLeaves, 
   onUpdateLeaveStatus, 
   disputes: propDisputes, 
-  onResolveDispute 
+  onResolveDispute,
+  users: propUsers,
+  onApproveUser
 }) {
-  const [activeApprovalTab, setActiveApprovalTab] = useState('leaves'); // 'leaves' | 'disputes'
+  const [activeApprovalTab, setActiveApprovalTab] = useState('leaves'); // 'leaves' | 'disputes' | 'registrations'
   const [internalLeaves, setInternalLeaves] = useState([
     {
       id: 'LV-8821',
@@ -66,6 +68,7 @@ export default function FacultyLeaveApprovals({
 
   const leaveRequests = propLeaves || internalLeaves;
   const disputeRequests = propDisputes || [];
+  const pendingUsersList = (propUsers || []).filter(u => u.status === 'pending' && u.role === 'student');
 
   const handleAction = (id, newStatus) => {
     if (onUpdateLeaveStatus) {
@@ -83,8 +86,17 @@ export default function FacultyLeaveApprovals({
     setTimeout(() => setToastMessage(''), 3500);
   };
 
+  const handleApproveStudent = (userId, userName) => {
+    if (onApproveUser) {
+      onApproveUser(userId);
+    }
+    setToastMessage(`Student ${userName || 'registration'} approved successfully! Account is now active.`);
+    setTimeout(() => setToastMessage(''), 3500);
+  };
+
   const pendingLeavesCount = leaveRequests.filter(r => r.status === 'PENDING').length;
   const pendingDisputesCount = disputeRequests.filter(r => r.status === 'PENDING').length;
+  const pendingRegistrationsCount = pendingUsersList.length;
 
   return (
     <div className="space-y-6">
@@ -93,11 +105,11 @@ export default function FacultyLeaveApprovals({
         <div>
           <div className="flex items-center gap-2.5">
             <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
-              Student Approvals &amp; Dispute Redressal
+              Faculty Approvals &amp; Dispute Redressal
             </h2>
           </div>
           <p className="text-xs text-slate-500 mt-1">
-            Review student leave applications and audit disputed classroom attendance marks for {activeCourse?.code || 'CS-602'}.
+            Review student registrations, leave applications, and audit disputed attendance marks for {activeCourse?.code || 'CS-602'}.
           </p>
         </div>
 
@@ -105,8 +117,20 @@ export default function FacultyLeaveApprovals({
         <div className="flex items-center p-1 bg-slate-100 rounded-xl border border-slate-200 text-xs font-bold">
           <button
             type="button"
+            onClick={() => setActiveApprovalTab('registrations')}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg transition-all cursor-pointer ${
+              activeApprovalTab === 'registrations'
+                ? 'bg-white text-slate-900 shadow-xs'
+                : 'text-slate-500 hover:text-slate-900'
+            }`}
+          >
+            <UserCheck className="w-3.5 h-3.5 text-blue-600" />
+            <span>Student Approvals ({pendingRegistrationsCount})</span>
+          </button>
+          <button
+            type="button"
             onClick={() => setActiveApprovalTab('leaves')}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg transition-all ${
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg transition-all cursor-pointer ${
               activeApprovalTab === 'leaves'
                 ? 'bg-white text-slate-900 shadow-xs'
                 : 'text-slate-500 hover:text-slate-900'
@@ -118,7 +142,7 @@ export default function FacultyLeaveApprovals({
           <button
             type="button"
             onClick={() => setActiveApprovalTab('disputes')}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg transition-all ${
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg transition-all cursor-pointer ${
               activeApprovalTab === 'disputes'
                 ? 'bg-white text-slate-900 shadow-xs'
                 : 'text-slate-500 hover:text-slate-900'
@@ -137,7 +161,72 @@ export default function FacultyLeaveApprovals({
         </div>
       )}
 
-      {/* DISPUTES REVIEW QUEUE */}
+      {/* 1. STUDENT REGISTRATIONS QUEUE */}
+      {activeApprovalTab === 'registrations' && (
+        <div className="space-y-4">
+          {pendingUsersList.length === 0 ? (
+            <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center">
+              <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto mb-3" />
+              <h3 className="text-sm font-bold text-slate-800">No Pending Student Registrations</h3>
+              <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+                All student sign-up requests have been reviewed and activated. New accounts will appear here automatically.
+              </p>
+            </div>
+          ) : (
+            <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs">
+              <div className="p-4 border-b border-slate-200 flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900">Student Account Approval Queue</h3>
+                  <p className="text-xs text-slate-500">
+                    Verify student credentials and approve their accounts to grant portal access.
+                  </p>
+                </div>
+                <span className="px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-bold border border-blue-200">
+                  {pendingUsersList.length} Pending
+                </span>
+              </div>
+
+              <div className="divide-y divide-slate-100">
+                {pendingUsersList.map(user => (
+                  <div key={user.id} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-50/70 transition">
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-sm shrink-0">
+                        {user.name ? user.name.charAt(0).toUpperCase() : 'S'}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-sm text-slate-900">{user.name || 'Student'}</span>
+                          <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-700 border border-amber-200">
+                            Pending Approval
+                          </span>
+                        </div>
+                        <div className="text-xs text-slate-500 mt-0.5 flex flex-wrap gap-x-3 gap-y-1">
+                          <span>Email: <strong className="text-slate-700">{user.email}</strong></span>
+                          {user.dept && <span>Dept: {user.dept}</span>}
+                          {user.rollNo && <span>Roll: {user.rollNo}</span>}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleApproveStudent(user.id, user.name)}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition shadow-xs cursor-pointer"
+                      >
+                        <Check className="w-3.5 h-3.5" />
+                        Approve &amp; Activate Account
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* 2. DISPUTES REVIEW QUEUE */}
       {activeApprovalTab === 'disputes' && (
         <div className="space-y-4">
           {disputeRequests.length === 0 ? (
