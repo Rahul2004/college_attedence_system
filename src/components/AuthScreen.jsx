@@ -719,7 +719,7 @@ export default function AuthScreen({ onLogin }) {
         </div>
 
         {/* ================= RIGHT SECTION: MODERN AUTHENTICATION CARD (order-1 on mobile, order-2 on lg+) ================= */}
-        <div className="order-1 lg:order-2 lg:col-span-7 bg-white p-6 sm:p-10 lg:p-14 flex flex-col justify-between relative">
+        <div className="order-1 lg:order-2 lg:col-span-7 bg-white p-6 sm:p-10 lg:p-14 flex flex-col justify-between relative min-h-screen lg:min-h-0">
           
           {/* Top Navigation Row: New User / Create Account shortcut */}
           <div className="flex justify-end items-center text-xs pb-4">
