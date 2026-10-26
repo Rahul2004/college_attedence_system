@@ -400,25 +400,31 @@ export default function AuthScreen({ onLogin }) {
     e.preventDefault();
     setErrorMsg('');
     setSuccessMsg('');
+
+    const targetEmail = resetEmail.trim().toLowerCase();
+    const token = otpInput.trim();
+
+    if (!token || token.length < 6) {
+      setErrorMsg('Please enter the complete 6-digit verification code.');
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const targetEmail = resetEmail.trim().toLowerCase();
-      const token = otpInput.trim();
-
       if (!isSupabaseConfigured || !supabase) {
-        throw new Error('Supabase is not configured.');
+        throw new Error('Supabase authentication is not configured.');
       }
 
-      // Supabase email signup confirmation type is 'signup' (or 'email' if signInWithOtp)
+      // 1. Supabase standard signup token verification
       let verifyRes = await supabase.auth.verifyOtp({
         email: targetEmail,
         token,
         type: 'signup'
       });
 
+      // 2. Fallback check: if token was dispatched as generic email OTP
       if (verifyRes.error) {
-        // Fallback check: if sent as email OTP token
         const fallbackRes = await supabase.auth.verifyOtp({
           email: targetEmail,
           token,
@@ -427,7 +433,15 @@ export default function AuthScreen({ onLogin }) {
         if (!fallbackRes.error) {
           verifyRes = fallbackRes;
         } else {
-          throw verifyRes.error;
+          // Extract and format clean user-friendly message
+          const rawErr = verifyRes.error.message?.toLowerCase() || '';
+          if (rawErr.includes('expired')) {
+            throw new Error('Your 6-digit code has expired. Please click "Resend Code" below to receive a new one.');
+          } else if (rawErr.includes('invalid') || rawErr.includes('not found')) {
+            throw new Error('The code entered is incorrect. Please check the 6-digit code in your email and try again.');
+          } else {
+            throw verifyRes.error;
+          }
         }
       }
 
@@ -437,17 +451,21 @@ export default function AuthScreen({ onLogin }) {
         const userRole = signupPendingData?.role || 'student';
         await supabase.auth.signOut();
         const reviewer = userRole === 'student' ? 'Faculty or Administration' : 'College Administration';
-        setSuccessMsg(`Email verified! Your ${userRole.toUpperCase()} account is currently PENDING approval. Please wait for the ${reviewer} to activate your access.`);
+        setSuccessMsg(`Email successfully verified! Your ${userRole.toUpperCase()} account is registered and awaiting approval from ${reviewer}.`);
         setAuthMode('login');
         setIsSignUp(false);
+        setPassword('');
+        setOtpInput('');
         return;
       } else {
-        setSuccessMsg('Email verified successfully! Your account is pending approval by Faculty or Administration.');
+        setSuccessMsg('Email successfully verified! Your account is registered and awaiting approval from Faculty or Administration.');
         setAuthMode('login');
         setIsSignUp(false);
+        setPassword('');
+        setOtpInput('');
       }
     } catch (err) {
-      setErrorMsg(err.message || 'Invalid verification code. Please check your email.');
+      setErrorMsg(err.message || 'Verification failed. Please verify the 6-digit code or request a new one.');
     } finally {
       setLoading(false);
     }
@@ -1051,30 +1069,43 @@ export default function AuthScreen({ onLogin }) {
               className="inline-flex items-center gap-1.5 text-xs text-ink-muted hover:text-ink font-medium mb-1 cursor-pointer"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
-              Change registration details
+              Change email or registration details
             </button>
 
-            <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-sk-btn">
-              <div className="flex items-center gap-2 mb-1 text-emerald-800 font-bold text-xs">
-                <ShieldCheck className="w-4 h-4 text-emerald-600" />
+            <div className="p-4 bg-sky-soft/60 border border-sky/30 rounded-sk-btn">
+              <div className="flex items-center gap-2 mb-1.5 text-sky-deep font-bold text-xs">
+                <ShieldCheck className="w-4 h-4 text-sky" />
                 <span>Verify Your College Email</span>
               </div>
               <p className="text-xs text-ink-muted leading-relaxed">
-                A 6-digit confirmation token was sent to <strong className="text-ink">{resetEmail}</strong>. Enter the code to activate your account.
+                We have dispatched a 6-digit verification code to:
+              </p>
+              <p className="text-xs font-bold text-ink mt-0.5 font-mono">
+                {resetEmail}
+              </p>
+              <p className="text-[11px] text-ink-subtle mt-2">
+                Please check your inbox (and spam folder). Enter the 6-digit code below to confirm your account.
               </p>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-ink mb-1">
-                6-Digit Confirmation Token
-              </label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-xs font-bold text-ink">
+                  Enter 6-Digit Verification Code
+                </label>
+                <span className="text-[11px] text-ink-muted font-mono">
+                  {otpInput.length}/6 digits
+                </span>
+              </div>
               <input
                 type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 maxLength={6}
-                placeholder="123456"
+                placeholder="0 0 0 0 0 0"
                 value={otpInput}
                 onChange={e => setOtpInput(e.target.value.replace(/\D/g, ''))}
-                className="w-full text-center text-xl font-mono tracking-widest text-ink bg-white border border-outline focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 rounded-sk-btn py-2.5 outline-none transition"
+                className="w-full text-center text-2xl font-mono tracking-[0.4em] font-bold text-ink bg-white border border-outline focus:border-sky focus:ring-2 focus:ring-sky/20 rounded-sk-btn py-3 outline-none transition placeholder:text-slate-300"
                 autoFocus
                 required
               />
@@ -1083,35 +1114,47 @@ export default function AuthScreen({ onLogin }) {
             <button
               type="submit"
               disabled={otpInput.length < 6 || loading}
-              className="w-full py-2.5 rounded-sk-btn bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold transition shadow-xs disabled:opacity-60 cursor-pointer"
+              className="w-full py-2.5 rounded-sk-btn bg-sky hover:bg-sky-hover text-white text-sm font-bold transition shadow-xs disabled:opacity-60 cursor-pointer flex items-center justify-center gap-2"
             >
-              {loading ? 'Confirming Token...' : 'Confirm Email & Activate'}
+              {loading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Verifying Code with Supabase...</span>
+                </>
+              ) : (
+                <span>Confirm Email &amp; Complete Registration</span>
+              )}
             </button>
 
-            <div className="text-center text-xs text-ink-muted pt-1">
+            <div className="text-center text-xs text-ink-muted pt-2 border-t border-outline flex flex-col items-center gap-1.5">
+              <span>Didn't receive the email?</span>
               {resendCooldown > 0 ? (
-                <span>Resend token in {resendCooldown}s</span>
+                <span className="text-ink-subtle font-medium text-[11px]">
+                  Request new code in <strong className="text-sky-deep font-mono">{resendCooldown}s</strong>
+                </span>
               ) : (
                 <button
                   type="button"
                   onClick={async () => {
                     try {
                       setLoading(true);
-                      await supabase.auth.resend({
+                      setErrorMsg('');
+                      const { error: resendErr } = await supabase.auth.resend({
                         type: 'signup',
                         email: resetEmail
                       });
+                      if (resendErr) throw resendErr;
                       setResendCooldown(60);
-                      setSuccessMsg(`A new confirmation code has been sent to ${resetEmail}.`);
+                      setSuccessMsg(`A new 6-digit confirmation code has been dispatched to ${resetEmail}.`);
                     } catch (err) {
-                      setErrorMsg(err.message || 'Failed to resend token.');
+                      setErrorMsg(err.message || 'Failed to resend code. Please try again shortly.');
                     } finally {
                       setLoading(false);
                     }
                   }}
-                  className="font-semibold text-emerald-700 hover:underline cursor-pointer"
+                  className="font-bold text-sky-deep hover:underline cursor-pointer"
                 >
-                  Resend Confirmation Token
+                  Resend 6-Digit Code
                 </button>
               )}
             </div>
