@@ -44,9 +44,8 @@ export default function AuthScreen({ onLogin }) {
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
-  // 'login' | 'login_otp' | 'signup_otp' | 'forgot_email' | 'forgot_otp' | 'forgot_new_password' | 'mfa_totp'
+  // 'login' | 'signup_otp' | 'forgot_email' | 'forgot_otp' | 'forgot_new_password' | 'mfa_totp'
   const [authMode, setAuthMode] = useState('login');
-  const [loginMethod, setLoginMethod] = useState('password'); // 'password' | 'otp'
   const [resetEmail, setResetEmail] = useState('');
   const [otpInput, setOtpInput] = useState('');
   const [generatedOtp, setGeneratedOtp] = useState('');
@@ -249,36 +248,13 @@ export default function AuthScreen({ onLogin }) {
         setSuccessMsg(`6-Digit Verification Code sent to ${normalizedEmail}. Please check your inbox.`);
         return;
       } else {
-        // Sign In
+        // Standard Sign In
         if (!isSupabaseConfigured || !supabase) {
           setErrorMsg('Authentication service is not configured.');
           return;
         }
 
-        // If user chose "Sign in with Email OTP"
-        if (loginMethod === 'otp') {
-          const { error: otpSendErr } = await supabase.auth.signInWithOtp({
-            email: normalizedEmail,
-            options: {
-              shouldCreateUser: false
-            }
-          });
-
-          if (otpSendErr) {
-            recordFailedAttempt(normalizedEmail);
-            setErrorMsg(otpSendErr.message || 'Could not send verification code.');
-            return;
-          }
-
-          setResetEmail(normalizedEmail);
-          setOtpInput('');
-          setResendCooldown(60);
-          setAuthMode('login_otp');
-          setSuccessMsg(`6-Digit Login Code sent to ${normalizedEmail}. Please enter the code below.`);
-          return;
-        }
-
-        // Standard Password Sign In
+        // Standard Email & Password Sign In
         const { data, error } = await supabase.auth.signInWithPassword({
           email: normalizedEmail,
           password,
@@ -418,54 +394,6 @@ export default function AuthScreen({ onLogin }) {
     }
   };
 
-  // Verify OTP for direct email login (passwordless or 2FA)
-  const handleVerifyLoginOtp = async (e) => {
-    e.preventDefault();
-    setErrorMsg('');
-    setSuccessMsg('');
-    setLoading(true);
-
-    try {
-      const targetEmail = resetEmail.trim().toLowerCase();
-      const token = otpInput.trim();
-
-      if (!isSupabaseConfigured || !supabase) {
-        throw new Error('Supabase is not configured.');
-      }
-
-      // Verify OTP with Supabase (type: 'email' or 'magiclink')
-      const { data, error } = await supabase.auth.verifyOtp({
-        email: targetEmail,
-        token,
-        type: 'email'
-      });
-
-      if (error) {
-        // Fallback check for magiclink type
-        const { data: retryData, error: retryError } = await supabase.auth.verifyOtp({
-          email: targetEmail,
-          token,
-          type: 'magiclink'
-        });
-
-        if (retryError) throw error;
-        if (retryData?.session) {
-          executeLoginFromSession(retryData.session, targetEmail);
-          return;
-        }
-      }
-
-      if (data?.session) {
-        executeLoginFromSession(data.session, targetEmail);
-      } else {
-        throw new Error('Could not authenticate. Please re-enter the code.');
-      }
-    } catch (err) {
-      setErrorMsg(err.message || 'Invalid or expired verification code.');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // Verify OTP for new signup email confirmation
   const handleVerifySignupOtp = async (e) => {
@@ -800,42 +728,6 @@ export default function AuthScreen({ onLogin }) {
               </>
             )}
 
-            {/* Login Method Toggle: Password vs Instant Email OTP */}
-            {!isSignUp && (
-              <div className="flex items-center justify-between p-1 bg-surface-sunken rounded-sk-btn border border-outline mb-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setLoginMethod('password');
-                    setErrorMsg('');
-                  }}
-                  className={`flex-1 py-1.5 text-xs font-bold rounded-sk-btn transition cursor-pointer flex items-center justify-center gap-1.5 ${
-                    loginMethod === 'password'
-                      ? 'bg-white text-ink shadow-2xs border border-outline'
-                      : 'text-ink-muted hover:text-ink'
-                  }`}
-                >
-                  <Lock className="w-3.5 h-3.5" />
-                  <span>Password</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setLoginMethod('otp');
-                    setErrorMsg('');
-                  }}
-                  className={`flex-1 py-1.5 text-xs font-bold rounded-sk-btn transition cursor-pointer flex items-center justify-center gap-1.5 ${
-                    loginMethod === 'otp'
-                      ? 'bg-white text-sky-deep shadow-2xs border border-outline'
-                      : 'text-ink-muted hover:text-ink'
-                  }`}
-                >
-                  <Mail className="w-3.5 h-3.5 text-sky" />
-                  <span>Email 6-Digit OTP</span>
-                </button>
-              </div>
-            )}
-
             <div>
               <label className="block text-xs font-bold text-ink mb-1">
                 Email Address
@@ -850,45 +742,43 @@ export default function AuthScreen({ onLogin }) {
               />
             </div>
 
-            {/* Password input shown only in password mode or during signup */}
-            {(isSignUp || loginMethod === 'password') && (
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label className="text-xs font-bold text-ink">
-                    Password
-                  </label>
-                  {!isSignUp && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setResetEmail(email || '');
-                        setErrorMsg('');
-                        setSuccessMsg('');
-                        setAuthMode('forgot_email');
-                      }}
-                      className="text-xs font-bold text-sky-deep hover:text-sky hover:underline"
-                    >
-                      Forgot password?
-                    </button>
-                  )}
-                </div>
-                <div className="relative">
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={e => setPassword(e.target.value)}
-                    className="w-full text-sm text-ink bg-white border border-outline focus:border-sky focus:ring-2 focus:ring-sky/20 rounded-sk-btn px-3.5 pr-10 py-2.5 outline-none transition"
-                    required={isSignUp || loginMethod === 'password'}
-                  />
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <label className="text-xs font-bold text-ink">
+                  Password
+                </label>
+                {!isSignUp && (
                   <button
                     type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-subtle hover:text-ink p-1"
+                    onClick={() => {
+                      setResetEmail(email || '');
+                      setErrorMsg('');
+                      setSuccessMsg('');
+                      setAuthMode('forgot_email');
+                    }}
+                    className="text-xs font-bold text-sky-deep hover:text-sky hover:underline"
                   >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    Forgot password?
                   </button>
-                </div>
+                )}
+              </div>
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  className="w-full text-sm text-ink bg-white border border-outline focus:border-sky focus:ring-2 focus:ring-sky/20 rounded-sk-btn px-3.5 pr-10 py-2.5 outline-none transition"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-subtle hover:text-ink p-1 cursor-pointer"
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
                 {isSignUp && (
                   <div className="mt-2 p-2.5 bg-surface-sunken rounded-sk-btn border border-outline text-[11px] text-ink-muted space-y-1">
                     <div className="font-semibold text-ink text-[11px] mb-1">Password Requirements:</div>
@@ -915,7 +805,6 @@ export default function AuthScreen({ onLogin }) {
                   </div>
                 )}
               </div>
-            )}
 
             <div className="flex items-center gap-2 pt-1">
               <input
@@ -990,9 +879,7 @@ export default function AuthScreen({ onLogin }) {
             >
               {loading 
                 ? 'Please wait...' 
-                : (isSignUp 
-                    ? 'Create Account & Get Code' 
-                    : (loginMethod === 'otp' ? 'Send 6-Digit Login Code' : 'Sign in'))}
+                : (isSignUp ? 'Create Account' : 'Sign in')}
             </button>
 
             <div className="pt-3 border-t border-outline flex flex-col items-center gap-2">
@@ -1135,85 +1022,6 @@ export default function AuthScreen({ onLogin }) {
           </form>
         )}
 
-        {/* ================= 3A. SIGN IN VIA EMAIL OTP (PASSWORDLESS) ================= */}
-        {authMode === 'login_otp' && (
-          <form onSubmit={handleVerifyLoginOtp} className="space-y-4">
-            <button
-              type="button"
-              onClick={() => {
-                setErrorMsg('');
-                setSuccessMsg('');
-                setAuthMode('login');
-              }}
-              className="inline-flex items-center gap-1.5 text-xs text-ink-muted hover:text-ink font-medium mb-1 cursor-pointer"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              Back to sign in options
-            </button>
-
-            <div className="p-3 bg-sky-soft/60 border border-sky/30 rounded-sk-btn">
-              <div className="flex items-center gap-2 mb-1 text-sky-deep font-bold text-xs">
-                <Mail className="w-4 h-4 text-sky" />
-                <span>Email 6-Digit Login Code</span>
-              </div>
-              <p className="text-xs text-ink-muted leading-relaxed">
-                We sent a 6-digit one-time passcode to <strong className="text-ink">{resetEmail}</strong>. Enter it below to sign in instantly without a password.
-              </p>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-ink mb-1">
-                6-Digit Login Passcode
-              </label>
-              <input
-                type="text"
-                maxLength={6}
-                placeholder="123456"
-                value={otpInput}
-                onChange={e => setOtpInput(e.target.value.replace(/\D/g, ''))}
-                className="w-full text-center text-xl font-mono tracking-widest text-ink bg-white border border-outline focus:border-sky focus:ring-2 focus:ring-sky/20 rounded-sk-btn py-2.5 outline-none transition"
-                autoFocus
-                required
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={otpInput.length < 6 || loading}
-              className="w-full py-2.5 rounded-sk-btn bg-sky hover:bg-sky-hover text-white text-sm font-bold transition shadow-xs disabled:opacity-60 cursor-pointer"
-            >
-              {loading ? 'Verifying Code...' : 'Verify Code & Sign In'}
-            </button>
-
-            <div className="text-center text-xs text-ink-muted pt-1">
-              {resendCooldown > 0 ? (
-                <span>Resend code in {resendCooldown}s</span>
-              ) : (
-                <button
-                  type="button"
-                  onClick={async () => {
-                    try {
-                      setLoading(true);
-                      await supabase.auth.signInWithOtp({
-                        email: resetEmail,
-                        options: { shouldCreateUser: false }
-                      });
-                      setResendCooldown(60);
-                      setSuccessMsg(`A new 6-digit login code has been dispatched to ${resetEmail}.`);
-                    } catch (err) {
-                      setErrorMsg(err.message || 'Failed to resend code.');
-                    } finally {
-                      setLoading(false);
-                    }
-                  }}
-                  className="font-semibold text-sky-deep hover:underline cursor-pointer"
-                >
-                  Resend 6-Digit Code
-                </button>
-              )}
-            </div>
-          </form>
-        )}
 
         {/* ================= 3B. SIGN UP EMAIL OTP CONFIRMATION ================= */}
         {authMode === 'signup_otp' && (
