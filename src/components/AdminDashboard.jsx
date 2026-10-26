@@ -237,47 +237,18 @@ export default function AdminDashboard({
       {/* Main Administrative User Management Table */}
       <div className="bg-white rounded-sk-card border border-outline shadow-sk-card overflow-hidden">
         {/* Table Toolbar */}
-        <div className="p-4 sm:p-5 border-b border-outline flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div>
-            <h2 className="text-base sm:text-lg font-extrabold text-ink font-display">
-              Institutional User Directory &amp; Role Management
-            </h2>
-            <p className="text-xs text-ink-muted mt-0.5 font-sans">
-              Review registered institutional accounts and assign or revoke privileges.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2 flex-wrap">
-            {/* Search Bar */}
-            <div className="relative w-full sm:w-60">
-              <Search className="w-3.5 h-3.5 text-ink-subtle absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                placeholder="Search user, email, dept..."
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                className="w-full pl-8 pr-3 py-1.5 text-xs bg-surface-sunken rounded-sk-btn border border-outline focus:outline-none focus:ring-2 focus:ring-sky/20 text-ink placeholder-ink-subtle"
-              />
+        <div className="p-4 sm:p-5 border-b border-outline flex flex-col gap-3.5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <h2 className="text-base sm:text-lg font-extrabold text-ink font-display">
+                Institutional User Directory &amp; Role Management
+              </h2>
+              <p className="text-xs text-ink-muted mt-0.5 font-sans">
+                Review registered institutional accounts and assign or revoke privileges.
+              </p>
             </div>
-
-            {/* Role Filter Pills */}
-            <div className="flex items-center p-1 bg-surface-sunken rounded-full border border-outline text-xs font-bold">
-              {['ALL', 'admin', 'faculty', 'student'].map(r => (
-                <button
-                  key={r}
-                  type="button"
-                  onClick={() => setRoleFilter(r)}
-                  className={`px-3 py-1 rounded-full capitalize transition-all ${
-                    roleFilter === r ? 'bg-white text-ink shadow-xs border border-outline' : 'text-ink-muted hover:text-ink'
-                  }`}
-                >
-                  {r}
-                </button>
-              ))}
-            </div>
-
-            {/* Add User, Bulk Ingestion and Debarment Notice Action Buttons */}
-            <div className="flex items-center gap-2 flex-wrap">
+            {/* Action Buttons: Add User, Bulk Import, Circular */}
+            <div className="flex items-center gap-2 flex-wrap sm:shrink-0">
               <button
                 type="button"
                 onClick={() => setIsAddUserModalOpen(true)}
@@ -293,7 +264,7 @@ export default function AdminDashboard({
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 transition-colors shadow-xs"
               >
                 <FileSpreadsheet className="w-3.5 h-3.5 text-indigo-600" />
-                <span>Bulk Import (CSV)</span>
+                <span className="hidden xs:inline">Bulk </span>Import
               </button>
 
               <button
@@ -302,8 +273,38 @@ export default function AdminDashboard({
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white transition-colors shadow-xs"
               >
                 <FileText className="w-3.5 h-3.5 text-rose-400" />
-                <span>Debarment Circular</span>
+                <span className="hidden xs:inline">Debarment </span>Circular
               </button>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 flex-wrap">
+            {/* Search Bar */}
+            <div className="relative w-full sm:w-64">
+              <Search className="w-3.5 h-3.5 text-ink-subtle absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Search user, email, dept..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                className="w-full pl-8 pr-3 py-1.5 text-xs bg-surface-sunken rounded-sk-btn border border-outline focus:outline-none focus:ring-2 focus:ring-sky/20 text-ink placeholder-ink-subtle"
+              />
+            </div>
+
+            {/* Role Filter Pills */}
+            <div className="flex items-center p-1 bg-surface-sunken rounded-full border border-outline text-xs font-bold overflow-x-auto max-w-full">
+              {['ALL', 'admin', 'faculty', 'student'].map(r => (
+                <button
+                  key={r}
+                  type="button"
+                  onClick={() => setRoleFilter(r)}
+                  className={`px-3 py-1 rounded-full capitalize transition-all shrink-0 ${
+                    roleFilter === r ? 'bg-white text-ink shadow-xs border border-outline' : 'text-ink-muted hover:text-ink'
+                  }`}
+                >
+                  {r}
+                </button>
+              ))}
             </div>
           </div>
         </div>

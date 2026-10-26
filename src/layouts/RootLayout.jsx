@@ -20,6 +20,7 @@ export default function RootLayout() {
     session,
     role,
     userProfile,
+    updateUserProfile,
     reloadUserProfile,
     setRole,
     switchRole,
@@ -112,6 +113,7 @@ export default function RootLayout() {
         role={role}
         currentStudent={authenticatedStudent}
         session={session}
+        userProfile={userProfile}
         isSidebarOpen={isSidebarOpen}
         onMobileClose={() => setIsSidebarOpen(false)}
         isExpanded={isSidebarExpanded}
@@ -127,11 +129,11 @@ export default function RootLayout() {
       <div className="flex-1 flex flex-col min-w-0 overflow-y-auto w-full transition-all duration-300 bg-[#F5F5F7]">
         <header className="h-16 bg-white/75 backdrop-blur-2xl border-b border-black/[0.08] px-4 sm:px-6 flex items-center justify-between shrink-0 sticky top-0 z-30 shadow-[0_2px_12px_rgba(0,0,0,0.02)] transition-all">
           <div className="flex items-center gap-2.5 text-xs text-[#86868B]">
-            {/* Hamburger Toggle */}
+            {/* Hamburger Toggle (Visible on mobile and tablet) */}
             <button
               type="button"
               onClick={() => setIsSidebarOpen(prev => !prev)}
-              className="p-2 text-ink hover:text-sky-deep rounded-xl hover:bg-black/[0.04] active:scale-95 transition-all flex items-center justify-center cursor-pointer"
+              className="xl:hidden p-2 text-ink hover:text-sky-deep rounded-xl hover:bg-black/[0.04] active:scale-95 transition-all flex items-center justify-center cursor-pointer"
               title="Toggle Navigation Menu"
             >
               <Menu className="w-5 h-5 text-slate-800" />
@@ -150,24 +152,21 @@ export default function RootLayout() {
             )}
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-3">
-
-            <span className={`text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1.5 border ${
+          <div className="flex items-center gap-1.5 sm:gap-3">
+            <span className={`text-[11px] sm:text-xs font-semibold px-2 sm:px-2.5 py-1 rounded-full flex items-center gap-1 sm:gap-1.5 border shrink-0 ${
               isSupabaseConfigured
                 ? 'bg-leaf-soft text-leaf-deep border-leaf-soft'
                 : 'bg-sun-soft text-sun-deep border-amber-200'
             }`}>
-              <span className={`w-2 h-2 rounded-full ${isSupabaseConfigured ? 'bg-leaf' : 'bg-sun'}`} />
-              <span className="hidden xs:inline">{isSupabaseConfigured ? 'Supabase Live' : 'Demo Local'}</span>
+              <span className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${isSupabaseConfigured ? 'bg-leaf' : 'bg-sun'}`} />
+              <span className="hidden sm:inline">{isSupabaseConfigured ? 'Supabase Live' : 'Demo Local'}</span>
             </span>
-
-
 
             {/* Profile Settings Quick Button */}
             <button
               type="button"
               onClick={() => setIsProfileModalOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold border border-slate-200/90 shadow-2xs transition-all cursor-pointer"
+              className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold border border-slate-200/90 shadow-2xs transition-all cursor-pointer shrink-0"
               title="Open Profile Settings"
             >
               <UserCheck className="w-3.5 h-3.5 text-indigo-600" />
@@ -178,7 +177,7 @@ export default function RootLayout() {
             <button
               type="button"
               onClick={() => setIsSpotlightOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#E8E8ED]/80 hover:bg-[#E8E8ED] text-[#1D1D1F] text-xs font-medium border border-black/[0.04] transition-all"
+              className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#E8E8ED]/80 hover:bg-[#E8E8ED] text-[#1D1D1F] text-xs font-medium border border-black/[0.04] transition-all shrink-0"
               title="Command Search (Ctrl + K)"
             >
               <span className="text-[#86868B]">Search</span>
@@ -191,7 +190,7 @@ export default function RootLayout() {
             <button
               type="button"
               onClick={() => setIsSiriOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 text-white text-xs font-semibold shadow-md shadow-purple-500/20 hover:scale-105 active:scale-95 transition-all cursor-pointer"
+              className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 text-white text-xs font-semibold shadow-md shadow-purple-500/20 hover:scale-105 active:scale-95 transition-all cursor-pointer shrink-0"
               title="Open AttendOS AI Assistant"
             >
               <Sparkles className="w-3.5 h-3.5 text-white animate-pulse" />
@@ -205,7 +204,7 @@ export default function RootLayout() {
                 await handleLogout();
                 navigate('/login', { replace: true });
               }}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold border border-rose-200 transition-all cursor-pointer"
+              className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-full bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold border border-rose-200 transition-all cursor-pointer shrink-0"
               title="Sign Out of Portal"
             >
               <span>Sign Out</span>
@@ -261,7 +260,7 @@ export default function RootLayout() {
         )}
 
         {/* 3. Page Content Outlet (Renders the active route's Page component) */}
-        <main className="p-3.5 sm:p-5 md:p-8 flex-1 w-full max-w-7xl mx-auto">
+        <main className="p-3 sm:p-5 md:p-8 flex-1 w-full max-w-7xl mx-auto min-w-0 overflow-x-hidden">
           <Outlet />
         </main>
       </div>
@@ -326,16 +325,39 @@ export default function RootLayout() {
         onClose={() => setIsProfileModalOpen(false)}
         role={role}
         session={session}
+        userProfile={userProfile}
         currentStudent={authenticatedStudent}
         activeCourse={activeCourse}
         users={users}
-        onUpdateCurrentUser={(updated) => {
-          if (role === 'student' && setStudents) {
-            setStudents(prev => prev.map(s => (s.id === authenticatedStudent.id || s.rollNo === authenticatedStudent.rollNo) ? { ...s, ...updated } : s));
+        onUpdateCurrentUser={async (updated) => {
+          // 1. Sync directly through AcademicContext's updateUserProfile
+          if (updateUserProfile) {
+            await updateUserProfile({
+              full_name: updated.name,
+              name: updated.name,
+              phone: updated.phone,
+              department: updated.department
+            });
           }
+
+          // 2. Update students roster state if student
+          if (role === 'student' && setStudents && authenticatedStudent) {
+            setStudents(prev => prev.map(s => 
+              (s.id === authenticatedStudent.id || s.email?.toLowerCase() === authenticatedStudent.email?.toLowerCase())
+                ? { ...s, ...updated }
+                : s
+            ));
+          }
+
+          // 3. Update users directory state
           if (setUsers) {
-            const targetEmail = session?.user?.email?.toLowerCase() || (role === 'student' ? authenticatedStudent.email : 'faculty@college.edu.in');
-            setUsers(prev => prev.map(u => u.email?.toLowerCase() === targetEmail?.toLowerCase() ? { ...u, ...updated } : u));
+            const targetEmail = session?.user?.email?.toLowerCase() || authenticatedStudent?.email?.toLowerCase();
+            setUsers(prev => prev.map(u => u.email?.toLowerCase() === targetEmail ? { ...u, ...updated } : u));
+          }
+
+          // 4. Reload full profile from Supabase
+          if (reloadUserProfile) {
+            await reloadUserProfile();
           }
         }}
         setToast={setToast}

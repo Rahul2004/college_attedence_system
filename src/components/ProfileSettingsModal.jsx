@@ -24,6 +24,7 @@ export default function ProfileSettingsModal({
   onClose, 
   role, 
   session, 
+  userProfile,
   currentStudent, 
   activeCourse,
   users = [], 
@@ -62,25 +63,28 @@ export default function ProfileSettingsModal({
   const [activeTab, setActiveTab] = useState('general'); // 'general' | 'security' | 'notifications'
   const [isLoadingProfile, setIsLoadingProfile] = useState(false);
   
-  // General Info Form - Strictly role-isolated defaults
+  // General Info Form - Strictly role-isolated defaults prioritizing userProfile
   const [fullName, setFullName] = useState(() => {
+    if (userProfile?.full_name) return userProfile.full_name;
     if (role === 'student') return currentStudent?.name || matchedUser.name || sessionUser?.user_metadata?.name || 'Student';
     if (role === 'admin') return matchedUser.name || sessionUser?.user_metadata?.name || 'Administrator';
     return matchedUser.name || sessionUser?.user_metadata?.name || 'Faculty Member';
   });
   
   const [phone, setPhone] = useState(() => {
+    if (userProfile?.phone || userProfile?.emergency_contact) return userProfile.phone || userProfile.emergency_contact;
     if (role === 'student') return currentStudent?.phone || matchedUser.phone || '+91 98765-43210';
     return matchedUser.phone || '+91 98765-43210';
   });
   
   const [department, setDepartment] = useState(() => {
+    if (userProfile?.department) return userProfile.department;
     if (role === 'student') return currentStudent?.department || matchedUser.department || 'Computer Science & Engineering';
     if (role === 'admin') return matchedUser.department || matchedUser.dept || 'Central Administration';
     return matchedUser.department || matchedUser.dept || 'Computer Science & Engineering';
   });
   
-  const [rollNo, setRollNo] = useState(() => currentStudent?.rollNo || '0101CS221001');
+  const [rollNo, setRollNo] = useState(() => userProfile?.roll_no || currentStudent?.rollNo || '0101CS221001');
 
   // Asynchronously query Supabase profiles table for authenticated user record
   useEffect(() => {
@@ -99,6 +103,7 @@ export default function ProfileSettingsModal({
           if (data.full_name) setFullName(data.full_name);
           if (data.phone) setPhone(data.phone);
           if (data.department) setDepartment(data.department);
+          if (data.roll_no) setRollNo(data.roll_no);
         }
       } catch (err) {
         console.warn('Notice: Could not load profile from Supabase:', err);
@@ -111,23 +116,42 @@ export default function ProfileSettingsModal({
     return () => { isMounted = false; };
   }, [sessionUser?.id]);
 
-  // Keep state synchronized whenever active student or role switches
+  // Keep state synchronized whenever userProfile, active student or role switches
   useEffect(() => {
-    if (role === 'student') {
+    if (userProfile?.full_name) {
+      setFullName(userProfile.full_name);
+    } else if (role === 'student') {
       setFullName(currentStudent?.name || matchedUser.name || sessionUser?.user_metadata?.name || 'Student');
-      setPhone(currentStudent?.phone || matchedUser.phone || '+91 98765-43210');
-      setDepartment(currentStudent?.department || matchedUser.department || 'Computer Science & Engineering');
-      setRollNo(currentStudent?.rollNo || '0101CS221001');
     } else if (role === 'admin') {
       setFullName(matchedUser.name || sessionUser?.user_metadata?.name || 'Administrator');
-      setPhone(matchedUser.phone || '+91 98765-43210');
-      setDepartment(matchedUser.department || matchedUser.dept || 'Central Administration');
     } else {
       setFullName(matchedUser.name || sessionUser?.user_metadata?.name || 'Faculty Member');
+    }
+
+    if (userProfile?.phone || userProfile?.emergency_contact) {
+      setPhone(userProfile.phone || userProfile.emergency_contact);
+    } else if (role === 'student') {
+      setPhone(currentStudent?.phone || matchedUser.phone || '+91 98765-43210');
+    } else {
       setPhone(matchedUser.phone || '+91 98765-43210');
+    }
+
+    if (userProfile?.department) {
+      setDepartment(userProfile.department);
+    } else if (role === 'student') {
+      setDepartment(currentStudent?.department || matchedUser.department || 'Computer Science & Engineering');
+    } else if (role === 'admin') {
+      setDepartment(matchedUser.department || matchedUser.dept || 'Central Administration');
+    } else {
       setDepartment(matchedUser.department || matchedUser.dept || 'Computer Science & Engineering');
     }
-  }, [role, currentStudent, currentEmail, matchedUser.name, matchedUser.phone, matchedUser.department, matchedUser.dept, sessionUser]);
+
+    if (userProfile?.roll_no) {
+      setRollNo(userProfile.roll_no);
+    } else if (currentStudent?.rollNo) {
+      setRollNo(currentStudent.rollNo);
+    }
+  }, [role, userProfile, currentStudent, currentEmail, matchedUser.name, matchedUser.phone, matchedUser.department, matchedUser.dept, sessionUser]);
   
   // Security Form
   const [currentPassword, setCurrentPassword] = useState('');
@@ -337,47 +361,47 @@ export default function ProfileSettingsModal({
         </div>
 
         {/* Tab Selector */}
-        <div className="flex border-b border-slate-200 bg-slate-50/70 px-6 pt-2 shrink-0">
+        <div className="flex border-b border-slate-200 bg-slate-50/70 px-4 sm:px-6 pt-2 shrink-0 overflow-x-auto">
           <button
             type="button"
             onClick={() => setActiveTab('general')}
-            className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold border-b-2 transition-all ${
+            className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 text-xs font-bold border-b-2 transition-all shrink-0 whitespace-nowrap ${
               activeTab === 'general'
                 ? 'border-indigo-600 text-indigo-600'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
-            <User className="w-4 h-4" />
-            Personal Details
+            <User className="w-4 h-4 shrink-0" />
+            <span>Personal Details</span>
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('security')}
-            className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold border-b-2 transition-all ${
+            className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 text-xs font-bold border-b-2 transition-all shrink-0 whitespace-nowrap ${
               activeTab === 'security'
                 ? 'border-indigo-600 text-indigo-600'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
-            <KeyRound className="w-4 h-4" />
-            Password &amp; Security
+            <KeyRound className="w-4 h-4 shrink-0" />
+            <span>Password &amp; Security</span>
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('notifications')}
-            className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold border-b-2 transition-all ${
+            className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 text-xs font-bold border-b-2 transition-all shrink-0 whitespace-nowrap ${
               activeTab === 'notifications'
                 ? 'border-indigo-600 text-indigo-600'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
-            <Bell className="w-4 h-4" />
-            Alert Preferences
+            <Bell className="w-4 h-4 shrink-0" />
+            <span>Alert Preferences</span>
           </button>
         </div>
 
         {/* Modal Body */}
-        <div className="p-6 overflow-y-auto space-y-6">
+        <div className="p-4 sm:p-6 overflow-y-auto space-y-5 sm:space-y-6">
           {activeTab === 'general' && (
             <form onSubmit={handleSaveGeneral} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

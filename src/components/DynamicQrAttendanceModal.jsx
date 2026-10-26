@@ -94,23 +94,23 @@ export default function DynamicQrAttendanceModal({
         isFullScreen ? 'h-screen max-h-screen rounded-none' : 'max-w-5xl'
       }`}>
         {/* Header Bar */}
-        <div className="bg-slate-900 text-white px-5 sm:px-8 py-4 flex items-center justify-between border-b border-slate-800 shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-indigo-600 flex items-center justify-center shadow-md shadow-indigo-600/30 text-white">
-              <QrCode className="w-5 h-5" />
+        <div className="bg-slate-900 text-white px-4 sm:px-8 py-3.5 sm:py-4 flex items-center justify-between border-b border-slate-800 shrink-0">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-indigo-600 flex items-center justify-center shadow-md shadow-indigo-600/30 text-white shrink-0">
+              <QrCode className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-base sm:text-lg font-bold tracking-tight text-white">
-                  Dynamic QR &amp; Live OTP Projector Mode
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                <h2 className="text-sm sm:text-lg font-bold tracking-tight text-white truncate">
+                  Dynamic QR &amp; OTP Mode
                 </h2>
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold animate-pulse">
+                <span className="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[9px] sm:text-[10px] font-bold animate-pulse shrink-0">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                  Live Session Active
+                  Live Active
                 </span>
               </div>
-              <p className="text-xs text-slate-400">
-                Project on Classroom Display • Anti-Proxy Geofenced Check-in
+              <p className="text-[11px] sm:text-xs text-slate-400 truncate">
+                Project on Display • Anti-Proxy Geofence
               </p>
             </div>
           </div>

@@ -27,6 +27,7 @@ export default function MateSidebar({
   role,
   currentStudent,
   session,
+  userProfile,
   onLogout,
   isSidebarOpen = false,
   onMobileClose,
@@ -34,6 +35,21 @@ export default function MateSidebar({
   onToggleExpand,
   onOpenProfile
 }) {
+  // Determine dynamically displayed name prioritizing latest synced profile, currentStudent, or session metadata
+  const displayName = 
+    userProfile?.full_name ||
+    (role === 'student' ? currentStudent?.name : null) ||
+    session?.user?.user_metadata?.name ||
+    (role === 'admin' ? 'Administrator' : role === 'student' ? 'Student' : 'Faculty In-Charge');
+
+  const displayInitials = (displayName || 'User')
+    .split(' ')
+    .filter(Boolean)
+    .map(n => n[0])
+    .join('')
+    .substring(0, 2)
+    .toUpperCase();
+
   // On mobile/drawer (when opened via 3-line hamburger menu), always render full expanded labels & text
   const effectiveExpanded = isSidebarOpen || isExpanded;
 
@@ -47,15 +63,17 @@ export default function MateSidebar({
         />
       )}
 
-      {/* Slide-out Navigation Drawer Container */}
+      {/* Slide-out Navigation Drawer Container (Mobile/Tablet drawer + Desktop Persistent Sidebar) */}
       <aside
         className={`
-          fixed inset-y-0 left-0 z-50
-          w-72 max-w-[85vw] sm:w-72
+          fixed xl:static inset-y-0 left-0 z-50
+          w-72 max-w-[85vw] sm:w-72 xl:max-w-none
           shrink-0 bg-white/95 backdrop-blur-2xl text-[#1D1D1F]
           flex flex-col justify-between py-5 px-3 min-h-screen border-r border-black/[0.08]
           transition-all duration-300 ease-[cubic-bezier(0.25,1,0.5,1)]
-          ${isSidebarOpen ? 'translate-x-0 shadow-[0_30px_60px_rgba(0,0,0,0.3)]' : '-translate-x-full pointer-events-none'}
+          ${isSidebarOpen 
+            ? 'translate-x-0 shadow-[0_30px_60px_rgba(0,0,0,0.3)]' 
+            : '-translate-x-full xl:translate-x-0 pointer-events-none xl:pointer-events-auto'}
         `}
       >
         <div className="space-y-6">
@@ -75,11 +93,11 @@ export default function MateSidebar({
               </div>
             </div>
 
-            {/* Close Drawer Button (X) */}
+            {/* Close Drawer Button (X) - visible on mobile/tablet */}
             <button
               type="button"
               onClick={onMobileClose}
-              className="p-1.5 rounded-lg text-[#86868B] hover:text-[#1D1D1F] hover:bg-black/[0.04] transition-colors cursor-pointer"
+              className="xl:hidden p-1.5 rounded-lg text-[#86868B] hover:text-[#1D1D1F] hover:bg-black/[0.04] transition-colors cursor-pointer"
               title="Close Menu"
               aria-label="Close Navigation Menu"
             >
@@ -445,28 +463,19 @@ export default function MateSidebar({
             title="Open Profile & Account Settings"
           >
             <div className="w-9 h-9 rounded-full bg-indigo-50 text-indigo-700 font-extrabold text-xs flex items-center justify-center border-2 border-white shadow-xs shrink-0 group-hover:scale-105 transition-transform">
-              {role === 'admin'
-                ? 'AD'
-                : role === 'student' 
-                ? (currentStudent?.name?.split(' ').map(n => n[0]).join('').substring(0, 2) || 'ST')
-                : (session?.user?.user_metadata?.name?.split(' ').map(n => n[0]).join('').substring(0, 2) || 'FA')
-              }
+              {displayInitials || (role === 'admin' ? 'AD' : role === 'student' ? 'ST' : 'FA')}
             </div>
             {effectiveExpanded && (
               <div className="min-w-0 flex-1">
                 <span className="text-xs font-bold text-ink block truncate font-display group-hover:text-indigo-600 transition-colors">
-                  {role === 'admin' 
-                    ? (session?.user?.user_metadata?.name || 'Administrator') 
-                    : role === 'student' 
-                    ? (currentStudent?.name || 'Student') 
-                    : (session?.user?.user_metadata?.name || 'Faculty In-Charge')}
+                  {displayName}
                 </span>
                 <span className="text-[11px] text-ink-subtle block truncate font-sans">
                   {role === 'admin' 
                     ? (session?.user?.email || 'admin@college.edu.in') 
                     : role === 'student' 
-                    ? (currentStudent?.rollNo ? `Roll: ${currentStudent.rollNo}` : (session?.user?.email || 'Student Portal')) 
-                    : (session?.user?.email || 'Faculty Portal')}
+                    ? (userProfile?.roll_no || currentStudent?.rollNo ? `Roll: ${userProfile?.roll_no || currentStudent.rollNo}` : (session?.user?.email || 'Student Portal')) 
+                    : (userProfile?.department ? `${userProfile.department}` : (session?.user?.email || 'Faculty Portal'))}
                 </span>
               </div>
             )}

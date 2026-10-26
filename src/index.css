@@ -15,6 +15,8 @@ html {
   scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  width: 100%;
 }
 
 body {
@@ -24,6 +26,17 @@ body {
   color: #1D1D1F;
   font-family: var(--font-sans);
   letter-spacing: -0.015em;
+  overflow-x: hidden;
+  width: 100%;
+  min-height: 100vh;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Fluid responsive table wrapper default */
+.responsive-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Apple Sleek Scrollbar */

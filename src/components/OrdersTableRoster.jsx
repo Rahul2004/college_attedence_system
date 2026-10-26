@@ -328,13 +328,13 @@ export default function OrdersTableRoster({
 
       {/* Filter Row Pills: Type (Status) / Search / Filter Pills */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 mb-5">
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-2 flex-wrap min-w-0 max-w-full">
           {/* Skylearn 999px Filter Pills */}
-          <div className="flex items-center gap-1.5 p-1 bg-surface-sunken rounded-full border border-outline text-xs font-bold transition-all duration-240">
+          <div className="flex items-center gap-1.5 p-1 bg-surface-sunken rounded-full border border-outline text-xs font-bold transition-all duration-240 overflow-x-auto max-w-full">
             <button
               type="button"
               onClick={() => setFilterType('ALL')}
-              className={`px-3.5 py-1.5 rounded-full transition-all duration-200 ${
+              className={`px-3 py-1.5 sm:px-3.5 rounded-full transition-all duration-200 shrink-0 whitespace-nowrap ${
                 filterType === 'ALL'
                   ? 'bg-sky text-white shadow-xs'
                   : 'text-ink-muted hover:text-ink'
@@ -346,7 +346,7 @@ export default function OrdersTableRoster({
             <button
               type="button"
               onClick={() => setFilterType('WARNING')}
-              className={`px-3.5 py-1.5 rounded-full transition-all duration-200 ${
+              className={`px-3 py-1.5 sm:px-3.5 rounded-full transition-all duration-200 shrink-0 whitespace-nowrap ${
                 filterType === 'WARNING'
                   ? 'bg-coral text-white shadow-xs font-bold'
                   : 'text-ink-muted hover:text-coral-deep'
@@ -358,7 +358,7 @@ export default function OrdersTableRoster({
             <button
               type="button"
               onClick={() => setFilterType('ABSENT')}
-              className={`px-3.5 py-1.5 rounded-full transition-all duration-200 ${
+              className={`px-3 py-1.5 sm:px-3.5 rounded-full transition-all duration-200 shrink-0 whitespace-nowrap ${
                 filterType === 'ABSENT'
                   ? 'bg-ink text-white shadow-xs'
                   : 'text-ink-muted hover:text-ink'

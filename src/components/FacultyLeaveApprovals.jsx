@@ -118,11 +118,11 @@ export default function FacultyLeaveApprovals({
         </div>
 
         {/* Tab Switcher */}
-        <div className="flex items-center p-1 bg-slate-100 rounded-xl border border-slate-200 text-xs font-bold">
+        <div className="flex items-center p-1 bg-slate-100 rounded-xl border border-slate-200 text-xs font-bold overflow-x-auto max-w-full">
           <button
             type="button"
             onClick={() => setActiveApprovalTab('registrations')}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg transition-all cursor-pointer ${
+            className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 rounded-lg transition-all cursor-pointer shrink-0 whitespace-nowrap ${
               activeApprovalTab === 'registrations'
                 ? 'bg-white text-slate-900 shadow-xs'
                 : 'text-slate-500 hover:text-slate-900'
@@ -134,7 +134,7 @@ export default function FacultyLeaveApprovals({
           <button
             type="button"
             onClick={() => setActiveApprovalTab('leaves')}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg transition-all cursor-pointer ${
+            className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 rounded-lg transition-all cursor-pointer shrink-0 whitespace-nowrap ${
               activeApprovalTab === 'leaves'
                 ? 'bg-white text-slate-900 shadow-xs'
                 : 'text-slate-500 hover:text-slate-900'
@@ -146,7 +146,7 @@ export default function FacultyLeaveApprovals({
           <button
             type="button"
             onClick={() => setActiveApprovalTab('disputes')}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg transition-all cursor-pointer ${
+            className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 rounded-lg transition-all cursor-pointer shrink-0 whitespace-nowrap ${
               activeApprovalTab === 'disputes'
                 ? 'bg-white text-slate-900 shadow-xs'
                 : 'text-slate-500 hover:text-slate-900'

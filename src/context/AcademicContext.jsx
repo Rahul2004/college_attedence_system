@@ -723,6 +723,64 @@ export function AcademicProvider({ children }) {
     return (((attended / ((s.totalClasses || 0) + 1))) * 100) < attendanceThreshold;
   }).length;
 
+  const updateUserProfile = async (updates) => {
+    // 1. Update userProfile state immediately
+    setUserProfile(prev => {
+      const merged = { ...(prev || {}), ...updates };
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('college_active_profile', JSON.stringify(merged));
+      }
+      return merged;
+    });
+
+    // 2. Update session user metadata
+    setSession(prev => {
+      if (!prev?.user) return prev;
+      const updatedSess = {
+        ...prev,
+        user: {
+          ...prev.user,
+          user_metadata: {
+            ...(prev.user.user_metadata || {}),
+            name: updates.full_name || updates.name || prev.user.user_metadata?.name,
+            phone: updates.phone || prev.user.user_metadata?.phone,
+            department: updates.department || prev.user.user_metadata?.department
+          }
+        }
+      };
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('college_active_session', JSON.stringify(updatedSess));
+      }
+      return updatedSess;
+    });
+
+    // 3. Update public.profiles table in Supabase
+    if (supabase && session?.user?.id) {
+      try {
+        await supabase
+          .from('profiles')
+          .update({
+            ...updates,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', session.user.id);
+      } catch (err) {
+        console.warn('Could not update profile in Supabase:', err);
+      }
+
+      // Also update auth user metadata in Supabase Auth
+      try {
+        await supabase.auth.updateUser({
+          data: {
+            name: updates.full_name || updates.name,
+            phone: updates.phone,
+            department: updates.department
+          }
+        });
+      } catch {}
+    }
+  };
+
   const reloadUserProfile = async () => {
     if (!supabase || !session?.user?.id) return;
     try {
@@ -750,6 +808,7 @@ export function AcademicProvider({ children }) {
       session, setSession,
       role, setRole,
       userProfile, setUserProfile,
+      updateUserProfile,
       reloadUserProfile,
       switchRole,
       loading,
