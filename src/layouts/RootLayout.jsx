@@ -10,12 +10,17 @@ import { useAcademic } from '../context/AcademicContext';
 import { isSupabaseConfigured } from '../lib/supabase';
 import { INITIAL_STUDENTS } from '../data/mockData';
 
+import StudentOnboardingStateView from '../components/StudentOnboardingStateView';
+import StudentAcademicDetailsModal from '../components/StudentAcademicDetailsModal';
+
 export default function RootLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const {
     session,
     role,
+    userProfile,
+    reloadUserProfile,
     setRole,
     switchRole,
     students,
@@ -39,6 +44,26 @@ export default function RootLayout() {
   const [isSiriOpen, setIsSiriOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
+  // Student Onboarding State Gatekeeper
+  // If user is a student and status is NOT active, render the dedicated onboarding view
+  const currentStatus = userProfile?.status || session?.user?.user_metadata?.status || 'active';
+  if (role === 'student' && currentStatus !== 'active') {
+    if (currentStatus === 'details_required') {
+      return (
+        <StudentAcademicDetailsModal
+          profile={userProfile}
+          onSubmitSuccess={() => reloadUserProfile()}
+        />
+      );
+    }
+    return (
+      <StudentOnboardingStateView
+        profile={userProfile}
+        onRefreshProfile={() => reloadUserProfile()}
+      />
+    );
+  }
+
   // Derive active tab from URL path (e.g. /faculty/roster -> activeTab = 'roster')
   const pathParts = location.pathname.split('/').filter(Boolean);
   const currentTab = pathParts[1] || (role === 'admin' ? 'admin' : role === 'faculty' ? 'roster' : 'overview');
@@ -56,24 +81,25 @@ export default function RootLayout() {
       if (matched) return matched;
 
       const metadata = session?.user?.user_metadata || {};
+      const profile = userProfile || {};
       return {
         id: session?.user?.id || 'stu-active',
-        rollNo: metadata.rollNo || metadata.roll_no || 'CS-2026',
-        name: metadata.name || session?.user?.email?.split('@')[0] || 'Student User',
+        rollNo: profile.roll_no || metadata.rollNo || metadata.roll_no || 'CS-2026',
+        name: profile.full_name || metadata.name || session?.user?.email?.split('@')[0] || 'Student User',
         email: session?.user?.email,
-        phone: metadata.phone || '+91 98000 00000',
-        program: metadata.program || 'B.Tech Computer Science & Engineering',
-        semester: metadata.semester || 'Semester VI',
-        section: 'A',
-        attendancePercentage: 82.5,
-        attendedClasses: 33,
-        totalClasses: 40,
-        todayStatus: 'PRESENT',
-        status: metadata.status || 'active'
+        phone: profile.emergency_contact || metadata.phone || '+91 98000 00000',
+        program: profile.program_name || metadata.program || 'B.Tech Computer Science & Engineering',
+        semester: profile.semester || metadata.semester || 'Semester VI',
+        section: profile.section || 'A',
+        attendancePercentage: 0,
+        attendedClasses: 0,
+        totalClasses: 0,
+        todayStatus: 'ABSENT',
+        status: profile.status || metadata.status || 'active'
       };
     }
-    return students[0] || INITIAL_STUDENTS[0];
-  }, [students, session]);
+    return null;
+  }, [students, session, userProfile]);
 
   return (
     <div className="min-h-screen bg-slate-100/60 font-sans flex text-slate-900 selection:bg-slate-900 selection:text-white">

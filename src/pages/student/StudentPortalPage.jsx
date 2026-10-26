@@ -10,6 +10,7 @@ export default function StudentPortalPage() {
   const location = useLocation();
   const {
     session,
+    userProfile,
     students,
     setStudents,
     attendanceThreshold,
@@ -24,7 +25,7 @@ export default function StudentPortalPage() {
 
   const studentEmail = session?.user?.email?.toLowerCase();
   
-  // Find student in roster by email, or dynamically construct their real profile from Supabase Auth session
+  // Find student in roster by email, or dynamically construct their real profile from Supabase Auth & userProfile
   const targetStudent = React.useMemo(() => {
     if (studentEmail) {
       const matched = (students || []).find(s => s.email?.toLowerCase() === studentEmail);
@@ -32,27 +33,28 @@ export default function StudentPortalPage() {
 
       // Dynamically construct authentic student record for the currently logged-in user
       const metadata = session?.user?.user_metadata || {};
-      const studentName = metadata.name || session?.user?.email?.split('@')[0] || 'Student User';
+      const profile = userProfile || {};
+      const studentName = profile.full_name || metadata.name || session?.user?.email?.split('@')[0] || 'Student User';
       const studentId = session?.user?.id || 'stu-active';
       return {
         id: studentId,
-        rollNo: metadata.rollNo || metadata.roll_no || 'CS-2026',
+        rollNo: profile.roll_no || metadata.rollNo || metadata.roll_no || 'Pending UID',
         name: studentName,
         email: session?.user?.email,
-        phone: metadata.phone || '+91 98000 00000',
-        program: metadata.program || 'B.Tech Computer Science & Engineering',
-        semester: metadata.semester || 'Semester VI',
-        section: 'A',
-        attendancePercentage: 82.5,
-        attendedClasses: 33,
-        totalClasses: 40,
-        todayStatus: 'PRESENT',
-        status: metadata.status || 'active',
-        academicStanding: 'Good Standing'
+        phone: profile.emergency_contact || metadata.phone || '+91 98000 00000',
+        program: profile.program_name || metadata.program || 'Undergraduate Degree',
+        semester: profile.semester || metadata.semester || 'Semester I',
+        section: profile.section || 'A',
+        attendancePercentage: 0,
+        attendedClasses: 0,
+        totalClasses: 0,
+        todayStatus: 'ABSENT',
+        status: profile.status || metadata.status || 'active',
+        academicStanding: 'Enrolled'
       };
     }
-    return students[0] || INITIAL_STUDENTS[0];
-  }, [studentEmail, students, session]);
+    return null;
+  }, [studentEmail, students, session, userProfile]);
 
   const pathParts = location.pathname.split('/').filter(Boolean);
   const currentTab = pathParts[1] || 'overview';

@@ -119,6 +119,31 @@ export async function saveSystemSettingToCloud(key, value) {
 export async function fetchCloudUsers() {
   if (!supabase || !isSupabaseConfigured) return null;
   try {
+    // 1. Primary: Load all profiles registered in Supabase
+    const { data: profiles, error: profErr } = await supabase
+      .from('profiles')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (!profErr && profiles && profiles.length > 0) {
+      return profiles.map(p => ({
+        id: p.id,
+        name: p.full_name || p.email?.split('@')[0],
+        email: p.email,
+        role: p.role || 'student',
+        status: p.status || 'pending_approval',
+        dept: p.department || p.program_name || 'General',
+        program_id: p.program_id,
+        program_name: p.program_name,
+        semester: p.semester,
+        section: p.section,
+        rollNo: p.roll_no,
+        review_notes: p.review_notes,
+        lastActive: p.updated_at ? new Date(p.updated_at).toLocaleDateString() : 'Recent'
+      }));
+    }
+
+    // 2. Secondary fallback: app_users table
     const { data, error } = await supabase
       .from('app_users')
       .select('*')

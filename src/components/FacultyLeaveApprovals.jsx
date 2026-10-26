@@ -68,7 +68,10 @@ export default function FacultyLeaveApprovals({
 
   const leaveRequests = propLeaves || internalLeaves;
   const disputeRequests = propDisputes || [];
-  const pendingUsersList = (propUsers || []).filter(u => u.status === 'pending' && u.role === 'student');
+  const pendingUsersList = (propUsers || []).filter(u => 
+    (u.status === 'pending' || u.status === 'pending_approval' || u.status === 'details_pending_review') &&
+    u.role === 'student'
+  );
 
   const handleAction = (id, newStatus) => {
     if (onUpdateLeaveStatus) {
@@ -86,11 +89,12 @@ export default function FacultyLeaveApprovals({
     setTimeout(() => setToastMessage(''), 3500);
   };
 
-  const handleApproveStudent = (userId, userName) => {
+  const handleApproveStudent = (userId, userName, targetStatus = 'details_required') => {
     if (onApproveUser) {
-      onApproveUser(userId);
+      onApproveUser(userId, targetStatus);
     }
-    setToastMessage(`Student ${userName || 'registration'} approved successfully! Account is now active.`);
+    const label = targetStatus === 'active' ? 'activated' : 'approved for academic details submission';
+    setToastMessage(`Student ${userName || 'registration'} ${label}!`);
     setTimeout(() => setToastMessage(''), 3500);
   };
 
@@ -187,39 +191,59 @@ export default function FacultyLeaveApprovals({
               </div>
 
               <div className="divide-y divide-slate-100">
-                {pendingUsersList.map(user => (
-                  <div key={user.id} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-50/70 transition">
-                    <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-sm shrink-0">
-                        {user.name ? user.name.charAt(0).toUpperCase() : 'S'}
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold text-sm text-slate-900">{user.name || 'Student'}</span>
-                          <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-700 border border-amber-200">
-                            Pending Approval
-                          </span>
+                {pendingUsersList.map(user => {
+                  const isDetailsPending = user.status === 'details_pending_review';
+                  return (
+                    <div key={user.id} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-50/70 transition">
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-sm shrink-0">
+                          {user.name ? user.name.charAt(0).toUpperCase() : 'S'}
                         </div>
-                        <div className="text-xs text-slate-500 mt-0.5 flex flex-wrap gap-x-3 gap-y-1">
-                          <span>Email: <strong className="text-slate-700">{user.email}</strong></span>
-                          {user.dept && <span>Dept: {user.dept}</span>}
-                          {user.rollNo && <span>Roll: {user.rollNo}</span>}
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-sm text-slate-900">{user.name || 'Student'}</span>
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${
+                              isDetailsPending
+                                ? 'bg-indigo-100 text-indigo-700 border-indigo-200'
+                                : 'bg-amber-100 text-amber-700 border-amber-200'
+                            }`}>
+                              {isDetailsPending ? 'Academic Details Pending Review' : 'Registration Pending'}
+                            </span>
+                          </div>
+                          <div className="text-xs text-slate-500 mt-0.5 flex flex-wrap gap-x-3 gap-y-1">
+                            <span>Email: <strong className="text-slate-700">{user.email}</strong></span>
+                            {user.dept && <span>Dept: {user.dept}</span>}
+                            {user.program_name && <span>Program: {user.program_name}</span>}
+                            {user.semester && <span>{user.semester}</span>}
+                            {user.rollNo && <span>Roll: <strong className="text-slate-800 font-mono">{user.rollNo}</strong></span>}
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => handleApproveStudent(user.id, user.name)}
-                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition shadow-xs cursor-pointer"
-                      >
-                        <Check className="w-3.5 h-3.5" />
-                        Approve &amp; Activate Account
-                      </button>
+                      <div className="flex items-center gap-2">
+                        {isDetailsPending ? (
+                          <button
+                            type="button"
+                            onClick={() => handleApproveStudent(user.id, user.name, 'active')}
+                            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition shadow-xs cursor-pointer"
+                          >
+                            <Check className="w-3.5 h-3.5" />
+                            Verify &amp; Unlock Dashboard
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => handleApproveStudent(user.id, user.name, 'details_required')}
+                            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition shadow-xs cursor-pointer"
+                          >
+                            <Check className="w-3.5 h-3.5" />
+                            Approve Registration (Request Academic Details)
+                          </button>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}

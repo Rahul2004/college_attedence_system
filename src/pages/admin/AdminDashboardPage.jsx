@@ -34,8 +34,8 @@ export default function AdminDashboardPage() {
     await saveUsersToCloud(updated);
   };
 
-  const handleApproveStatus = async (userId) => {
-    const updated = users.map(u => u.id === userId ? { ...u, status: 'active' } : u);
+  const handleApproveStatus = async (userId, targetStatus = 'active') => {
+    const updated = users.map(u => u.id === userId ? { ...u, status: targetStatus } : u);
     setUsers(updated);
     if (typeof window !== 'undefined') localStorage.setItem('college_app_users', JSON.stringify(updated));
     await saveUsersToCloud(updated);

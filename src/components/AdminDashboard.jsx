@@ -87,25 +87,25 @@ export default function AdminDashboard({
     }
   };
 
-  const handleApproveStatus = async (userId) => {
+  const handleApproveStatus = async (userId, targetStatus = 'active') => {
     if (propOnApproveStatus) {
-      propOnApproveStatus(userId);
+      propOnApproveStatus(userId, targetStatus);
     } else {
-      setInternalUsers(prev => prev.map(u => u.id === userId ? { ...u, status: 'active' } : u));
+      setInternalUsers(prev => prev.map(u => u.id === userId ? { ...u, status: targetStatus } : u));
     }
 
     if (supabase && isSupabaseConfigured) {
       try {
         await supabase
           .from('profiles')
-          .update({ status: 'active', updated_at: new Date().toISOString() })
+          .update({ status: targetStatus, updated_at: new Date().toISOString() })
           .eq('id', userId);
-        showToast('User registration approved on cloud.');
+        showToast(`User status updated to ${targetStatus} on cloud.`);
       } catch {
         showToast('Approval updated locally.');
       }
     } else {
-      showToast('User approved (Persistent Local Storage).');
+      showToast(`User marked as ${targetStatus} (Local Storage).`);
     }
   };
 
@@ -333,7 +333,9 @@ export default function AdminDashboard({
                 filteredUsers.map(user => {
                   const isAdmin = user.role === 'admin';
                   const isFaculty = user.role === 'faculty';
-                  const isPending = user.status === 'pending';
+                  const isPending = user.status === 'pending' || user.status === 'pending_approval';
+                  const isDetailsPending = user.status === 'details_pending_review';
+                  const isDetailsRequired = user.status === 'details_required';
 
                   return (
                     <tr key={user.id} className="hover:bg-slate-50/80 transition-colors">
@@ -341,7 +343,7 @@ export default function AdminDashboard({
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-2.5">
                           <div className="w-8 h-8 rounded-full bg-slate-100 text-slate-700 font-bold flex items-center justify-center shrink-0 border border-slate-200">
-                            {user.name.split(' ').map(n => n[0]).join('').substring(0, 2)}
+                            {(user.name || 'User').split(' ').map(n => n[0]).join('').substring(0, 2)}
                           </div>
                           <div>
                             <span className="font-semibold text-slate-900 block">{user.name}</span>
@@ -359,7 +361,11 @@ export default function AdminDashboard({
                       <td className="py-3 px-4 text-center">
                         <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
                           isPending 
-                            ? 'bg-amber-50 text-amber-700 border border-amber-200' 
+                            ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                            : isDetailsPending
+                            ? 'bg-indigo-50 text-indigo-700 border border-indigo-200'
+                            : isDetailsRequired
+                            ? 'bg-blue-50 text-blue-700 border border-blue-200'
                             : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                         }`}>
                           {user.status}
@@ -397,11 +403,23 @@ export default function AdminDashboard({
                         {isPending ? (
                           <button
                             type="button"
-                            onClick={() => handleApproveStatus(user.id)}
-                            className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-[11px] transition-colors"
+                            onClick={() => handleApproveStatus(user.id, 'details_required')}
+                            className="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-[11px] transition-colors"
+                            title="Approve registration & allow student to enter academic details"
                           >
-                            Approve
+                            Approve (Request Info)
                           </button>
+                        ) : isDetailsPending ? (
+                          <button
+                            type="button"
+                            onClick={() => handleApproveStatus(user.id, 'active')}
+                            className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-[11px] transition-colors"
+                            title="Verify academic details & unlock portal"
+                          >
+                            Verify &amp; Activate
+                          </button>
+                        ) : isDetailsRequired ? (
+                          <span className="text-[11px] text-blue-600 font-medium">Awaiting Student</span>
                         ) : (
                           <span className="text-[11px] text-slate-400 font-mono">Active</span>
                         )}

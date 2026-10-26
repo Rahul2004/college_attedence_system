@@ -31,8 +31,8 @@ export default function LeaveApprovalsPage() {
     setTimeout(() => setToast({ type: null, message: '' }), 4000);
   };
 
-  const handleApproveUser = async (userId) => {
-    const updated = users.map(u => u.id === userId ? { ...u, status: 'active' } : u);
+  const handleApproveUser = async (userId, targetStatus = 'details_required') => {
+    const updated = users.map(u => u.id === userId ? { ...u, status: targetStatus } : u);
     setUsers(updated);
     if (typeof window !== 'undefined') {
       localStorage.setItem('college_app_users', JSON.stringify(updated));
@@ -42,15 +42,21 @@ export default function LeaveApprovalsPage() {
       try {
         await supabase
           .from('profiles')
-          .update({ status: 'active', updated_at: new Date().toISOString() })
+          .update({ status: targetStatus, updated_at: new Date().toISOString() })
           .eq('id', userId);
-      } catch {}
+      } catch (err) {
+        console.warn('Update profile status error:', err);
+      }
     }
 
     await saveUsersToCloud(updated);
+    const msg = targetStatus === 'active'
+      ? 'Student account fully verified and activated! Student dashboard is now unlocked.'
+      : 'Student registration approved! Student has been granted access to submit college academic details.';
+
     setToast({
       type: 'success',
-      message: `Student registration approved! Student can now log in to the portal.`
+      message: msg
     });
     setTimeout(() => setToast({ type: null, message: '' }), 4000);
   };

@@ -44,6 +44,16 @@ export function AcademicProvider({ children }) {
     return 'student';
   });
 
+  const [userProfile, setUserProfile] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('college_active_profile');
+      if (saved) {
+        try { return JSON.parse(saved); } catch {}
+      }
+    }
+    return null;
+  });
+
   const [loading, setLoading] = useState(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('college_active_session');
@@ -381,16 +391,20 @@ export function AcademicProvider({ children }) {
       if (currentSession?.user) {
         let resolvedRole = null;
         let resolvedStatus = currentSession.user.user_metadata?.status || 'active';
+        let resolvedProfile = null;
 
         try {
           const { data: profile } = await supabase
             .from('profiles')
-            .select('role, status')
+            .select('*')
             .eq('id', currentSession.user.id)
             .maybeSingle();
 
-          if (profile?.role) resolvedRole = profile.role;
-          if (profile?.status) resolvedStatus = profile.status;
+          if (profile) {
+            resolvedProfile = profile;
+            if (profile.role) resolvedRole = profile.role;
+            if (profile.status) resolvedStatus = profile.status;
+          }
         } catch {}
 
         if (!resolvedRole) {
@@ -400,33 +414,37 @@ export function AcademicProvider({ children }) {
 
         const userEmail = currentSession.user?.email?.toLowerCase();
 
-        // 1. Guard against Pending or Suspended accounts
-        if (resolvedStatus === 'pending' || resolvedStatus === 'suspended') {
+        // 1. Guard against hard-suspended accounts
+        if (resolvedStatus === 'suspended') {
           await supabase.auth.signOut();
           setSession(null);
+          setUserProfile(null);
           setRole('student');
           if (typeof window !== 'undefined') {
             localStorage.removeItem('college_active_session');
             localStorage.removeItem('college_active_role');
+            localStorage.removeItem('college_active_profile');
           }
           setLoading(false);
           return;
         }
 
-        // 2. Check if user has been revoked or removed by Administrator in local storage
+        // 2. Check if user has been revoked or deleted by Administrator in local storage
         try {
           const rawUsers = localStorage.getItem('college_app_users');
           if (rawUsers && userEmail) {
             const parsedUsers = JSON.parse(rawUsers);
             if (Array.isArray(parsedUsers)) {
               const matched = parsedUsers.find(u => u.email?.toLowerCase() === userEmail);
-              if (matched && (matched.status === 'deleted' || matched.status === 'suspended' || matched.status === 'pending')) {
+              if (matched && (matched.status === 'deleted' || matched.status === 'suspended')) {
                 await supabase.auth.signOut();
                 setSession(null);
+                setUserProfile(null);
                 setRole('student');
                 if (typeof window !== 'undefined') {
                   localStorage.removeItem('college_active_session');
                   localStorage.removeItem('college_active_role');
+                  localStorage.removeItem('college_active_profile');
                 }
                 setLoading(false);
                 return;
@@ -435,34 +453,53 @@ export function AcademicProvider({ children }) {
           }
         } catch {}
 
+        const profileObj = resolvedProfile || {
+          id: currentSession.user.id,
+          email: currentSession.user.email,
+          role: resolvedRole,
+          status: resolvedStatus,
+          full_name: currentSession.user.user_metadata?.name || currentSession.user.email?.split('@')[0],
+          department: currentSession.user.user_metadata?.department || ''
+        };
+
         setSession(currentSession);
+        setUserProfile(profileObj);
         setRole(resolvedRole);
         if (typeof window !== 'undefined') {
           localStorage.setItem('college_active_role', resolvedRole);
           localStorage.setItem('college_active_session', JSON.stringify(currentSession));
+          localStorage.setItem('college_active_profile', JSON.stringify(profileObj));
         }
       } else {
         // No active Supabase cloud session: check if local institutional session exists before clearing
         let localSess = null;
         let localRole = null;
+        let localProf = null;
         if (typeof window !== 'undefined') {
           const raw = localStorage.getItem('college_active_session');
           if (raw) {
             try { localSess = JSON.parse(raw); } catch {}
           }
           localRole = localStorage.getItem('college_active_role');
+          const rawProf = localStorage.getItem('college_active_profile');
+          if (rawProf) {
+            try { localProf = JSON.parse(rawProf); } catch {}
+          }
         }
 
         if (localSess && localSess.user) {
           setSession(localSess);
+          setUserProfile(localProf);
           if (localRole) setRole(localRole);
         } else {
           // Genuinely logged out
           setSession(null);
+          setUserProfile(null);
           setRole('student');
           if (typeof window !== 'undefined') {
             localStorage.removeItem('college_active_session');
             localStorage.removeItem('college_active_role');
+            localStorage.removeItem('college_active_profile');
           }
         }
       }
@@ -686,10 +723,34 @@ export function AcademicProvider({ children }) {
     return (((attended / ((s.totalClasses || 0) + 1))) * 100) < attendanceThreshold;
   }).length;
 
+  const reloadUserProfile = async () => {
+    if (!supabase || !session?.user?.id) return;
+    try {
+      const { data: prof } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', session.user.id)
+        .maybeSingle();
+
+      if (prof) {
+        setUserProfile(prof);
+        if (prof.role) setRole(prof.role);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('college_active_profile', JSON.stringify(prof));
+          if (prof.role) localStorage.setItem('college_active_role', prof.role);
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to reload profile:', err);
+    }
+  };
+
   return (
     <AcademicContext.Provider value={{
       session, setSession,
       role, setRole,
+      userProfile, setUserProfile,
+      reloadUserProfile,
       switchRole,
       loading,
       students, setStudents,
