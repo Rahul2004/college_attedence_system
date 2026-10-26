@@ -44,11 +44,13 @@ export default function AuthScreen({ onLogin }) {
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
-  // 'login' | 'forgot_email' | 'forgot_otp' | 'forgot_new_password' | 'mfa_totp'
+  // 'login' | 'login_otp' | 'signup_otp' | 'forgot_email' | 'forgot_otp' | 'forgot_new_password' | 'mfa_totp'
   const [authMode, setAuthMode] = useState('login');
+  const [loginMethod, setLoginMethod] = useState('password'); // 'password' | 'otp'
   const [resetEmail, setResetEmail] = useState('');
   const [otpInput, setOtpInput] = useState('');
   const [generatedOtp, setGeneratedOtp] = useState('');
+  const [signupPendingData, setSignupPendingData] = useState(null);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [resendCooldown, setResendCooldown] = useState(0);
@@ -190,6 +192,7 @@ export default function AuthScreen({ onLogin }) {
         // Faculty registers as 'pending' awaiting Admin approval, Students register as 'active'
         const initialStatus = selectedRole === 'faculty' ? 'pending' : 'active';
 
+        // 1. Initiate Supabase sign up with credentials
         const { data, error } = await supabase.auth.signUp({
           email: normalizedEmail,
           password,
@@ -198,18 +201,17 @@ export default function AuthScreen({ onLogin }) {
               role: selectedRole, 
               name: name || undefined,
               status: initialStatus
-            },
-            emailRedirectTo: window.location.origin
+            }
           }
         });
 
         if (error) throw error;
 
-        // If email confirmation is disabled on Supabase
+        // If email confirmation is disabled on Supabase and session returned immediately
         if (data?.session) {
           if (selectedRole === 'faculty') {
             await supabase.auth.signOut();
-            setSuccessMsg('Faculty account created! However, your account is currently PENDING Admin approval before you can access the teacher portal.');
+            setSuccessMsg('Faculty account created! Awaiting Admin approval before portal access.');
             setIsSignUp(false);
             setPassword('');
             setFacultyPasskey('');
@@ -219,15 +221,17 @@ export default function AuthScreen({ onLogin }) {
           return;
         }
 
-        // Email verification link sent
-        setSuccessMsg(
-          selectedRole === 'faculty'
-            ? `Confirmation link sent to ${normalizedEmail}. Please verify your email. Note: Faculty accounts also require approval from the Administrator.`
-            : `Confirmation link has been sent to ${normalizedEmail}. Please check your email and click the verification link before signing in.`
-        );
-        setIsSignUp(false);
-        setPassword('');
-        setFacultyPasskey('');
+        // Switch directly to 6-digit OTP verification screen
+        setResetEmail(normalizedEmail);
+        setSignupPendingData({
+          email: normalizedEmail,
+          role: selectedRole,
+          status: initialStatus
+        });
+        setOtpInput('');
+        setResendCooldown(60);
+        setAuthMode('signup_otp');
+        setSuccessMsg(`6-Digit Verification Code sent to ${normalizedEmail}. Please check your inbox.`);
         return;
       } else {
         // Sign In
@@ -236,6 +240,30 @@ export default function AuthScreen({ onLogin }) {
           return;
         }
 
+        // If user chose "Sign in with Email OTP"
+        if (loginMethod === 'otp') {
+          const { error: otpSendErr } = await supabase.auth.signInWithOtp({
+            email: normalizedEmail,
+            options: {
+              shouldCreateUser: false
+            }
+          });
+
+          if (otpSendErr) {
+            recordFailedAttempt(normalizedEmail);
+            setErrorMsg(otpSendErr.message || 'Could not send verification code.');
+            return;
+          }
+
+          setResetEmail(normalizedEmail);
+          setOtpInput('');
+          setResendCooldown(60);
+          setAuthMode('login_otp');
+          setSuccessMsg(`6-Digit Login Code sent to ${normalizedEmail}. Please enter the code below.`);
+          return;
+        }
+
+        // Standard Password Sign In
         const { data, error } = await supabase.auth.signInWithPassword({
           email: normalizedEmail,
           password,
@@ -372,6 +400,137 @@ export default function AuthScreen({ onLogin }) {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Verify OTP for direct email login (passwordless or 2FA)
+  const handleVerifyLoginOtp = async (e) => {
+    e.preventDefault();
+    setErrorMsg('');
+    setSuccessMsg('');
+    setLoading(true);
+
+    try {
+      const targetEmail = resetEmail.trim().toLowerCase();
+      const token = otpInput.trim();
+
+      if (!isSupabaseConfigured || !supabase) {
+        throw new Error('Supabase is not configured.');
+      }
+
+      // Verify OTP with Supabase (type: 'email' or 'magiclink')
+      const { data, error } = await supabase.auth.verifyOtp({
+        email: targetEmail,
+        token,
+        type: 'email'
+      });
+
+      if (error) {
+        // Fallback check for magiclink type
+        const { data: retryData, error: retryError } = await supabase.auth.verifyOtp({
+          email: targetEmail,
+          token,
+          type: 'magiclink'
+        });
+
+        if (retryError) throw error;
+        if (retryData?.session) {
+          executeLoginFromSession(retryData.session, targetEmail);
+          return;
+        }
+      }
+
+      if (data?.session) {
+        executeLoginFromSession(data.session, targetEmail);
+      } else {
+        throw new Error('Could not authenticate. Please re-enter the code.');
+      }
+    } catch (err) {
+      setErrorMsg(err.message || 'Invalid or expired verification code.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Verify OTP for new signup email confirmation
+  const handleVerifySignupOtp = async (e) => {
+    e.preventDefault();
+    setErrorMsg('');
+    setSuccessMsg('');
+    setLoading(true);
+
+    try {
+      const targetEmail = resetEmail.trim().toLowerCase();
+      const token = otpInput.trim();
+
+      if (!isSupabaseConfigured || !supabase) {
+        throw new Error('Supabase is not configured.');
+      }
+
+      // Supabase email signup confirmation type is 'signup'
+      const { data, error } = await supabase.auth.verifyOtp({
+        email: targetEmail,
+        token,
+        type: 'signup'
+      });
+
+      if (error) throw error;
+
+      if (data?.session) {
+        const userRole = signupPendingData?.role || 'student';
+        if (userRole === 'faculty') {
+          await supabase.auth.signOut();
+          setSuccessMsg('Email verified! Your Faculty registration is PENDING approval by the College Administrator.');
+          setAuthMode('login');
+          setIsSignUp(false);
+          return;
+        }
+        executeSmoothLogin(userRole, data.session);
+      } else {
+        setSuccessMsg('Email verified successfully! You can now sign in.');
+        setAuthMode('login');
+        setIsSignUp(false);
+      }
+    } catch (err) {
+      setErrorMsg(err.message || 'Invalid verification code. Please check your email.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Helper to resolve role and enter portal from verified session
+  const executeLoginFromSession = async (session, targetEmail) => {
+    clearRateLimit(targetEmail);
+    const userId = session.user?.id;
+    let userRole = session.user?.user_metadata?.role;
+    let userStatus = session.user?.user_metadata?.status || 'active';
+
+    try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role, status')
+        .eq('id', userId)
+        .maybeSingle();
+
+      if (profile?.role) userRole = profile.role;
+      if (profile?.status) userStatus = profile.status;
+    } catch {}
+
+    if (userRole === 'faculty' && userStatus === 'pending') {
+      await supabase.auth.signOut();
+      setErrorMsg('Your Faculty account is pending approval by the College Administrator.');
+      setAuthMode('login');
+      return;
+    }
+
+    if (userStatus === 'suspended') {
+      await supabase.auth.signOut();
+      setErrorMsg('Your account has been suspended by administration.');
+      setAuthMode('login');
+      return;
+    }
+
+    if (!userRole) userRole = selectedRole || 'student';
+    executeSmoothLogin(userRole, session);
   };
 
   const handleVerifyOtp = async (e) => {
@@ -626,6 +785,42 @@ export default function AuthScreen({ onLogin }) {
               </>
             )}
 
+            {/* Login Method Toggle: Password vs Instant Email OTP */}
+            {!isSignUp && (
+              <div className="flex items-center justify-between p-1 bg-surface-sunken rounded-sk-btn border border-outline mb-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLoginMethod('password');
+                    setErrorMsg('');
+                  }}
+                  className={`flex-1 py-1.5 text-xs font-bold rounded-sk-btn transition cursor-pointer flex items-center justify-center gap-1.5 ${
+                    loginMethod === 'password'
+                      ? 'bg-white text-ink shadow-2xs border border-outline'
+                      : 'text-ink-muted hover:text-ink'
+                  }`}
+                >
+                  <Lock className="w-3.5 h-3.5" />
+                  <span>Password</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLoginMethod('otp');
+                    setErrorMsg('');
+                  }}
+                  className={`flex-1 py-1.5 text-xs font-bold rounded-sk-btn transition cursor-pointer flex items-center justify-center gap-1.5 ${
+                    loginMethod === 'otp'
+                      ? 'bg-white text-sky-deep shadow-2xs border border-outline'
+                      : 'text-ink-muted hover:text-ink'
+                  }`}
+                >
+                  <Mail className="w-3.5 h-3.5 text-sky" />
+                  <span>Email 6-Digit OTP</span>
+                </button>
+              </div>
+            )}
+
             <div>
               <label className="block text-xs font-bold text-ink mb-1">
                 Email Address
@@ -640,44 +835,47 @@ export default function AuthScreen({ onLogin }) {
               />
             </div>
 
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <label className="text-xs font-bold text-ink">
-                  Password
-                </label>
-                {!isSignUp && (
+            {/* Password input shown only in password mode or during signup */}
+            {(isSignUp || loginMethod === 'password') && (
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-xs font-bold text-ink">
+                    Password
+                  </label>
+                  {!isSignUp && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setResetEmail(email || '');
+                        setErrorMsg('');
+                        setSuccessMsg('');
+                        setAuthMode('forgot_email');
+                      }}
+                      className="text-xs font-bold text-sky-deep hover:text-sky hover:underline"
+                    >
+                      Forgot password?
+                    </button>
+                  )}
+                </div>
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    className="w-full text-sm text-ink bg-white border border-outline focus:border-sky focus:ring-2 focus:ring-sky/20 rounded-sk-btn px-3.5 pr-10 py-2.5 outline-none transition"
+                    required={isSignUp || loginMethod === 'password'}
+                  />
                   <button
                     type="button"
-                    onClick={() => {
-                      setResetEmail(email || '');
-                      setErrorMsg('');
-                      setSuccessMsg('');
-                      setAuthMode('forgot_email');
-                    }}
-                    className="text-xs font-bold text-sky-deep hover:text-sky hover:underline"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-subtle hover:text-ink p-1"
                   >
-                    Forgot password?
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
-                )}
+                </div>
               </div>
-              <div className="relative">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  className="w-full text-sm text-ink bg-white border border-outline focus:border-sky focus:ring-2 focus:ring-sky/20 rounded-sk-btn px-3.5 pr-10 py-2.5 outline-none transition"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-subtle hover:text-ink p-1"
-                >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
+            )}
 
             <div className="flex items-center gap-2 pt-1">
               <input
@@ -750,7 +948,11 @@ export default function AuthScreen({ onLogin }) {
               disabled={loading || botVerifying}
               className="w-full py-2.5 rounded-sk-btn bg-sky hover:bg-sky-hover text-white text-sm font-bold transition shadow-xs active:scale-[0.99] disabled:opacity-60 cursor-pointer mt-2"
             >
-              {loading ? 'Please wait...' : (isSignUp ? 'Create Account' : 'Sign in')}
+              {loading 
+                ? 'Please wait...' 
+                : (isSignUp 
+                    ? 'Create Account & Get Code' 
+                    : (loginMethod === 'otp' ? 'Send 6-Digit Login Code' : 'Sign in'))}
             </button>
 
             <div className="pt-3 border-t border-outline flex flex-col items-center gap-2">
@@ -840,7 +1042,7 @@ export default function AuthScreen({ onLogin }) {
                 setErrorMsg('');
                 setAuthMode('forgot_email');
               }}
-              className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-800 font-medium mb-1"
+              className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-800 font-medium mb-1 cursor-pointer"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               Change email
@@ -881,9 +1083,170 @@ export default function AuthScreen({ onLogin }) {
                     setResendCooldown(60);
                     setSuccessMsg('New code generated.');
                   }}
-                  className="font-medium text-blue-600 hover:underline"
+                  className="font-medium text-blue-600 hover:underline cursor-pointer"
                 >
                   Resend code
+                </button>
+              )}
+            </div>
+          </form>
+        )}
+
+        {/* ================= 3A. SIGN IN VIA EMAIL OTP (PASSWORDLESS) ================= */}
+        {authMode === 'login_otp' && (
+          <form onSubmit={handleVerifyLoginOtp} className="space-y-4">
+            <button
+              type="button"
+              onClick={() => {
+                setErrorMsg('');
+                setSuccessMsg('');
+                setAuthMode('login');
+              }}
+              className="inline-flex items-center gap-1.5 text-xs text-ink-muted hover:text-ink font-medium mb-1 cursor-pointer"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              Back to sign in options
+            </button>
+
+            <div className="p-3 bg-sky-soft/60 border border-sky/30 rounded-sk-btn">
+              <div className="flex items-center gap-2 mb-1 text-sky-deep font-bold text-xs">
+                <Mail className="w-4 h-4 text-sky" />
+                <span>Email 6-Digit Login Code</span>
+              </div>
+              <p className="text-xs text-ink-muted leading-relaxed">
+                We sent a 6-digit one-time passcode to <strong className="text-ink">{resetEmail}</strong>. Enter it below to sign in instantly without a password.
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-ink mb-1">
+                6-Digit Login Passcode
+              </label>
+              <input
+                type="text"
+                maxLength={6}
+                placeholder="123456"
+                value={otpInput}
+                onChange={e => setOtpInput(e.target.value.replace(/\D/g, ''))}
+                className="w-full text-center text-xl font-mono tracking-widest text-ink bg-white border border-outline focus:border-sky focus:ring-2 focus:ring-sky/20 rounded-sk-btn py-2.5 outline-none transition"
+                autoFocus
+                required
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={otpInput.length < 6 || loading}
+              className="w-full py-2.5 rounded-sk-btn bg-sky hover:bg-sky-hover text-white text-sm font-bold transition shadow-xs disabled:opacity-60 cursor-pointer"
+            >
+              {loading ? 'Verifying Code...' : 'Verify Code & Sign In'}
+            </button>
+
+            <div className="text-center text-xs text-ink-muted pt-1">
+              {resendCooldown > 0 ? (
+                <span>Resend code in {resendCooldown}s</span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      setLoading(true);
+                      await supabase.auth.signInWithOtp({
+                        email: resetEmail,
+                        options: { shouldCreateUser: false }
+                      });
+                      setResendCooldown(60);
+                      setSuccessMsg(`A new 6-digit login code has been dispatched to ${resetEmail}.`);
+                    } catch (err) {
+                      setErrorMsg(err.message || 'Failed to resend code.');
+                    } finally {
+                      setLoading(false);
+                    }
+                  }}
+                  className="font-semibold text-sky-deep hover:underline cursor-pointer"
+                >
+                  Resend 6-Digit Code
+                </button>
+              )}
+            </div>
+          </form>
+        )}
+
+        {/* ================= 3B. SIGN UP EMAIL OTP CONFIRMATION ================= */}
+        {authMode === 'signup_otp' && (
+          <form onSubmit={handleVerifySignupOtp} className="space-y-4">
+            <button
+              type="button"
+              onClick={() => {
+                setErrorMsg('');
+                setSuccessMsg('');
+                setAuthMode('login');
+                setIsSignUp(true);
+              }}
+              className="inline-flex items-center gap-1.5 text-xs text-ink-muted hover:text-ink font-medium mb-1 cursor-pointer"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              Change registration details
+            </button>
+
+            <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-sk-btn">
+              <div className="flex items-center gap-2 mb-1 text-emerald-800 font-bold text-xs">
+                <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                <span>Verify Your College Email</span>
+              </div>
+              <p className="text-xs text-ink-muted leading-relaxed">
+                A 6-digit confirmation token was sent to <strong className="text-ink">{resetEmail}</strong>. Enter the code to activate your account.
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-ink mb-1">
+                6-Digit Confirmation Token
+              </label>
+              <input
+                type="text"
+                maxLength={6}
+                placeholder="123456"
+                value={otpInput}
+                onChange={e => setOtpInput(e.target.value.replace(/\D/g, ''))}
+                className="w-full text-center text-xl font-mono tracking-widest text-ink bg-white border border-outline focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 rounded-sk-btn py-2.5 outline-none transition"
+                autoFocus
+                required
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={otpInput.length < 6 || loading}
+              className="w-full py-2.5 rounded-sk-btn bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold transition shadow-xs disabled:opacity-60 cursor-pointer"
+            >
+              {loading ? 'Confirming Token...' : 'Confirm Email & Activate'}
+            </button>
+
+            <div className="text-center text-xs text-ink-muted pt-1">
+              {resendCooldown > 0 ? (
+                <span>Resend token in {resendCooldown}s</span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      setLoading(true);
+                      await supabase.auth.resend({
+                        type: 'signup',
+                        email: resetEmail
+                      });
+                      setResendCooldown(60);
+                      setSuccessMsg(`A new confirmation code has been sent to ${resetEmail}.`);
+                    } catch (err) {
+                      setErrorMsg(err.message || 'Failed to resend token.');
+                    } finally {
+                      setLoading(false);
+                    }
+                  }}
+                  className="font-semibold text-emerald-700 hover:underline cursor-pointer"
+                >
+                  Resend Confirmation Token
                 </button>
               )}
             </div>
