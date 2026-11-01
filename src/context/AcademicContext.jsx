@@ -16,7 +16,9 @@ import {
   fetchCloudAnnouncements,
   saveAnnouncementsToCloud,
   fetchCloudAuditLogs,
-  recordAuditLog
+  recordAuditLog,
+  fetchCloudAdmissionsForms,
+  saveAdmissionsFormsToCloud
 } from '../lib/syncService';
 import { INITIAL_STUDENTS, COURSE_METADATA, INDIAN_COLLEGE_PROGRAMS, LECTURE_PERIODS } from '../data/mockData';
 
@@ -198,11 +200,22 @@ export function AcademicProvider({ children }) {
     ];
   });
 
-  // 6. Active Class Filter State
+  // 9. Student Admissions Applications State
+  const [admissionsForms, setAdmissionsForms] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('college_student_admissions_forms');
+      if (saved) {
+        try { return JSON.parse(saved); } catch {}
+      }
+    }
+    return [];
+  });
+
+  // 6. Active Class Filter State (Defaults to Semester I BAS-101 where newly enrolled students begin)
   const [selectedProgramId, setSelectedProgramId] = useState('btech-cse');
-  const [selectedSemNumber, setSelectedSemNumber] = useState('VI');
-  const [selectedSubjectCode, setSelectedSubjectCode] = useState('CS-602');
-  const [selectedSlotId, setSelectedSlotId] = useState('P2');
+  const [selectedSemNumber, setSelectedSemNumber] = useState('I');
+  const [selectedSubjectCode, setSelectedSubjectCode] = useState('BAS-101');
+  const [selectedSlotId, setSelectedSlotId] = useState('P1');
 
   const selectedProgram = programs.find(p => p.id === selectedProgramId) || null;
   const selectedSem = selectedProgram?.semesters?.find(s => s.semNumber === selectedSemNumber) || null;
@@ -228,11 +241,13 @@ export function AcademicProvider({ children }) {
   useEffect(() => {
     // 1. Fetch Cloud Settings
     fetchSystemSettings().then(cloudVal => {
-      if (cloudVal && !isNaN(cloudVal)) {
-        setAttendanceThreshold(cloudVal);
+      if (cloudVal && !isNaN(cloudVal) && Number(cloudVal) > 0) {
+        setAttendanceThreshold(Number(cloudVal));
         if (typeof window !== 'undefined') {
           localStorage.setItem('college_min_attendance_threshold', cloudVal.toString());
         }
+      } else {
+        setAttendanceThreshold(75.0);
       }
     });
 
@@ -288,6 +303,13 @@ export function AcademicProvider({ children }) {
       }
     });
 
+    fetchCloudAdmissionsForms().then(cloudForms => {
+      if (cloudForms && Array.isArray(cloudForms)) {
+        setAdmissionsForms(cloudForms);
+        if (typeof window !== 'undefined') localStorage.setItem('college_student_admissions_forms', JSON.stringify(cloudForms));
+      }
+    });
+
     // 5. Listen to Global Supabase Realtime WebSocket events
     const cloudChannel = subscribeToCloudEvents((eventType, payload) => {
       if (eventType === 'THRESHOLD_UPDATE') {
@@ -311,6 +333,9 @@ export function AcademicProvider({ children }) {
       } else if (eventType === 'AUDIT_LOG_UPDATE') {
         setAuditLogs(payload);
         if (typeof window !== 'undefined') localStorage.setItem('college_system_audit_logs', JSON.stringify(payload));
+      } else if (eventType === 'ADMISSIONS_FORMS_UPDATE') {
+        setAdmissionsForms(payload);
+        if (typeof window !== 'undefined') localStorage.setItem('college_student_admissions_forms', JSON.stringify(payload));
       } else if (eventType === 'STUDENTS_UPDATE') {
         if (payload?.students) {
           setStudents(payload.students);
@@ -330,6 +355,7 @@ export function AcademicProvider({ children }) {
           else if (type === 'USERS_UPDATE') setUsers(payload);
           else if (type === 'LEAVES_UPDATE') setLeaves(payload);
           else if (type === 'PROGRAMS_UPDATE') setPrograms(payload);
+          else if (type === 'ADMISSIONS_FORMS_UPDATE') setAdmissionsForms(payload);
           else if (type === 'STUDENTS_UPDATE') {
             if (payload?.students) setStudents(payload.students);
             else if (Array.isArray(payload)) setStudents(payload);
@@ -345,6 +371,7 @@ export function AcademicProvider({ children }) {
         else if (e.key === 'college_app_users') setUsers(JSON.parse(e.newValue));
         else if (e.key === 'college_app_leaves') setLeaves(JSON.parse(e.newValue));
         else if (e.key === 'college_programs_master') setPrograms(JSON.parse(e.newValue));
+        else if (e.key === 'college_student_admissions_forms') setAdmissionsForms(JSON.parse(e.newValue));
       } catch {}
     };
 
@@ -388,6 +415,12 @@ export function AcademicProvider({ children }) {
     }
 
     const resolveRoleAndSetSession = async (currentSession) => {
+      // If student is in admission flow, do NOT set session to avoid triggering router redirection
+      if (typeof window !== 'undefined' && localStorage.getItem('college_in_admission_flow') === 'true') {
+        setLoading(false);
+        return;
+      }
+
       if (currentSession?.user) {
         let resolvedRole = null;
         let resolvedStatus = currentSession.user.user_metadata?.status || 'active';
@@ -453,13 +486,61 @@ export function AcademicProvider({ children }) {
           }
         } catch {}
 
-        const profileObj = resolvedProfile || {
+        let resolvedName = currentSession.user.user_metadata?.name;
+        let resolvedDept = currentSession.user.user_metadata?.department || '';
+        let resolvedRollNo = currentSession.user.user_metadata?.rollNo || '';
+
+        // 3. Check if user is approved in admissions forms or users directory
+        try {
+          const rawAdmissions = localStorage.getItem('college_student_admissions_forms');
+          if (rawAdmissions && userEmail) {
+            const parsedForms = JSON.parse(rawAdmissions);
+            if (Array.isArray(parsedForms)) {
+              const matchedForm = parsedForms.find(f => f.email?.toLowerCase() === userEmail);
+              if (matchedForm) {
+                if (matchedForm.fullName) resolvedName = matchedForm.fullName;
+                if (matchedForm.branch || matchedForm.department) resolvedDept = matchedForm.branch || matchedForm.department;
+                if (matchedForm.rollNo) resolvedRollNo = matchedForm.rollNo;
+                if (matchedForm.status === 'APPROVED') {
+                  resolvedStatus = 'active';
+                } else if (matchedForm.status === 'WAITING_APPROVAL') {
+                  resolvedStatus = 'pending_approval';
+                }
+              }
+            }
+          }
+
+          const rawUsers = localStorage.getItem('college_app_users');
+          if (rawUsers && userEmail) {
+            const parsedUsers = JSON.parse(rawUsers);
+            if (Array.isArray(parsedUsers)) {
+              const matchedUser = parsedUsers.find(u => u.email?.toLowerCase() === userEmail);
+              if (matchedUser) {
+                if (matchedUser.name) resolvedName = matchedUser.name;
+                if (matchedUser.dept) resolvedDept = matchedUser.dept;
+                if (matchedUser.rollNo) resolvedRollNo = matchedUser.rollNo;
+                if (matchedUser.status === 'active') {
+                  resolvedStatus = 'active';
+                }
+              }
+            }
+          }
+        } catch {}
+
+        const profileObj = resolvedProfile ? {
+          ...resolvedProfile,
+          status: resolvedStatus,
+          full_name: resolvedName || resolvedProfile.full_name || currentSession.user.email?.split('@')[0],
+          roll_no: resolvedRollNo || resolvedProfile.roll_no || '',
+          department: resolvedDept || resolvedProfile.department || ''
+        } : {
           id: currentSession.user.id,
           email: currentSession.user.email,
           role: resolvedRole,
           status: resolvedStatus,
-          full_name: currentSession.user.user_metadata?.name || currentSession.user.email?.split('@')[0],
-          department: currentSession.user.user_metadata?.department || ''
+          full_name: resolvedName || currentSession.user.email?.split('@')[0],
+          roll_no: resolvedRollNo || '',
+          department: resolvedDept || ''
         };
 
         setSession(currentSession);
@@ -507,22 +588,28 @@ export function AcademicProvider({ children }) {
     };
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, sess) => {
-      // During password recovery, do NOT auto-login or redirect to dashboard!
-      // Let the user stay on the AuthScreen to choose their new password.
+      // During password recovery or signup email verification, do NOT auto-login or redirect to dashboard!
+      // Let the user stay on the AuthScreen to complete their admission form.
       if (event === 'PASSWORD_RECOVERY') {
+        return;
+      }
+      if (typeof window !== 'undefined' && localStorage.getItem('college_in_admission_flow') === 'true') {
         return;
       }
       resolveRoleAndSetSession(sess);
     });
 
     supabase.auth.getSession().then(({ data }) => {
+      if (typeof window !== 'undefined' && localStorage.getItem('college_in_admission_flow') === 'true') {
+        return;
+      }
       resolveRoleAndSetSession(data?.session || null);
     });
 
     return () => subscription?.unsubscribe?.();
   }, []);
 
-  // Load Students Cache & Cloud Database
+  // Load Students Cache & Cloud Database (with Dynamic Integration of Approved Admissions)
   useEffect(() => {
     if (!isClassConfigured) {
       setStudents([]);
@@ -540,21 +627,82 @@ export function AcademicProvider({ children }) {
       }
     }
 
-    const initialList = cached && cached.length > 0 ? cached : INITIAL_STUDENTS;
+    // Helper to merge approved real students with class roster
+    const mergeWithAdmissions = (baseList, forms) => {
+      const approvedForms = (forms || []).filter(f => {
+        if (f.status !== 'APPROVED') return false;
+        // Check program match (tolerant to id or branch name)
+        const matchProg = !f.programId || f.programId === selectedProgramId ||
+          (f.branch && f.branch.toLowerCase().includes(selectedProgramId.replace('btech-', '')));
+        // Check semester match: "Semester I" vs "I"
+        const formSemNorm = (f.semester || '').replace(/semester\s*/i, '').trim();
+        const curSemNorm = (selectedSemNumber || '').replace(/semester\s*/i, '').trim();
+        const matchSem = !formSemNorm || formSemNorm.toLowerCase() === curSemNorm.toLowerCase();
+        return matchProg && matchSem;
+      });
+
+      const merged = [...(baseList || [])];
+      for (const form of approvedForms) {
+        const studentId = form.id || `stu-${form.rollNo || form.email}`;
+        const existingIdx = merged.findIndex(s => s.id === studentId || (form.rollNo && s.rollNo === form.rollNo) || (form.email && s.email === form.email));
+        const formattedStudent = {
+          id: studentId,
+          name: form.fullName || form.name || 'Student',
+          rollNo: form.rollNo || '00000',
+          email: form.email || '',
+          phone: form.phone || '+91 99999 99999',
+          department: form.branch || form.department || selectedProgram?.branch || 'Computer Science & Engineering',
+          programId: selectedProgramId,
+          semester: `Semester ${selectedSemNumber}`,
+          gender: form.gender || 'Not specified',
+          state: 'Institutional Enrolled',
+          attendedClasses: 0,
+          totalClasses: 0,
+          todayStatus: 'ABSENT',
+          status: 'active'
+        };
+
+        if (existingIdx >= 0) {
+          // Preserve any existing attendance record while updating real student metadata
+          merged[existingIdx] = {
+            ...formattedStudent,
+            ...merged[existingIdx],
+            name: form.fullName || merged[existingIdx].name,
+            rollNo: form.rollNo || merged[existingIdx].rollNo,
+            email: form.email || merged[existingIdx].email,
+            department: form.branch || form.department || merged[existingIdx].department
+          };
+        } else {
+          // Add newly joined approved student to the top of the roster
+          merged.unshift(formattedStudent);
+        }
+      }
+      return merged;
+    };
+
+    // For Semesters other than VI (or if cache has data), don't show the hardcoded Semester VI demo list
+    const fallbackBase = selectedSemNumber === 'VI' ? INITIAL_STUDENTS : [];
+    const baseList = (cached && cached.length > 0) ? cached : fallbackBase;
+    const initialList = mergeWithAdmissions(baseList, admissionsForms);
     setStudents(initialList);
     setActiveDetailStudent(initialList[0] || null);
 
     // Fetch from Supabase Cloud as single source of truth
     fetchCloudAttendance(classKey).then(cloudList => {
-      if (cloudList && Array.isArray(cloudList) && cloudList.length > 0) {
-        setStudents(cloudList);
-        setActiveDetailStudent(cloudList[0] || null);
+      const sourceList = (cloudList && Array.isArray(cloudList) && cloudList.length > 0)
+        ? cloudList
+        : (cached && cached.length > 0 ? cached : fallbackBase);
+
+      const finalMerged = mergeWithAdmissions(sourceList, admissionsForms);
+      if (finalMerged && finalMerged.length > 0) {
+        setStudents(finalMerged);
+        setActiveDetailStudent(finalMerged[0] || null);
         if (typeof window !== 'undefined') {
-          localStorage.setItem(storageKey, JSON.stringify(cloudList));
+          localStorage.setItem(storageKey, JSON.stringify(finalMerged));
         }
       }
     });
-  }, [selectedProgramId, selectedSemNumber, selectedSubjectCode, isClassConfigured]);
+  }, [selectedProgramId, selectedSemNumber, selectedSubjectCode, isClassConfigured, admissionsForms]);
 
   const saveStudentsCache = (updatedList) => {
     if (typeof window !== 'undefined' && isClassConfigured) {
@@ -623,6 +771,7 @@ export function AcademicProvider({ children }) {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('college_active_session');
       localStorage.removeItem('college_active_role');
+      localStorage.removeItem('college_dev_bypass');
     }
   };
 
@@ -689,13 +838,14 @@ export function AcademicProvider({ children }) {
       localStorage.setItem('college_active_role', newRole);
     }
     
+    const isDev = newRole === 'developer' || (typeof window !== 'undefined' && localStorage.getItem('college_dev_bypass') === 'true');
     // Find authentic user record from users list for this role
     const matchedUser = users.find(u => u.role === newRole) || {
-      id: `usr-${newRole}`,
-      email: newRole === 'admin' ? ADMIN_EMAIL : newRole === 'faculty' ? 'prof.vance@univ.edu' : 'aarav.sharma@collegemail.edu.in',
-      name: newRole === 'admin' ? 'Dr. Evelyn Carter' : newRole === 'faculty' ? 'Prof. Rajesh Verma' : 'Aarav Sharma',
+      id: newRole === 'developer' ? 'dev-root' : `usr-${newRole}`,
+      email: newRole === 'developer' ? 'dev@attendos.internal' : newRole === 'admin' ? ADMIN_EMAIL : newRole === 'faculty' ? 'prof.vance@univ.edu' : 'aarav.sharma@collegemail.edu.in',
+      name: newRole === 'developer' ? 'Developer (Bypass All)' : newRole === 'admin' ? 'Dr. Evelyn Carter' : newRole === 'faculty' ? 'Prof. Rajesh Verma' : 'Aarav Sharma',
       role: newRole,
-      dept: newRole === 'admin' ? 'Central Administration' : 'Computer Science & Engineering',
+      dept: newRole === 'developer' ? 'Core Systems Dev' : newRole === 'admin' ? 'Central Administration' : 'Computer Science & Engineering',
       phone: '+91 98765-43210'
     };
 
@@ -706,9 +856,11 @@ export function AcademicProvider({ children }) {
         user_metadata: {
           role: newRole,
           name: matchedUser.name,
-          department: matchedUser.dept || matchedUser.department
+          department: matchedUser.dept || matchedUser.department,
+          isDeveloper: isDev
         }
-      }
+      },
+      isDeveloper: isDev
     };
 
     setSession(newSession);
@@ -782,22 +934,68 @@ export function AcademicProvider({ children }) {
   };
 
   const reloadUserProfile = async () => {
-    if (!supabase || !session?.user?.id) return;
+    if (!session?.user?.id && !session?.user?.email) return;
     try {
-      const { data: prof } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', session.user.id)
-        .maybeSingle();
+      let resolvedStatus = 'pending_approval';
+      const userEmail = session.user.email?.toLowerCase();
 
-      if (prof) {
-        setUserProfile(prof);
-        if (prof.role) setRole(prof.role);
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('college_active_profile', JSON.stringify(prof));
-          if (prof.role) localStorage.setItem('college_active_role', prof.role);
+      // Check admissions forms
+      const rawAdmissions = localStorage.getItem('college_student_admissions_forms');
+      if (rawAdmissions && userEmail) {
+        try {
+          const forms = JSON.parse(rawAdmissions);
+          const found = forms.find(f => f.email?.toLowerCase() === userEmail);
+          if (found && found.status === 'APPROVED') {
+            resolvedStatus = 'active';
+          }
+        } catch {}
+      }
+
+      // Check app users
+      const rawUsers = localStorage.getItem('college_app_users');
+      if (rawUsers && userEmail) {
+        try {
+          const usersList = JSON.parse(rawUsers);
+          const foundUser = usersList.find(u => u.email?.toLowerCase() === userEmail);
+          if (foundUser && foundUser.status === 'active') {
+            resolvedStatus = 'active';
+          }
+        } catch {}
+      }
+
+      if (supabase && session?.user?.id) {
+        const { data: prof } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .maybeSingle();
+
+        if (prof) {
+          const mergedProf = {
+            ...prof,
+            status: prof.status === 'active' || resolvedStatus === 'active' ? 'active' : (prof.status || resolvedStatus)
+          };
+          setUserProfile(mergedProf);
+          if (mergedProf.role) setRole(mergedProf.role);
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('college_active_profile', JSON.stringify(mergedProf));
+            if (mergedProf.role) localStorage.setItem('college_active_role', mergedProf.role);
+          }
+          return;
         }
       }
+
+      // If no supabase profile row found yet, update userProfile with resolvedStatus
+      setUserProfile(prev => {
+        const updated = {
+          ...(prev || {}),
+          status: resolvedStatus
+        };
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('college_active_profile', JSON.stringify(updated));
+        }
+        return updated;
+      });
     } catch (err) {
       console.warn('Failed to reload profile:', err);
     }
@@ -825,6 +1023,7 @@ export function AcademicProvider({ children }) {
       disputes, setDisputes,
       announcements, setAnnouncements,
       auditLogs, setAuditLogs,
+      admissionsForms, setAdmissionsForms,
       handleResolveDispute,
       selectedProgramId, setSelectedProgramId,
       selectedSemNumber, setSelectedSemNumber,

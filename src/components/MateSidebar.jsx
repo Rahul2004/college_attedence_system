@@ -1,6 +1,7 @@
 import React from 'react';
 import {
   LayoutDashboard,
+  History,
   Users,
   BarChart3,
   ShieldAlert,
@@ -13,6 +14,9 @@ import {
   Layers,
   GraduationCap,
   CheckSquare,
+  Megaphone,
+  UserCheck,
+  Bell,
   X,
   ChevronLeft,
   ChevronRight,
@@ -25,6 +29,7 @@ export default function MateSidebar({
   lowWarningCount,
   course,
   role,
+  isDevMode = false,
   currentStudent,
   session,
   userProfile,
@@ -122,7 +127,7 @@ export default function MateSidebar({
             {role === 'admin' ? (
               /* ================= ADMIN NAVIGATION ================= */
               <>
-                <div className="px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-ink-subtle font-display">
+                <div className="px-3 py-1.5 text-[11px] font-semibold text-slate-400">
                   {effectiveExpanded ? 'Administration' : '•••'}
                 </div>
 
@@ -130,14 +135,14 @@ export default function MateSidebar({
                   type="button"
                   onClick={() => onTabChange('admin')}
                   title="Institutional Executive Suite"
-                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-sk-btn text-xs font-bold transition-all ${
+                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
                     activeTab === 'admin'
-                      ? 'bg-berry-soft text-berry-deep border border-berry/30 shadow-xs'
-                      : 'text-ink-muted hover:text-ink hover:bg-surface-sunken'
+                      ? 'bg-slate-900 text-white font-semibold'
+                      : 'text-slate-600 hover:text-slate-950 hover:bg-slate-100'
                   }`}
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <ShieldCheck className={`w-4 h-4 shrink-0 ${activeTab === 'admin' ? 'text-berry' : 'text-ink-muted'}`} />
+                    <ShieldCheck className={`w-4 h-4 shrink-0 ${activeTab === 'admin' ? 'text-sky-400' : 'text-slate-500'}`} />
                     {effectiveExpanded && <span className="truncate">Admin Dashboard</span>}
                   </div>
                 </button>
@@ -146,19 +151,19 @@ export default function MateSidebar({
                   type="button"
                   onClick={() => onTabChange('academic-setup')}
                   title="Master Curriculum & Programs"
-                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-sk-btn text-xs font-bold transition-all ${
+                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
                     activeTab === 'academic-setup'
-                      ? 'bg-berry-soft text-berry-deep border border-berry/30 shadow-xs'
-                      : 'text-ink-muted hover:text-ink hover:bg-surface-sunken'
+                      ? 'bg-slate-900 text-white font-semibold'
+                      : 'text-slate-600 hover:text-slate-950 hover:bg-slate-100'
                   }`}
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <BookOpen className={`w-4 h-4 shrink-0 ${activeTab === 'academic-setup' ? 'text-berry' : 'text-ink-muted'}`} />
+                    <BookOpen className={`w-4 h-4 shrink-0 ${activeTab === 'academic-setup' ? 'text-sky-400' : 'text-slate-500'}`} />
                     {effectiveExpanded && <span className="truncate">Academic Setup</span>}
                   </div>
                 </button>
 
-                <div className="pt-2 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-ink-subtle font-display">
+                <div className="pt-2 px-3 py-1 text-[11px] font-semibold text-slate-400">
                   {effectiveExpanded ? 'Monitoring & Reports' : '•••'}
                 </div>
 
@@ -166,14 +171,14 @@ export default function MateSidebar({
                   type="button"
                   onClick={() => onTabChange('roster')}
                   title="Universal Attendance Audit"
-                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-sk-btn text-xs font-bold transition-all ${
+                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
                     activeTab === 'roster'
-                      ? 'bg-sky-soft text-sky-deep border border-sky/30 shadow-xs'
-                      : 'text-ink-muted hover:text-ink hover:bg-surface-sunken'
+                      ? 'bg-slate-900 text-white font-semibold'
+                      : 'text-slate-600 hover:text-slate-950 hover:bg-slate-100'
                   }`}
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <Users className={`w-4 h-4 shrink-0 ${activeTab === 'roster' ? 'text-sky' : 'text-ink-muted'}`} />
+                    <Users className={`w-4 h-4 shrink-0 ${activeTab === 'roster' ? 'text-sky-400' : 'text-slate-500'}`} />
                     {effectiveExpanded && <span className="truncate">Attendance Audit</span>}
                   </div>
                 </button>
@@ -182,14 +187,14 @@ export default function MateSidebar({
                   type="button"
                   onClick={() => onTabChange('analytics')}
                   title="Campus-Wide Analytics"
-                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-sk-btn text-xs font-bold transition-all ${
+                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
                     activeTab === 'analytics'
-                      ? 'bg-sky-soft text-sky-deep border border-sky/30 shadow-xs'
-                      : 'text-ink-muted hover:text-ink hover:bg-surface-sunken'
+                      ? 'bg-slate-900 text-white font-semibold'
+                      : 'text-slate-600 hover:text-slate-950 hover:bg-slate-100'
                   }`}
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <BarChart3 className={`w-4 h-4 shrink-0 ${activeTab === 'analytics' ? 'text-sky' : 'text-ink-muted'}`} />
+                    <BarChart3 className={`w-4 h-4 shrink-0 ${activeTab === 'analytics' ? 'text-sky-400' : 'text-slate-500'}`} />
                     {effectiveExpanded && <span className="truncate">Analytics</span>}
                   </div>
                 </button>
@@ -198,14 +203,14 @@ export default function MateSidebar({
                   type="button"
                   onClick={() => onTabChange('warnings')}
                   title="Exam Debarment Board"
-                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-sk-btn text-xs font-bold transition-all relative ${
+                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-lg text-xs font-medium transition-colors cursor-pointer relative ${
                     activeTab === 'warnings'
-                      ? 'bg-coral-soft text-coral-deep border border-coral/30 shadow-xs'
-                      : 'text-ink-muted hover:text-ink hover:bg-surface-sunken'
+                      ? 'bg-slate-900 text-white font-semibold'
+                      : 'text-slate-600 hover:text-slate-950 hover:bg-slate-100'
                   }`}
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <ShieldAlert className={`w-4 h-4 shrink-0 ${activeTab === 'warnings' ? 'text-coral' : 'text-ink-muted'}`} />
+                    <ShieldAlert className={`w-4 h-4 shrink-0 ${activeTab === 'warnings' ? 'text-red-400' : 'text-slate-500'}`} />
                     {effectiveExpanded && <span className="truncate">Debarment List</span>}
                   </div>
                   {lowWarningCount > 0 && (
@@ -219,22 +224,70 @@ export default function MateSidebar({
                   type="button"
                   onClick={() => onTabChange('reports')}
                   title="Accreditation & University Reports"
-                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-sk-btn text-xs font-bold transition-all ${
+                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
                     activeTab === 'reports'
-                      ? 'bg-sky-soft text-sky-deep border border-sky/30 shadow-xs'
-                      : 'text-ink-muted hover:text-ink hover:bg-surface-sunken'
+                      ? 'bg-slate-900 text-white font-semibold'
+                      : 'text-slate-600 hover:text-slate-950 hover:bg-slate-100'
                   }`}
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <Download className={`w-4 h-4 shrink-0 ${activeTab === 'reports' ? 'text-sky' : 'text-ink-muted'}`} />
+                    <Download className={`w-4 h-4 shrink-0 ${activeTab === 'reports' ? 'text-sky-400' : 'text-slate-500'}`} />
                     {effectiveExpanded && <span className="truncate">Reports</span>}
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => onTabChange('history')}
+                  title="Attendance Session History & Logs"
+                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
+                    activeTab === 'history'
+                      ? 'bg-slate-900 text-white font-semibold'
+                      : 'text-slate-600 hover:text-slate-950 hover:bg-slate-100'
+                  }`}
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <History className={`w-4 h-4 shrink-0 ${activeTab === 'history' ? 'text-sky-400' : 'text-slate-500'}`} />
+                    {effectiveExpanded && <span className="truncate">Attendance History</span>}
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => onTabChange('notices')}
+                  title="Official Campus Notices & Circulars"
+                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
+                    activeTab === 'notices'
+                      ? 'bg-slate-900 text-white font-semibold'
+                      : 'text-slate-600 hover:text-slate-950 hover:bg-slate-100'
+                  }`}
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <Megaphone className={`w-4 h-4 shrink-0 ${activeTab === 'notices' ? 'text-sky-400' : 'text-slate-500'}`} />
+                    {effectiveExpanded && <span className="truncate">Notice Board</span>}
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => onTabChange('admissions')}
+                  title="Review New Student Enrollment Forms"
+                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
+                    activeTab === 'admissions'
+                      ? 'bg-slate-900 text-white font-semibold'
+                      : 'text-slate-600 hover:text-slate-950 hover:bg-slate-100'
+                  }`}
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <UserCheck className={`w-4 h-4 shrink-0 ${activeTab === 'admissions' ? 'text-emerald-400' : 'text-slate-500'}`} />
+                    {effectiveExpanded && <span className="truncate">Admissions Forms</span>}
                   </div>
                 </button>
               </>
             ) : role === 'faculty' ? (
               /* ================= FACULTY NAVIGATION ================= */
               <>
-                <div className="px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-ink-subtle font-display">
+                <div className="px-3 py-1.5 text-[11px] font-semibold text-slate-400">
                   {effectiveExpanded ? 'Classroom' : '•••'}
                 </div>
 
@@ -242,14 +295,14 @@ export default function MateSidebar({
                   type="button"
                   onClick={() => onTabChange('roster')}
                   title="Class Roll Call (Mark Attendance)"
-                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-sk-btn text-xs font-bold transition-all ${
+                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
                     activeTab === 'roster'
-                      ? 'bg-sky-soft text-sky-deep border border-sky/30 shadow-xs'
-                      : 'text-ink-muted hover:text-ink hover:bg-surface-sunken'
+                      ? 'bg-slate-900 text-white font-semibold'
+                      : 'text-slate-600 hover:text-slate-950 hover:bg-slate-100'
                   }`}
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <Users className={`w-4 h-4 shrink-0 ${activeTab === 'roster' ? 'text-sky' : 'text-ink-muted'}`} />
+                    <Users className={`w-4 h-4 shrink-0 ${activeTab === 'roster' ? 'text-sky-400' : 'text-slate-500'}`} />
                     {effectiveExpanded && <span className="truncate">Roll Call</span>}
                   </div>
                 </button>
@@ -258,14 +311,14 @@ export default function MateSidebar({
                   type="button"
                   onClick={() => onTabChange('attendance-grid')}
                   title="Quick Attendance Grid Matrix"
-                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-sk-btn text-xs font-bold transition-all ${
+                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
                     activeTab === 'attendance-grid'
-                      ? 'bg-sky-soft text-sky-deep border border-sky/30 shadow-xs'
-                      : 'text-ink-muted hover:text-ink hover:bg-surface-sunken'
+                      ? 'bg-slate-900 text-white font-semibold'
+                      : 'text-slate-600 hover:text-slate-950 hover:bg-slate-100'
                   }`}
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <CheckSquare className={`w-4 h-4 shrink-0 ${activeTab === 'attendance-grid' ? 'text-sky' : 'text-ink-muted'}`} />
+                    <CheckSquare className={`w-4 h-4 shrink-0 ${activeTab === 'attendance-grid' ? 'text-sky-400' : 'text-slate-500'}`} />
                     {effectiveExpanded && <span className="truncate">Quick Grid</span>}
                   </div>
                 </button>
@@ -274,19 +327,19 @@ export default function MateSidebar({
                   type="button"
                   onClick={() => onTabChange('leave')}
                   title="Student Leave Approvals"
-                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-sk-btn text-xs font-bold transition-all ${
+                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
                     activeTab === 'leave'
-                      ? 'bg-sky-soft text-sky-deep border border-sky/30 shadow-xs'
-                      : 'text-ink-muted hover:text-ink hover:bg-surface-sunken'
+                      ? 'bg-slate-900 text-white font-semibold'
+                      : 'text-slate-600 hover:text-slate-950 hover:bg-slate-100'
                   }`}
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <FileText className={`w-4 h-4 shrink-0 ${activeTab === 'leave' ? 'text-sky' : 'text-ink-muted'}`} />
+                    <FileText className={`w-4 h-4 shrink-0 ${activeTab === 'leave' ? 'text-sky-400' : 'text-slate-500'}`} />
                     {effectiveExpanded && <span className="truncate">Leave Approvals</span>}
                   </div>
                 </button>
 
-                <div className="pt-2 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-ink-subtle font-display">
+                <div className="pt-2 px-3 py-1 text-[11px] font-semibold text-slate-400">
                   {effectiveExpanded ? 'Insights' : '•••'}
                 </div>
 
@@ -294,14 +347,14 @@ export default function MateSidebar({
                   type="button"
                   onClick={() => onTabChange('analytics')}
                   title="Subject Analytics & Delivery"
-                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-sk-btn text-xs font-bold transition-all ${
+                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
                     activeTab === 'analytics'
-                      ? 'bg-sky-soft text-sky-deep border border-sky/30 shadow-xs'
-                      : 'text-ink-muted hover:text-ink hover:bg-surface-sunken'
+                      ? 'bg-slate-900 text-white font-semibold'
+                      : 'text-slate-600 hover:text-slate-950 hover:bg-slate-100'
                   }`}
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <BarChart3 className={`w-4 h-4 shrink-0 ${activeTab === 'analytics' ? 'text-sky' : 'text-ink-muted'}`} />
+                    <BarChart3 className={`w-4 h-4 shrink-0 ${activeTab === 'analytics' ? 'text-sky-400' : 'text-slate-500'}`} />
                     {effectiveExpanded && <span className="truncate">Subject Analytics</span>}
                   </div>
                 </button>
@@ -310,14 +363,14 @@ export default function MateSidebar({
                   type="button"
                   onClick={() => onTabChange('warnings')}
                   title="Shortage Watchlist"
-                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-sk-btn text-xs font-bold transition-all relative ${
+                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-lg text-xs font-medium transition-colors cursor-pointer relative ${
                     activeTab === 'warnings'
-                      ? 'bg-coral-soft text-coral-deep border border-coral/30 shadow-xs'
-                      : 'text-ink-muted hover:text-ink hover:bg-surface-sunken'
+                      ? 'bg-slate-900 text-white font-semibold'
+                      : 'text-slate-600 hover:text-slate-950 hover:bg-slate-100'
                   }`}
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <ShieldAlert className={`w-4 h-4 shrink-0 ${activeTab === 'warnings' ? 'text-coral' : 'text-ink-muted'}`} />
+                    <ShieldAlert className={`w-4 h-4 shrink-0 ${activeTab === 'warnings' ? 'text-red-400' : 'text-slate-500'}`} />
                     {effectiveExpanded && <span className="truncate">Defaulter Watchlist</span>}
                   </div>
                   {lowWarningCount > 0 && (
@@ -331,22 +384,70 @@ export default function MateSidebar({
                   type="button"
                   onClick={() => onTabChange('reports')}
                   title="Subject Attendance Register"
-                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-sk-btn text-xs font-bold transition-all ${
+                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
                     activeTab === 'reports'
-                      ? 'bg-sky-soft text-sky-deep border border-sky/30 shadow-xs'
-                      : 'text-ink-muted hover:text-ink hover:bg-surface-sunken'
+                      ? 'bg-slate-900 text-white font-semibold'
+                      : 'text-slate-600 hover:text-slate-950 hover:bg-slate-100'
                   }`}
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <Download className={`w-4 h-4 shrink-0 ${activeTab === 'reports' ? 'text-sky' : 'text-ink-muted'}`} />
+                    <Download className={`w-4 h-4 shrink-0 ${activeTab === 'reports' ? 'text-sky-400' : 'text-slate-500'}`} />
                     {effectiveExpanded && <span className="truncate">Attendance Register</span>}
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => onTabChange('history')}
+                  title="Class Attendance History & Past Sessions"
+                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
+                    activeTab === 'history'
+                      ? 'bg-slate-900 text-white font-semibold'
+                      : 'text-slate-600 hover:text-slate-950 hover:bg-slate-100'
+                  }`}
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <History className={`w-4 h-4 shrink-0 ${activeTab === 'history' ? 'text-sky-400' : 'text-slate-500'}`} />
+                    {effectiveExpanded && <span className="truncate">Attendance History</span>}
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => onTabChange('notices')}
+                  title="Official Campus Notices & Circulars"
+                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
+                    activeTab === 'notices'
+                      ? 'bg-slate-900 text-white font-semibold'
+                      : 'text-slate-600 hover:text-slate-950 hover:bg-slate-100'
+                  }`}
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <Megaphone className={`w-4 h-4 shrink-0 ${activeTab === 'notices' ? 'text-sky-400' : 'text-slate-500'}`} />
+                    {effectiveExpanded && <span className="truncate">Notice Board</span>}
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => onTabChange('admissions')}
+                  title="Review New Student Enrollment Forms"
+                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
+                    activeTab === 'admissions'
+                      ? 'bg-slate-900 text-white font-semibold'
+                      : 'text-slate-600 hover:text-slate-950 hover:bg-slate-100'
+                  }`}
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <UserCheck className={`w-4 h-4 shrink-0 ${activeTab === 'admissions' ? 'text-emerald-400' : 'text-slate-500'}`} />
+                    {effectiveExpanded && <span className="truncate">Admissions Forms</span>}
                   </div>
                 </button>
               </>
             ) : (
               /* ================= STUDENT NAVIGATION ================= */
               <>
-                <div className="px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-ink-subtle font-display">
+                <div className="px-3 py-1.5 text-[11px] font-semibold text-slate-400">
                   {effectiveExpanded ? 'Student Portal' : '•••'}
                 </div>
 
@@ -354,14 +455,14 @@ export default function MateSidebar({
                   type="button"
                   onClick={() => onTabChange('overview')}
                   title="My Attendance Dashboard"
-                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-sk-btn text-xs font-bold transition-all ${
+                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
                     activeTab === 'overview'
-                      ? 'bg-sky-soft text-sky-deep border border-sky/30 shadow-xs'
-                      : 'text-ink-muted hover:text-ink hover:bg-surface-sunken'
+                      ? 'bg-slate-900 text-white font-semibold'
+                      : 'text-slate-600 hover:text-slate-950 hover:bg-slate-100'
                   }`}
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <LayoutDashboard className={`w-4 h-4 shrink-0 ${activeTab === 'overview' ? 'text-sky' : 'text-ink-muted'}`} />
+                    <LayoutDashboard className={`w-4 h-4 shrink-0 ${activeTab === 'overview' ? 'text-sky-400' : 'text-slate-500'}`} />
                     {effectiveExpanded && <span className="truncate">My Dashboard</span>}
                   </div>
                 </button>
@@ -370,14 +471,14 @@ export default function MateSidebar({
                   type="button"
                   onClick={() => onTabChange('courses')}
                   title="Subject Attendance"
-                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-sk-btn text-xs font-bold transition-all ${
+                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
                     activeTab === 'courses'
-                      ? 'bg-sky-soft text-sky-deep border border-sky/30 shadow-xs'
-                      : 'text-ink-muted hover:text-ink hover:bg-surface-sunken'
+                      ? 'bg-slate-900 text-white font-semibold'
+                      : 'text-slate-600 hover:text-slate-950 hover:bg-slate-100'
                   }`}
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <BookOpen className={`w-4 h-4 shrink-0 ${activeTab === 'courses' ? 'text-sky' : 'text-ink-muted'}`} />
+                    <BookOpen className={`w-4 h-4 shrink-0 ${activeTab === 'courses' ? 'text-sky-400' : 'text-slate-500'}`} />
                     {effectiveExpanded && <span className="truncate">Subjects &amp; Credits</span>}
                   </div>
                 </button>
@@ -386,14 +487,14 @@ export default function MateSidebar({
                   type="button"
                   onClick={() => onTabChange('schedule')}
                   title="Class Timetable"
-                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-sk-btn text-xs font-bold transition-all ${
+                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
                     activeTab === 'schedule'
-                      ? 'bg-sky-soft text-sky-deep border border-sky/30 shadow-xs'
-                      : 'text-ink-muted hover:text-ink hover:bg-surface-sunken'
+                      ? 'bg-slate-900 text-white font-semibold'
+                      : 'text-slate-600 hover:text-slate-950 hover:bg-slate-100'
                   }`}
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <Calendar className={`w-4 h-4 shrink-0 ${activeTab === 'schedule' ? 'text-sky' : 'text-ink-muted'}`} />
+                    <Calendar className={`w-4 h-4 shrink-0 ${activeTab === 'schedule' ? 'text-sky-400' : 'text-slate-500'}`} />
                     {effectiveExpanded && <span className="truncate">Class Timetable</span>}
                   </div>
                 </button>
@@ -402,14 +503,14 @@ export default function MateSidebar({
                   type="button"
                   onClick={() => onTabChange('leave')}
                   title="Leave & Medical Excuses"
-                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-sk-btn text-xs font-bold transition-all ${
+                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
                     activeTab === 'leave'
-                      ? 'bg-sky-soft text-sky-deep border border-sky/30 shadow-xs'
-                      : 'text-ink-muted hover:text-ink hover:bg-surface-sunken'
+                      ? 'bg-slate-900 text-white font-semibold'
+                      : 'text-slate-600 hover:text-slate-950 hover:bg-slate-100'
                   }`}
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <FileText className={`w-4 h-4 shrink-0 ${activeTab === 'leave' ? 'text-sky' : 'text-ink-muted'}`} />
+                    <FileText className={`w-4 h-4 shrink-0 ${activeTab === 'leave' ? 'text-sky-400' : 'text-slate-500'}`} />
                     {effectiveExpanded && <span className="truncate">Leave Application</span>}
                   </div>
                 </button>
@@ -418,15 +519,47 @@ export default function MateSidebar({
                   type="button"
                   onClick={() => onTabChange('certificates')}
                   title="Hall Ticket & Exam Eligibility"
-                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-sk-btn text-xs font-bold transition-all ${
+                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
                     activeTab === 'certificates'
-                      ? 'bg-sun-soft text-sun-deep border border-sun/30 shadow-xs'
-                      : 'text-ink-muted hover:text-ink hover:bg-surface-sunken'
+                      ? 'bg-slate-900 text-white font-semibold'
+                      : 'text-slate-600 hover:text-slate-950 hover:bg-slate-100'
                   }`}
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <Award className={`w-4 h-4 shrink-0 ${activeTab === 'certificates' ? 'text-sun-deep' : 'text-ink-muted'}`} />
+                    <Award className={`w-4 h-4 shrink-0 ${activeTab === 'certificates' ? 'text-amber-400' : 'text-slate-500'}`} />
                     {effectiveExpanded && <span className="truncate">Exam Hall Ticket</span>}
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => onTabChange('history')}
+                  title="My Attendance Punch History & Logs"
+                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
+                    activeTab === 'history'
+                      ? 'bg-slate-900 text-white font-semibold'
+                      : 'text-slate-600 hover:text-slate-950 hover:bg-slate-100'
+                  }`}
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <History className={`w-4 h-4 shrink-0 ${activeTab === 'history' ? 'text-sky-400' : 'text-slate-500'}`} />
+                    {effectiveExpanded && <span className="truncate">Attendance History</span>}
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => onTabChange('notices')}
+                  title="Official Campus Notices & Bulletins"
+                  className={`w-full flex items-center ${effectiveExpanded ? 'justify-between px-3.5' : 'justify-center px-2'} py-2.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
+                    activeTab === 'notices'
+                      ? 'bg-slate-900 text-white font-semibold'
+                      : 'text-slate-600 hover:text-slate-950 hover:bg-slate-100'
+                  }`}
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <Megaphone className={`w-4 h-4 shrink-0 ${activeTab === 'notices' ? 'text-sky-400' : 'text-slate-500'}`} />
+                    {effectiveExpanded && <span className="truncate">Notice Board</span>}
                   </div>
                 </button>
               </>
@@ -435,24 +568,26 @@ export default function MateSidebar({
         </div>
 
         {/* Bottom Profile & Role Information */}
-        <div className="space-y-3 pt-4 border-t border-outline px-1">
+        <div className="space-y-3 pt-4 border-t border-slate-200/90 px-1">
           {/* Verified Database Role Badge */}
           {effectiveExpanded ? (
-            <div className="py-1 px-3 bg-surface-sunken rounded-full border border-outline text-xs font-bold flex items-center justify-between">
+            <div className="py-1 px-3 bg-slate-50 rounded-lg border border-slate-200 text-xs font-bold flex items-center justify-between">
               <span className="text-ink-subtle text-[10px] uppercase tracking-wider">Access</span>
               <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                role === 'admin'
+                isDevMode || role === 'developer'
+                  ? 'bg-amber-100 text-amber-900 border border-amber-300'
+                  : role === 'admin'
                   ? 'bg-berry-soft text-berry-deep border border-purple-200'
                   : role === 'faculty'
                   ? 'bg-sky-soft text-sky-deep border border-sky-200'
                   : 'bg-leaf-soft text-leaf-deep border border-green-200'
               }`}>
-                {role === 'admin' ? 'Admin' : role === 'faculty' ? 'Faculty' : 'Student'}
+                {isDevMode || role === 'developer' ? '⚡ Dev Bypass' : role === 'admin' ? 'Admin' : role === 'faculty' ? 'Faculty' : 'Student'}
               </span>
             </div>
           ) : (
-            <div className="flex justify-center" title={`Access: ${role}`}>
-              <span className={`w-3 h-3 rounded-full ${role === 'admin' ? 'bg-berry' : role === 'faculty' ? 'bg-sky' : 'bg-leaf'}`} />
+            <div className="flex justify-center" title={`Access: ${isDevMode ? 'Developer Bypass' : role}`}>
+              <span className={`w-3 h-3 rounded-full ${isDevMode || role === 'developer' ? 'bg-amber-500 ring-2 ring-amber-300' : role === 'admin' ? 'bg-berry' : role === 'faculty' ? 'bg-sky' : 'bg-leaf'}`} />
             </div>
           )}
 
@@ -486,7 +621,7 @@ export default function MateSidebar({
             type="button"
             onClick={() => onLogout?.()}
             title="Sign Out"
-            className={`w-full flex items-center ${!effectiveExpanded ? 'justify-center px-1' : 'justify-center gap-1.5 px-3'} text-xs font-bold text-coral hover:text-coral-deep hover:bg-coral-soft/50 py-2 rounded-sk-btn transition-colors border border-coral/20`}
+            className={`w-full flex items-center ${!effectiveExpanded ? 'justify-center px-1' : 'justify-center gap-1.5 px-3'} text-xs font-bold text-slate-700 hover:text-red-700 hover:bg-red-50 py-1.5 rounded-lg transition-colors border border-slate-200 cursor-pointer`}
           >
             <LogOut className="w-3.5 h-3.5 shrink-0" />
             {effectiveExpanded && <span>Sign Out</span>}

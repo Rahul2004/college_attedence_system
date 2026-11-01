@@ -119,7 +119,36 @@ export async function saveSystemSettingToCloud(key, value) {
 export async function fetchCloudUsers() {
   if (!supabase || !isSupabaseConfigured) return null;
   try {
-    // 1. Primary: Load all profiles registered in Supabase
+    // 1. Primary: Load app_users table
+    const { data: appUsers, error: appErr } = await supabase
+      .from('app_users')
+      .select('*')
+      .order('updated_at', { ascending: false });
+
+    if (!appErr && appUsers && appUsers.length > 0) {
+      return appUsers.map(u => ({
+        id: u.id,
+        name: u.name,
+        email: u.email,
+        role: u.role,
+        status: u.status,
+        dept: u.department || 'General',
+        lastActive: u.updated_at ? new Date(u.updated_at).toLocaleDateString() : 'Active'
+      }));
+    }
+
+    // 2. Secondary: Load from system_settings backup key
+    const { data: setUsers } = await supabase
+      .from('system_settings')
+      .select('value')
+      .eq('key', 'college_app_users')
+      .maybeSingle();
+
+    if (setUsers?.value && Array.isArray(setUsers.value) && setUsers.value.length > 0) {
+      return setUsers.value;
+    }
+
+    // 3. Tertiary fallback: Load from registered auth profiles
     const { data: profiles, error: profErr } = await supabase
       .from('profiles')
       .select('*')
@@ -142,16 +171,6 @@ export async function fetchCloudUsers() {
         lastActive: p.updated_at ? new Date(p.updated_at).toLocaleDateString() : 'Recent'
       }));
     }
-
-    // 2. Secondary fallback: app_users table
-    const { data, error } = await supabase
-      .from('app_users')
-      .select('*')
-      .order('updated_at', { ascending: false });
-
-    if (!error && data && data.length > 0) {
-      return data;
-    }
   } catch (err) {
     console.warn('Fetch users notice:', err);
   }
@@ -166,6 +185,16 @@ export async function saveUsersToCloud(users) {
 
   if (!supabase || !isSupabaseConfigured) return;
   try {
+    // 1. Save directly into system_settings as authoritative fallback for instant multi-device hydration
+    await supabase
+      .from('system_settings')
+      .upsert({
+        key: 'college_app_users',
+        value: users,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'key' });
+
+    // 2. Also save to app_users table
     const formatted = users.map(u => ({
       id: u.id,
       name: u.name,
@@ -443,6 +472,47 @@ export async function recordAuditLog(actorEmail, role, action, details) {
     }
   } catch (err) {
     console.warn('Record audit log notice:', err);
+  }
+}
+
+/**
+ * Fetches student admissions forms from Supabase Cloud.
+ */
+export async function fetchCloudAdmissionsForms() {
+  if (!supabase || !isSupabaseConfigured) return null;
+  try {
+    const { data, error } = await supabase
+      .from('system_settings')
+      .select('value')
+      .eq('key', 'college_student_admissions_forms')
+      .maybeSingle();
+
+    if (!error && data?.value) {
+      return typeof data.value === 'string' ? JSON.parse(data.value) : data.value;
+    }
+  } catch (err) {
+    console.warn('Fetch cloud admissions forms notice:', err);
+  }
+  return null;
+}
+
+/**
+ * Saves student admissions forms to Supabase Cloud and broadcasts to all connected tabs/browsers.
+ */
+export async function saveAdmissionsFormsToCloud(formsList) {
+  await broadcastCloudEvent('ADMISSIONS_FORMS_UPDATE', formsList);
+
+  if (!supabase || !isSupabaseConfigured) return;
+  try {
+    await supabase
+      .from('system_settings')
+      .upsert({
+        key: 'college_student_admissions_forms',
+        value: formsList,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'key' });
+  } catch (err) {
+    console.warn('Save admissions forms to cloud error:', err);
   }
 }
 

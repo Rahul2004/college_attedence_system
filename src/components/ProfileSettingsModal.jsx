@@ -20,8 +20,9 @@ import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { saveUsersToCloud } from '../lib/syncService';
 
 export default function ProfileSettingsModal({ 
-  isOpen, 
+  isOpen = true, 
   onClose, 
+  isPageView = false, 
   role, 
   session, 
   userProfile,
@@ -31,7 +32,7 @@ export default function ProfileSettingsModal({
   onUpdateCurrentUser, 
   setToast 
 }) {
-  if (!isOpen) return null;
+  if (!isOpen && !isPageView) return null;
 
   const ADMIN_EMAIL = (import.meta.env.VITE_ADMIN_EMAIL || 'admin@college.edu.in').toLowerCase();
   
@@ -315,13 +316,12 @@ export default function ProfileSettingsModal({
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="bg-white rounded-3xl shadow-2xl border border-slate-200/90 w-full max-w-2xl overflow-hidden flex flex-col max-h-[92vh]">
+  const innerCard = (
+    <div className={`bg-white rounded-xl shadow-xs border border-slate-300 w-full ${isPageView ? "max-w-4xl mx-auto" : "max-w-2xl overflow-hidden flex flex-col max-h-[92vh] shadow-xl"}`}>
         {/* Header */}
         <div className="bg-slate-900 text-white px-6 py-4 flex items-center justify-between border-b border-slate-800 shrink-0">
           <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-2xl flex items-center justify-center text-white shadow-md ${
+            <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-white shadow-md ${
               role === 'admin'
                 ? 'bg-purple-600 shadow-purple-600/30'
                 : role === 'faculty'
@@ -351,13 +351,15 @@ export default function ProfileSettingsModal({
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          {onClose && !isPageView && (
+            <button
+              type="button"
+              onClick={onClose}
+              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          )}
         </div>
 
         {/* Tab Selector */}
@@ -367,7 +369,7 @@ export default function ProfileSettingsModal({
             onClick={() => setActiveTab('general')}
             className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 text-xs font-bold border-b-2 transition-all shrink-0 whitespace-nowrap ${
               activeTab === 'general'
-                ? 'border-indigo-600 text-indigo-600'
+                ? 'border-indigo-600 text-slate-800'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
@@ -379,7 +381,7 @@ export default function ProfileSettingsModal({
             onClick={() => setActiveTab('security')}
             className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 text-xs font-bold border-b-2 transition-all shrink-0 whitespace-nowrap ${
               activeTab === 'security'
-                ? 'border-indigo-600 text-indigo-600'
+                ? 'border-indigo-600 text-slate-800'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
@@ -391,7 +393,7 @@ export default function ProfileSettingsModal({
             onClick={() => setActiveTab('notifications')}
             className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 text-xs font-bold border-b-2 transition-all shrink-0 whitespace-nowrap ${
               activeTab === 'notifications'
-                ? 'border-indigo-600 text-indigo-600'
+                ? 'border-indigo-600 text-slate-800'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
@@ -416,7 +418,7 @@ export default function ProfileSettingsModal({
                       value={fullName}
                       onChange={e => setFullName(e.target.value)}
                       required
-                      className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-indigo-600 focus:bg-white transition-all font-medium text-slate-900"
+                      className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-600 focus:bg-white transition-all font-medium text-slate-900"
                     />
                   </div>
                 </div>
@@ -431,7 +433,7 @@ export default function ProfileSettingsModal({
                       type="email"
                       value={currentEmail}
                       disabled
-                      className="w-full pl-9 pr-3 py-2 text-xs bg-slate-100 border border-slate-200 rounded-xl font-mono text-slate-500 cursor-not-allowed"
+                      className="w-full pl-9 pr-3 py-2 text-xs bg-slate-100 border border-slate-200 rounded-lg font-mono text-slate-500 cursor-not-allowed"
                     />
                   </div>
                 </div>
@@ -446,7 +448,7 @@ export default function ProfileSettingsModal({
                       type="text"
                       value={phone}
                       onChange={e => setPhone(e.target.value)}
-                      className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-indigo-600 focus:bg-white transition-all font-medium text-slate-900"
+                      className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-600 focus:bg-white transition-all font-medium text-slate-900"
                     />
                   </div>
                 </div>
@@ -461,7 +463,7 @@ export default function ProfileSettingsModal({
                       type="text"
                       value={department}
                       onChange={e => setDepartment(e.target.value)}
-                      className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-indigo-600 focus:bg-white transition-all font-medium text-slate-900"
+                      className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-600 focus:bg-white transition-all font-medium text-slate-900"
                     />
                   </div>
                 </div>
@@ -478,7 +480,7 @@ export default function ProfileSettingsModal({
                           type="text"
                           value={rollNo}
                           disabled
-                          className="w-full pl-9 pr-3 py-2 text-xs bg-slate-100 border border-slate-200 rounded-xl font-mono font-bold text-slate-600 cursor-not-allowed"
+                          className="w-full pl-9 pr-3 py-2 text-xs bg-slate-100 border border-slate-200 rounded-lg font-mono font-bold text-slate-600 cursor-not-allowed"
                         />
                       </div>
                     </div>
@@ -492,7 +494,7 @@ export default function ProfileSettingsModal({
                           type="text"
                           value={`${currentStudent?.semester || 'Semester VI'} • B.Tech CSE`}
                           disabled
-                          className="w-full pl-9 pr-3 py-2 text-xs bg-slate-100 border border-slate-200 rounded-xl text-slate-600 font-semibold cursor-not-allowed"
+                          className="w-full pl-9 pr-3 py-2 text-xs bg-slate-100 border border-slate-200 rounded-lg text-slate-600 font-semibold cursor-not-allowed"
                         />
                       </div>
                     </div>
@@ -511,7 +513,7 @@ export default function ProfileSettingsModal({
                           type="text"
                           value="Associate Professor & Course Coordinator"
                           disabled
-                          className="w-full pl-9 pr-3 py-2 text-xs bg-slate-100 border border-slate-200 rounded-xl text-slate-600 font-semibold cursor-not-allowed"
+                          className="w-full pl-9 pr-3 py-2 text-xs bg-slate-100 border border-slate-200 rounded-lg text-slate-600 font-semibold cursor-not-allowed"
                         />
                       </div>
                     </div>
@@ -525,7 +527,7 @@ export default function ProfileSettingsModal({
                           type="text"
                           value={activeCourse?.name ? `${activeCourse.code}: ${activeCourse.name}` : 'CS-602: Database Management Systems (DBMS)'}
                           disabled
-                          className="w-full pl-9 pr-3 py-2 text-xs bg-slate-100 border border-slate-200 rounded-xl text-slate-600 font-semibold cursor-not-allowed"
+                          className="w-full pl-9 pr-3 py-2 text-xs bg-slate-100 border border-slate-200 rounded-lg text-slate-600 font-semibold cursor-not-allowed"
                         />
                       </div>
                     </div>
@@ -544,7 +546,7 @@ export default function ProfileSettingsModal({
                           type="text"
                           value="Tier-1 University Registrar / Institutional Super-Admin"
                           disabled
-                          className="w-full pl-9 pr-3 py-2 text-xs bg-slate-100 border border-slate-200 rounded-xl text-slate-600 font-semibold cursor-not-allowed"
+                          className="w-full pl-9 pr-3 py-2 text-xs bg-slate-100 border border-slate-200 rounded-lg text-slate-600 font-semibold cursor-not-allowed"
                         />
                       </div>
                     </div>
@@ -558,7 +560,7 @@ export default function ProfileSettingsModal({
                           type="text"
                           value="Statutory 75% Rule Enforcement • Faculty Approvals • Audit Logs"
                           disabled
-                          className="w-full pl-9 pr-3 py-2 text-xs bg-slate-100 border border-slate-200 rounded-xl text-slate-600 font-semibold cursor-not-allowed"
+                          className="w-full pl-9 pr-3 py-2 text-xs bg-slate-100 border border-slate-200 rounded-lg text-slate-600 font-semibold cursor-not-allowed"
                         />
                       </div>
                     </div>
@@ -567,7 +569,7 @@ export default function ProfileSettingsModal({
               </div>
 
               {/* Database Authorization Summary */}
-              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex items-center justify-between text-xs">
+              <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 flex items-center justify-between text-xs">
                 <div className="flex items-center gap-3">
                   <ShieldCheck className="w-5 h-5 text-emerald-600" />
                   <div>
@@ -590,14 +592,14 @@ export default function ProfileSettingsModal({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
+                  className="px-4 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSaving}
-                  className="flex items-center gap-2 px-5 py-2 rounded-xl bg-indigo-600 text-white text-xs font-bold hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-600/20 disabled:opacity-50"
+                  className="flex items-center gap-2 px-5 py-2 rounded-lg bg-indigo-600 text-white text-xs font-bold hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-600/20 disabled:opacity-50"
                 >
                   {isSaving ? (
                     <span className="inline-block animate-spin rounded-full h-3.5 w-3.5 border-2 border-white border-t-transparent" />
@@ -612,7 +614,7 @@ export default function ProfileSettingsModal({
 
           {activeTab === 'security' && (
             <form onSubmit={handleSaveSecurity} className="space-y-4">
-              <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-xs text-amber-800 flex items-start gap-3">
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-xs text-amber-800 flex items-start gap-3">
                 <KeyRound className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                 <div>
                   <span className="font-bold block mb-0.5">Password Renewal Policy</span>
@@ -621,7 +623,7 @@ export default function ProfileSettingsModal({
               </div>
 
               {securityMsg.text && (
-                <div className={`p-3 rounded-xl text-xs font-bold ${
+                <div className={`p-3 rounded-lg text-xs font-bold ${
                   securityMsg.type === 'success'
                     ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                     : 'bg-rose-50 text-rose-700 border border-rose-200'
@@ -642,7 +644,7 @@ export default function ProfileSettingsModal({
                       value={newPassword}
                       onChange={e => setNewPassword(e.target.value)}
                       placeholder="Minimum 6 characters"
-                      className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-indigo-600 focus:bg-white transition-all font-medium text-slate-900"
+                      className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-600 focus:bg-white transition-all font-medium text-slate-900"
                     />
                   </div>
                 </div>
@@ -658,7 +660,7 @@ export default function ProfileSettingsModal({
                       value={confirmPassword}
                       onChange={e => setConfirmPassword(e.target.value)}
                       placeholder="Re-enter new password"
-                      className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-indigo-600 focus:bg-white transition-all font-medium text-slate-900"
+                      className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-600 focus:bg-white transition-all font-medium text-slate-900"
                     />
                   </div>
                 </div>
@@ -668,14 +670,14 @@ export default function ProfileSettingsModal({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
+                  className="px-4 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSaving}
-                  className="flex items-center gap-2 px-5 py-2 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition-colors shadow-md disabled:opacity-50"
+                  className="flex items-center gap-2 px-5 py-2 rounded-lg bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition-colors shadow-md disabled:opacity-50"
                 >
                   {isSaving ? (
                     <span className="inline-block animate-spin rounded-full h-3.5 w-3.5 border-2 border-white border-t-transparent" />
@@ -691,7 +693,7 @@ export default function ProfileSettingsModal({
           {activeTab === 'notifications' && (
             <div className="space-y-4">
               <div className="space-y-3">
-                <label className="flex items-center justify-between p-3.5 rounded-2xl border border-slate-200 hover:bg-slate-50 transition-colors cursor-pointer">
+                <label className="flex items-center justify-between p-3.5 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors cursor-pointer">
                   <div>
                     <span className="text-xs font-bold text-slate-900 block">Classroom Attendance Push Alerts</span>
                     <span className="text-[11px] text-slate-500">Real-time alerts when punch sessions start or change</span>
@@ -700,11 +702,11 @@ export default function ProfileSettingsModal({
                     type="checkbox"
                     checked={emailAlerts}
                     onChange={e => setEmailAlerts(e.target.checked)}
-                    className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                    className="w-4 h-4 rounded text-slate-800 focus:ring-indigo-500 cursor-pointer"
                   />
                 </label>
 
-                <label className="flex items-center justify-between p-3.5 rounded-2xl border border-slate-200 hover:bg-slate-50 transition-colors cursor-pointer">
+                <label className="flex items-center justify-between p-3.5 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors cursor-pointer">
                   <div>
                     <span className="text-xs font-bold text-slate-900 block">WhatsApp Defaulter Shortage Notices</span>
                     <span className="text-[11px] text-slate-500">Dispatch alerts to registered parent number if attendance &lt; 75%</span>
@@ -713,11 +715,11 @@ export default function ProfileSettingsModal({
                     type="checkbox"
                     checked={whatsappAlerts}
                     onChange={e => setWhatsappAlerts(e.target.checked)}
-                    className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                    className="w-4 h-4 rounded text-slate-800 focus:ring-indigo-500 cursor-pointer"
                   />
                 </label>
 
-                <label className="flex items-center justify-between p-3.5 rounded-2xl border border-slate-200 hover:bg-slate-50 transition-colors cursor-pointer">
+                <label className="flex items-center justify-between p-3.5 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors cursor-pointer">
                   <div>
                     <span className="text-xs font-bold text-slate-900 block">Dean &amp; Faculty Broadcasts</span>
                     <span className="text-[11px] text-slate-500">Academic calendar notices, holidays, and circular updates</span>
@@ -726,7 +728,7 @@ export default function ProfileSettingsModal({
                     type="checkbox"
                     checked={lowAttendanceWarnings}
                     onChange={e => setLowAttendanceWarnings(e.target.checked)}
-                    className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                    className="w-4 h-4 rounded text-slate-800 focus:ring-indigo-500 cursor-pointer"
                   />
                 </label>
               </div>
@@ -749,7 +751,7 @@ export default function ProfileSettingsModal({
                     }
                     onClose();
                   }}
-                  className="flex items-center gap-2 px-5 py-2 rounded-xl bg-indigo-600 text-white text-xs font-bold hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-600/20"
+                  className="flex items-center gap-2 px-5 py-2 rounded-lg bg-indigo-600 text-white text-xs font-bold hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-600/20"
                 >
                   <Check className="w-3.5 h-3.5" />
                   Save Preferences
@@ -759,6 +761,15 @@ export default function ProfileSettingsModal({
           )}
         </div>
       </div>
+  );
+
+  if (isPageView) {
+    return <div className="py-2 sm:py-4">{innerCard}</div>;
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+      {innerCard}
     </div>
   );
 }

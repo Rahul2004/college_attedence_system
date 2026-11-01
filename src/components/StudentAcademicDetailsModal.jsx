@@ -91,9 +91,9 @@ export default function StudentAcademicDetailsModal({ profile, onSubmitSuccess }
 
   if (isDone) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-indigo-50/40 flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white rounded-3xl border border-slate-200/80 shadow-xl p-8 text-center">
-          <div className="w-16 h-16 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-4">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white rounded-lg border border-slate-300 shadow-sm p-8 text-center">
+          <div className="w-12 h-12 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center justify-center mx-auto mb-4">
             <CheckCircle2 className="w-8 h-8" />
           </div>
           <h2 className="text-xl font-bold text-slate-900 mb-2">Details Submitted Successfully!</h2>
@@ -104,7 +104,7 @@ export default function StudentAcademicDetailsModal({ profile, onSubmitSuccess }
           <button
             type="button"
             onClick={() => window.location.reload()}
-            className="w-full py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-md transition"
+            className="w-full py-3 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm shadow-xs transition-colors"
           >
             Check Status
           </button>
@@ -114,11 +114,11 @@ export default function StudentAcademicDetailsModal({ profile, onSubmitSuccess }
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-indigo-50/40 flex flex-col items-center justify-center p-4 sm:p-6 font-sans">
+    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4 sm:p-6 font-sans">
       <div className="max-w-2xl w-full">
         {/* University Header */}
         <div className="flex items-center justify-center gap-3 mb-6">
-          <div className="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-md shadow-indigo-600/30">
+          <div className="w-10 h-10 rounded-lg bg-slate-900 text-white flex items-center justify-center shadow-xs">
             <GraduationCap className="w-6 h-6" />
           </div>
           <div>
@@ -132,9 +132,9 @@ export default function StudentAcademicDetailsModal({ profile, onSubmitSuccess }
         </div>
 
         {/* Form Card */}
-        <div className="bg-white rounded-3xl border border-slate-200/80 shadow-xl p-6 sm:p-8 backdrop-blur-xl">
+        <div className="bg-white rounded-lg border border-slate-300 shadow-sm p-6 sm:p-8">
           <div className="mb-6 pb-4 border-b border-slate-100">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border bg-indigo-500/10 text-indigo-700 border-indigo-200 mb-2">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border bg-slate-100 text-slate-800 border-slate-300 mb-2">
               Action Required
             </span>
             <h2 className="text-lg font-bold text-slate-900">
@@ -146,7 +146,7 @@ export default function StudentAcademicDetailsModal({ profile, onSubmitSuccess }
           </div>
 
           {errorMsg && (
-            <div className="mb-6 p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2">
+            <div className="mb-6 p-3.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2">
               <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
               <span>{errorMsg}</span>
             </div>
@@ -163,7 +163,7 @@ export default function StudentAcademicDetailsModal({ profile, onSubmitSuccess }
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 required
-                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                className="w-full px-4 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:outline-none focus:border-slate-900"
                 placeholder="e.g. Rahul Sharma"
               />
             </div>
@@ -179,7 +179,7 @@ export default function StudentAcademicDetailsModal({ profile, onSubmitSuccess }
                   setSelectedProgramId(e.target.value);
                   setSemester('I');
                 }}
-                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white"
+                className="w-full px-4 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:outline-none focus:border-slate-900 bg-white"
               >
                 {INDIAN_COLLEGE_PROGRAMS.map((prog) => (
                   <option key={prog.id} value={prog.id}>
@@ -201,7 +201,7 @@ export default function StudentAcademicDetailsModal({ profile, onSubmitSuccess }
                 <select
                   value={semester}
                   onChange={(e) => setSemester(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white"
+                  className="w-full px-4 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:outline-none focus:border-slate-900 bg-white"
                 >
                   {(selectedProgram?.semesters || []).map((sem) => (
                     <option key={sem.semNumber} value={sem.semNumber}>
@@ -218,7 +218,7 @@ export default function StudentAcademicDetailsModal({ profile, onSubmitSuccess }
                 <select
                   value={section}
                   onChange={(e) => setSection(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white"
+                  className="w-full px-4 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:outline-none focus:border-slate-900 bg-white"
                 >
                   <option value="A">Section A</option>
                   <option value="B">Section B</option>
@@ -239,7 +239,7 @@ export default function StudentAcademicDetailsModal({ profile, onSubmitSuccess }
                   value={rollNo}
                   onChange={(e) => setRollNo(e.target.value)}
                   required
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 uppercase"
+                  className="w-full px-4 py-2.5 rounded-lg border border-slate-200 text-sm font-mono focus:outline-none focus:outline-none focus:border-slate-900 uppercase"
                   placeholder="e.g. 0101CS221045"
                 />
               </div>
@@ -251,7 +251,7 @@ export default function StudentAcademicDetailsModal({ profile, onSubmitSuccess }
                 <select
                   value={admissionYear}
                   onChange={(e) => setAdmissionYear(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white"
+                  className="w-full px-4 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:outline-none focus:border-slate-900 bg-white"
                 >
                   <option value="2026">2026</option>
                   <option value="2025">2025</option>
@@ -273,7 +273,7 @@ export default function StudentAcademicDetailsModal({ profile, onSubmitSuccess }
                   type="date"
                   value={dob}
                   onChange={(e) => setDob(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white"
+                  className="w-full px-4 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:outline-none focus:border-slate-900 bg-white"
                 />
               </div>
 
@@ -286,7 +286,7 @@ export default function StudentAcademicDetailsModal({ profile, onSubmitSuccess }
                   value={emergencyContact}
                   onChange={(e) => setEmergencyContact(e.target.value)}
                   required
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                  className="w-full px-4 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:outline-none focus:border-slate-900"
                   placeholder="+91 98000 00000"
                 />
               </div>
@@ -300,7 +300,7 @@ export default function StudentAcademicDetailsModal({ profile, onSubmitSuccess }
                   await handleLogout();
                   window.location.href = '/login';
                 }}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-rose-600 hover:text-rose-700 hover:bg-rose-50 transition cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold text-rose-600 hover:text-rose-700 hover:bg-rose-50 transition cursor-pointer"
               >
                 <LogOut className="w-3.5 h-3.5" />
                 <span>Sign Out</span>
@@ -309,7 +309,7 @@ export default function StudentAcademicDetailsModal({ profile, onSubmitSuccess }
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md transition disabled:opacity-50 cursor-pointer"
+                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs shadow-xs transition-colors disabled:opacity-50 cursor-pointer"
               >
                 <Send className="w-3.5 h-3.5" />
                 <span>{isSubmitting ? 'Submitting Details...' : 'Submit Academic Details'}</span>

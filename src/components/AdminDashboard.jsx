@@ -189,62 +189,62 @@ export default function AdminDashboard({
 
       {/* High-Level Master Analytics KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white p-5 rounded-sk-card border border-outline shadow-sk-card">
+        <div className="bg-white p-5 rounded-xl border border-slate-200/90 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-ink-subtle uppercase tracking-wider font-sans">Total Enrolled</span>
-            <div className="w-9 h-9 rounded-sk-btn bg-sky-soft text-sky-deep flex items-center justify-center border border-sky/20">
+            <span className="text-xs font-medium text-slate-500">Total accounts</span>
+            <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center border border-slate-200">
               <Users className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-2xl font-extrabold font-mono text-ink mt-2">{users.length}</div>
-          <span className="text-xs text-ink-subtle mt-1 block">Active across all roles</span>
+          <div className="text-2xl font-bold font-mono text-slate-900 mt-2">{users.length}</div>
+          <span className="text-xs text-slate-500 mt-1 block">Active across all roles</span>
         </div>
 
-        <div className="bg-white p-5 rounded-sk-card border border-outline shadow-sk-card">
+        <div className="bg-white p-5 rounded-xl border border-slate-200/90 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-ink-subtle uppercase tracking-wider font-sans">Faculty Officers</span>
-            <div className="w-9 h-9 rounded-sk-btn bg-sky-soft text-sky-deep flex items-center justify-center border border-sky/20">
+            <span className="text-xs font-medium text-slate-500">Faculty officers</span>
+            <div className="w-8 h-8 rounded-lg bg-sky-50 text-sky-700 flex items-center justify-center border border-sky-200">
               <Building2 className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-2xl font-extrabold font-mono text-ink mt-2">{totalFaculty}</div>
-          <span className="text-xs text-ink-subtle mt-1 block">Authorized to log attendance</span>
+          <div className="text-2xl font-bold font-mono text-slate-900 mt-2">{totalFaculty}</div>
+          <span className="text-xs text-slate-500 mt-1 block">Authorized to log attendance</span>
         </div>
 
-        <div className="bg-white p-5 rounded-sk-card border border-outline shadow-sk-card">
+        <div className="bg-white p-5 rounded-xl border border-slate-200/90 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-ink-subtle uppercase tracking-wider font-sans">Institutional Average</span>
-            <div className="w-9 h-9 rounded-sk-btn bg-leaf-soft text-leaf-deep flex items-center justify-center border border-leaf/20">
+            <span className="text-xs font-medium text-slate-500">Institutional average</span>
+            <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center border border-emerald-200">
               <BarChart3 className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-2xl font-extrabold font-mono text-ink mt-2">82.8%</div>
-          <span className="text-xs text-leaf-deep font-bold mt-1 block">&gt; 75.0% Statutory requirement</span>
+          <div className="text-2xl font-bold font-mono text-slate-900 mt-2">82.8%</div>
+          <span className="text-xs text-emerald-700 font-medium mt-1 block">&gt; 75.0% Statutory requirement</span>
         </div>
 
-        <div className="bg-white p-5 rounded-sk-card border border-outline shadow-sk-card">
+        <div className="bg-white p-5 rounded-xl border border-slate-200/90 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-ink-subtle uppercase tracking-wider font-sans">Pending Approvals</span>
-            <div className="w-9 h-9 rounded-sk-btn bg-sun-soft text-sun-deep flex items-center justify-center border border-sun/30">
+            <span className="text-xs font-medium text-slate-500">Pending approvals</span>
+            <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center border border-amber-200">
               <Clock className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-2xl font-extrabold font-mono text-ink mt-2">{totalPending}</div>
-          <span className="text-xs text-sun-deep font-bold mt-1 block">Awaiting admin review</span>
+          <div className="text-2xl font-bold font-mono text-slate-900 mt-2">{totalPending}</div>
+          <span className="text-xs text-amber-700 font-medium mt-1 block">Awaiting admin review</span>
         </div>
       </div>
 
       {/* Main Administrative User Management Table */}
-      <div className="bg-white rounded-sk-card border border-outline shadow-sk-card overflow-hidden">
+      <div className="bg-white rounded-2xl border border-slate-200/90 shadow-xs overflow-hidden">
         {/* Table Toolbar */}
-        <div className="p-4 sm:p-5 border-b border-outline flex flex-col gap-3.5">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div className="p-4 sm:p-5 border-b border-slate-200/90 flex flex-col gap-3.5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h2 className="text-base sm:text-lg font-extrabold text-ink font-display">
-                Institutional User Directory &amp; Role Management
+              <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
+                Institutional User Directory
               </h2>
-              <p className="text-xs text-ink-muted mt-0.5 font-sans">
-                Review registered institutional accounts and assign or revoke privileges.
+              <p className="text-xs text-slate-500 mt-0.5 font-normal">
+                Manage accounts, assign roles, and grant verification status across departments.
               </p>
             </div>
             {/* Action Buttons: Add User, Bulk Import, Circular */}
@@ -252,57 +252,57 @@ export default function AdminDashboard({
               <button
                 type="button"
                 onClick={() => setIsAddUserModalOpen(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-purple-600 hover:bg-purple-700 text-white transition-colors shadow-xs"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-white transition-colors cursor-pointer shadow-xs"
               >
-                <UserPlus className="w-3.5 h-3.5" />
-                <span>+ Add User</span>
+                <UserPlus className="w-3.5 h-3.5 text-sky-400" />
+                <span>Add User</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setIsBulkImporterOpen(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 transition-colors shadow-xs"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 transition-colors cursor-pointer shadow-xs"
               >
-                <FileSpreadsheet className="w-3.5 h-3.5 text-indigo-600" />
-                <span className="hidden xs:inline">Bulk </span>Import
+                <FileSpreadsheet className="w-3.5 h-3.5 text-slate-600" />
+                <span>Bulk Import CSV</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setIsDebarmentCircularOpen(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white transition-colors shadow-xs"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 transition-colors cursor-pointer shadow-xs"
               >
-                <FileText className="w-3.5 h-3.5 text-rose-400" />
-                <span className="hidden xs:inline">Debarment </span>Circular
+                <FileText className="w-3.5 h-3.5 text-rose-600" />
+                <span>Debarment Circular</span>
               </button>
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 flex-wrap">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
             {/* Search Bar */}
-            <div className="relative w-full sm:w-64">
-              <Search className="w-3.5 h-3.5 text-ink-subtle absolute left-3 top-1/2 -translate-y-1/2" />
+            <div className="relative w-full sm:w-72">
+              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
-                placeholder="Search user, email, dept..."
+                placeholder="Search by name, email, department..."
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                className="w-full pl-8 pr-3 py-1.5 text-xs bg-surface-sunken rounded-sk-btn border border-outline focus:outline-none focus:ring-2 focus:ring-sky/20 text-ink placeholder-ink-subtle"
+                className="w-full pl-8 pr-3 py-2 text-xs bg-slate-50 rounded-xl border border-slate-300 focus:outline-none focus:border-slate-500 text-slate-900 placeholder-slate-400 font-medium"
               />
             </div>
 
             {/* Role Filter Pills */}
-            <div className="flex items-center p-1 bg-surface-sunken rounded-full border border-outline text-xs font-bold overflow-x-auto max-w-full">
+            <div className="flex items-center p-1 bg-slate-100 rounded-xl border border-slate-200 text-xs font-medium overflow-x-auto max-w-full">
               {['ALL', 'admin', 'faculty', 'student'].map(r => (
                 <button
                   key={r}
                   type="button"
                   onClick={() => setRoleFilter(r)}
-                  className={`px-3 py-1 rounded-full capitalize transition-all shrink-0 ${
-                    roleFilter === r ? 'bg-white text-ink shadow-xs border border-outline' : 'text-ink-muted hover:text-ink'
+                  className={`px-3 py-1 rounded-lg capitalize transition-all shrink-0 cursor-pointer ${
+                    roleFilter === r ? 'bg-white text-slate-900 font-bold shadow-xs border border-slate-200' : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
-                  {r}
+                  {r === 'ALL' ? 'All Roles' : r}
                 </button>
               ))}
             </div>
@@ -311,22 +311,21 @@ export default function AdminDashboard({
 
         {/* User Roster Table with Overflow Container */}
         <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-left text-xs">
+          <table className="w-full border-collapse text-left text-xs min-w-[700px]">
             <thead>
-              <tr className="border-b border-slate-100 bg-slate-50/60 text-slate-500 font-semibold">
+              <tr className="border-b border-slate-200 bg-slate-50 text-slate-600 font-bold">
                 <th className="py-3 px-4">User &amp; Email</th>
                 <th className="py-3 px-4">Department / Unit</th>
                 <th className="py-3 px-4 text-center">Status</th>
-                <th className="py-3 px-4 text-center">Current Role</th>
-                <th className="py-3 px-4 text-center">Assign Role</th>
-                <th className="py-3 px-4 text-center">Approval</th>
+                <th className="py-3 px-4 text-center">Role Permission</th>
+                <th className="py-3 px-4 text-center">Approval Action</th>
                 <th className="py-3 px-4 text-center">Delete</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {filteredUsers.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-8 text-center text-slate-400">
+                  <td colSpan={6} className="py-8 text-center text-slate-400">
                     No users matching search filters found.
                   </td>
                 </tr>
@@ -346,9 +345,9 @@ export default function AdminDashboard({
                           <div className="w-8 h-8 rounded-full bg-slate-100 text-slate-700 font-bold flex items-center justify-center shrink-0 border border-slate-200">
                             {(user.name || 'User').split(' ').map(n => n[0]).join('').substring(0, 2)}
                           </div>
-                          <div>
-                            <span className="font-semibold text-slate-900 block">{user.name}</span>
-                            <span className="text-[11px] text-slate-400 font-mono">{user.email}</span>
+                          <div className="min-w-0">
+                            <span className="font-semibold text-slate-900 block truncate">{user.name}</span>
+                            <span className="text-[11px] text-slate-400 font-mono block truncate">{user.email}</span>
                           </div>
                         </div>
                       </td>
@@ -359,7 +358,7 @@ export default function AdminDashboard({
                       </td>
 
                       {/* Status */}
-                      <td className="py-3 px-4 text-center">
+                      <td className="py-3 px-4 text-center whitespace-nowrap">
                         <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
                           isPending 
                             ? 'bg-amber-50 text-amber-700 border border-amber-200'
@@ -373,25 +372,12 @@ export default function AdminDashboard({
                         </span>
                       </td>
 
-                      {/* Current Role Badge */}
-                      <td className="py-3 px-4 text-center">
-                        <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${
-                          isAdmin 
-                            ? 'bg-purple-100 text-purple-700 border border-purple-200' 
-                            : isFaculty 
-                            ? 'bg-indigo-100 text-indigo-700 border border-indigo-200' 
-                            : 'bg-slate-100 text-slate-700 border border-slate-200'
-                        }`}>
-                          {user.role}
-                        </span>
-                      </td>
-
                       {/* Role Selector */}
-                      <td className="py-3 px-4 text-center">
+                      <td className="py-3 px-4 text-center whitespace-nowrap">
                         <select
                           value={user.role}
                           onChange={(e) => handleUpdateRole(user.id, e.target.value)}
-                          className="bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 cursor-pointer"
+                          className="bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/10 cursor-pointer"
                         >
                           <option value="student">Student</option>
                           <option value="faculty">Faculty</option>
@@ -400,12 +386,12 @@ export default function AdminDashboard({
                       </td>
 
                       {/* Quick Approval Action */}
-                      <td className="py-3 px-4 text-center">
+                      <td className="py-3 px-4 text-center whitespace-nowrap">
                         {isPending ? (
                           <button
                             type="button"
                             onClick={() => handleApproveStatus(user.id, 'details_required')}
-                            className="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-[11px] transition-colors"
+                            className="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-[11px] transition-colors cursor-pointer"
                             title="Approve registration & allow student to enter academic details"
                           >
                             Approve (Request Info)
@@ -414,24 +400,27 @@ export default function AdminDashboard({
                           <button
                             type="button"
                             onClick={() => handleApproveStatus(user.id, 'active')}
-                            className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-[11px] transition-colors"
+                            className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-[11px] transition-colors cursor-pointer"
                             title="Verify academic details & unlock portal"
                           >
                             Verify &amp; Activate
                           </button>
                         ) : isDetailsRequired ? (
-                          <span className="text-[11px] text-blue-600 font-medium">Awaiting Student</span>
+                          <span className="text-[11px] text-blue-600 font-medium">Awaiting Info</span>
                         ) : (
-                          <span className="text-[11px] text-slate-400 font-mono">Active</span>
+                          <span className="text-[11px] text-emerald-600 font-semibold flex items-center justify-center gap-1">
+                            <CheckCircle2 className="w-3 h-3" />
+                            Active
+                          </span>
                         )}
                       </td>
 
                       {/* Real Delete Action */}
-                      <td className="py-3 px-4 text-center">
+                      <td className="py-3 px-4 text-center whitespace-nowrap">
                         <button
                           type="button"
                           onClick={() => handleDeleteUserAction(user.id, user.name)}
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
                           title={`Delete ${user.name}`}
                         >
                           <Trash2 className="w-4 h-4" />
@@ -446,207 +435,64 @@ export default function AdminDashboard({
         </div>
       </div>
 
-      {/* System Governance & Configuration Controls */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-2xl border border-slate-200/80 p-5 sm:p-6 shadow-xs">
-          <div className="flex items-center gap-2.5 mb-4">
-            <Sliders className="w-4.5 h-4.5 text-indigo-600" />
+      {/* System Governance: Academic Term & Examination Threshold */}
+      <div className="bg-white rounded-2xl border border-slate-200/90 p-5 sm:p-6 shadow-xs max-w-2xl">
+        <div className="flex items-center gap-2.5 mb-4">
+          <Sliders className="w-4.5 h-4.5 text-slate-900" />
+          <div>
             <h3 className="font-bold text-sm text-slate-900">
-              System Parameters &amp; Academic Terms
+              System Parameters &amp; Examination Regulations
             </h3>
-          </div>
-
-          <div className="space-y-4 text-xs">
-            <div>
-              <label className="font-semibold text-slate-700 block mb-1">
-                Active Academic Term
-              </label>
-              <input
-                type="text"
-                value={termSetting}
-                onChange={e => setTermSetting(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-              />
-            </div>
-
-            <div>
-              <label className="font-semibold text-slate-700 block mb-1">
-                Statutory Examination Threshold (%)
-              </label>
-              <div className="flex items-center gap-3">
-                <input
-                  type="range"
-                  min="60"
-                  max="85"
-                  value={minAttendanceThreshold}
-                  onChange={e => setMinAttendanceThreshold(Number(e.target.value))}
-                  className="flex-1 accent-indigo-600 cursor-pointer"
-                />
-                <span className="font-mono font-bold text-slate-900 text-sm w-12 text-right">
-                  {minAttendanceThreshold}%
-                </span>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => {
-                if (onUpdateThreshold) {
-                  onUpdateThreshold(minAttendanceThreshold);
-                }
-                showToast(`System parameters saved: Minimum examination threshold updated to ${minAttendanceThreshold}% across entire institution.`);
-              }}
-              className="w-full py-2.5 rounded-xl bg-slate-900 text-white font-bold text-xs hover:bg-slate-800 transition-colors shadow-xs"
-            >
-              Save Academic Settings
-            </button>
+            <p className="text-xs text-slate-500">
+              Statutory attendance threshold synced across student hall tickets and defaulter alerts.
+            </p>
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl border border-slate-200/80 p-5 sm:p-6 shadow-xs flex flex-col justify-between">
+        <div className="space-y-4 text-xs">
           <div>
-            <div className="flex items-center gap-2.5 mb-4">
-              <Building2 className="w-4.5 h-4.5 text-indigo-600" />
-              <h3 className="font-bold text-sm text-slate-900">
-                Departmental Roster Synced Units
-              </h3>
-            </div>
-            <div className="space-y-2 text-xs">
-              {[
-                { name: 'Computer Science & Engineering', code: 'CSE', courses: 8, head: 'Prof. R. Vance' },
-                { name: 'Electrical & Electronics', code: 'EEE', courses: 6, head: 'Dr. A. Sharma' },
-                { name: 'Mechanical Engineering', code: 'ME', courses: 5, head: 'Dr. K. Patel' },
-                { name: 'Information Technology', code: 'IT', courses: 7, head: 'Prof. S. Rao' },
-              ].map(dept => (
-                <div key={dept.code} className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-                  <div>
-                    <span className="font-semibold text-slate-800 block">{dept.name}</span>
-                    <span className="text-[10px] text-slate-400">Head: {dept.head}</span>
-                  </div>
-                  <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md bg-slate-200 text-slate-700">
-                    {dept.courses} Courses
-                  </span>
-                </div>
-              ))}
-            </div>
+            <label className="font-semibold text-slate-700 block mb-1">
+              Active Academic Term
+            </label>
+            <input
+              type="text"
+              value={termSetting}
+              onChange={e => setTermSetting(e.target.value)}
+              className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
+            />
           </div>
 
-          <div className="mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-400 flex items-center justify-between">
-            <span>Database Status: Connected (Supabase RLS active)</span>
-            <span className="font-semibold text-emerald-600">Encrypted</span>
-          </div>
-        </div>
-      </div>
-
-      {/* ================= 3. CAMPUS ANNOUNCEMENTS & OFFICIAL BROADCASTS ================= */}
-      <div className="bg-white rounded-sk-card border border-outline shadow-sk-card overflow-hidden">
-        <div className="p-4 sm:p-5 border-b border-outline flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-base sm:text-lg font-extrabold text-ink font-display">
-                Campus-Wide Announcements &amp; Official Circulars
-              </h2>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
-                {announcements.length} Active
+            <div className="flex items-center justify-between mb-1">
+              <label className="font-semibold text-slate-700">
+                Mandatory Attendance Threshold (%)
+              </label>
+              <span className="font-mono font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200">
+                {minAttendanceThreshold}%
               </span>
             </div>
-            <p className="text-xs text-ink-muted mt-0.5">
-              Publish statutory notices, holiday memos, and academic advisories to student &amp; faculty dashboards.
-            </p>
+            <input
+              type="range"
+              min="60"
+              max="85"
+              value={minAttendanceThreshold}
+              onChange={e => setMinAttendanceThreshold(Number(e.target.value))}
+              className="w-full accent-slate-900 cursor-pointer h-2 bg-slate-100 rounded-lg"
+            />
           </div>
 
           <button
             type="button"
-            onClick={() => setIsAnnModalOpen(true)}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-sk-btn bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition shadow-xs cursor-pointer"
+            onClick={() => {
+              if (onUpdateThreshold) {
+                onUpdateThreshold(minAttendanceThreshold);
+              }
+              showToast(`Saved: Statutory minimum attendance threshold updated to ${minAttendanceThreshold}%.`);
+            }}
+            className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 active:bg-slate-950 text-white font-semibold text-xs transition-colors shadow-xs cursor-pointer"
           >
-            <UserPlus className="w-3.5 h-3.5" />
-            <span>Publish Announcement</span>
+            Save Academic Settings
           </button>
-        </div>
-
-        <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-4">
-          {announcements.map(ann => (
-            <div key={ann.id} className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col justify-between">
-              <div>
-                <div className="flex items-center justify-between gap-2 mb-2">
-                  <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase ${
-                    ann.priority === 'URGENT'
-                      ? 'bg-rose-100 text-rose-800 border border-rose-200 animate-pulse'
-                      : 'bg-indigo-100 text-indigo-800 border border-indigo-200'
-                  }`}>
-                    {ann.priority}
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[11px] text-slate-400 font-mono">
-                      Target: {ann.audience}
-                    </span>
-                    {onDeleteAnnouncement && (
-                      <button
-                        type="button"
-                        onClick={() => onDeleteAnnouncement(ann.id)}
-                        className="text-slate-400 hover:text-rose-600 p-1 transition"
-                        title="Delete Announcement"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    )}
-                  </div>
-                </div>
-                <h4 className="font-bold text-sm text-slate-900 mb-1">{ann.title}</h4>
-                <p className="text-xs text-slate-600 leading-relaxed">{ann.content}</p>
-              </div>
-              <div className="mt-3 pt-2 border-t border-slate-200/60 text-[10px] text-slate-400 flex items-center justify-between">
-                <span>By {ann.author}</span>
-                <span>{ann.publishedAt}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* ================= 4. ADMINISTRATIVE AUDIT TRAIL ================= */}
-      <div className="bg-white rounded-sk-card border border-outline shadow-sk-card overflow-hidden">
-        <div className="p-4 sm:p-5 border-b border-outline">
-          <h2 className="text-base sm:text-lg font-extrabold text-ink font-display">
-            Administrative &amp; Security Audit Trail
-          </h2>
-          <p className="text-xs text-ink-muted mt-0.5">
-            Immutable log of role changes, attendance revisions, threshold updates, and official decisions.
-          </p>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs font-sans">
-            <thead>
-              <tr className="border-b border-outline bg-surface-sunken/80 text-ink-muted font-bold font-display select-none">
-                <th className="py-3 px-4">Timestamp</th>
-                <th className="py-3 px-4">Actor</th>
-                <th className="py-3 px-4">Action</th>
-                <th className="py-3 px-4">Details</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-outline text-ink">
-              {auditLogs.slice(0, 10).map((log, i) => (
-                <tr key={log.id || i} className="hover:bg-slate-50 transition">
-                  <td className="py-2.5 px-4 font-mono text-[11px] text-slate-500 whitespace-nowrap">
-                    {new Date(log.timestamp).toLocaleString()}
-                  </td>
-                  <td className="py-2.5 px-4 font-semibold text-slate-800 whitespace-nowrap">
-                    {log.actorEmail}
-                  </td>
-                  <td className="py-2.5 px-4">
-                    <span className="font-mono text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
-                      {log.action}
-                    </span>
-                  </td>
-                  <td className="py-2.5 px-4 text-slate-600 max-w-md truncate">
-                    {log.details}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
         </div>
       </div>
 
@@ -679,17 +525,17 @@ export default function AdminDashboard({
 
       {/* Add New User Modal */}
       {isAddUserModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-950/80 backdrop-blur-md">
-          <div className="bg-white rounded-3xl shadow-2xl border border-slate-200/90 w-full max-w-md overflow-hidden flex flex-col">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-900/60 backdrop-blur-sm">
+          <div className="bg-white rounded-xl shadow-xl border border-slate-300 w-full max-w-md overflow-hidden flex flex-col">
             <div className="bg-slate-900 text-white px-6 py-4 flex items-center justify-between border-b border-slate-800">
               <div className="flex items-center gap-2.5">
-                <UserPlus className="w-5 h-5 text-purple-400" />
-                <h3 className="font-bold text-sm text-white">Enroll New University Member</h3>
+                <UserPlus className="w-4 h-4 text-slate-300" />
+                <h3 className="font-semibold text-sm text-white">Enroll New University Member</h3>
               </div>
               <button
                 type="button"
                 onClick={() => setIsAddUserModalOpen(false)}
-                className="p-1 rounded-lg text-slate-400 hover:text-white"
+                className="p-1 rounded text-slate-400 hover:text-white"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -697,36 +543,36 @@ export default function AdminDashboard({
 
             <form onSubmit={handleCreateNewUser} className="p-6 space-y-4 text-xs">
               <div>
-                <label className="font-semibold text-slate-700 block mb-1">Full Name</label>
+                <label className="font-medium text-slate-700 block mb-1">Full Name</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. Dr. Ramesh Kumar"
                   value={newUserName}
                   onChange={e => setNewUserName(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500/20 font-medium text-slate-900"
+                  className="w-full px-3 py-2 rounded-lg bg-white border border-slate-300 focus:outline-none focus:border-slate-900 font-medium text-slate-900"
                 />
               </div>
 
               <div>
-                <label className="font-semibold text-slate-700 block mb-1">Institutional Email</label>
+                <label className="font-medium text-slate-700 block mb-1">Institutional Email</label>
                 <input
                   type="email"
                   required
                   placeholder="e.g. ramesh.k@univ.edu"
                   value={newUserEmail}
                   onChange={e => setNewUserEmail(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500/20 font-medium text-slate-900"
+                  className="w-full px-3 py-2 rounded-lg bg-white border border-slate-300 focus:outline-none focus:border-slate-900 font-medium text-slate-900"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="font-semibold text-slate-700 block mb-1">Assigned Role</label>
+                  <label className="font-medium text-slate-700 block mb-1">Assigned Role</label>
                   <select
                     value={newUserRole}
                     onChange={e => setNewUserRole(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 font-semibold text-slate-900"
+                    className="w-full px-3 py-2 rounded-lg bg-white border border-slate-300 font-medium text-slate-900"
                   >
                     <option value="student">Student</option>
                     <option value="faculty">Faculty</option>
@@ -735,27 +581,27 @@ export default function AdminDashboard({
                 </div>
 
                 <div>
-                  <label className="font-semibold text-slate-700 block mb-1">Department</label>
+                  <label className="font-medium text-slate-700 block mb-1">Department</label>
                   <input
                     type="text"
                     value={newUserDept}
                     onChange={e => setNewUserDept(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 font-medium text-slate-900"
+                    className="w-full px-3 py-2 rounded-lg bg-white border border-slate-300 font-medium text-slate-900"
                   />
                 </div>
               </div>
 
-              <div className="pt-2 flex items-center justify-end gap-2">
+              <div className="pt-2 flex items-center justify-end gap-2 border-t border-slate-200">
                 <button
                   type="button"
                   onClick={() => setIsAddUserModalOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition-colors"
+                  className="px-4 py-2 rounded-lg bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-medium transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold shadow-md shadow-purple-600/20 transition-all"
+                  className="px-4 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-medium shadow-sm transition-colors"
                 >
                   Confirm &amp; Save
                 </button>
@@ -776,6 +622,140 @@ export default function AdminDashboard({
           course={{ code: 'CS-602', name: 'Database Management Systems' }}
           onClose={() => setIsDebarmentCircularOpen(false)}
         />
+      )}
+
+      {/* Publish Announcement Modal */}
+      {isAnnModalOpen && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl border border-slate-200 max-w-lg w-full shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            <div className="p-5 border-b border-slate-100 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center">
+                  <Megaphone className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-sm text-slate-900">
+                    Publish Official Announcement
+                  </h3>
+                  <span className="text-[11px] text-slate-400 font-medium">
+                    Office of the Registrar &amp; Academic Administration
+                  </span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsAnnModalOpen(false)}
+                className="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (!newAnnTitle.trim() || !newAnnContent.trim()) return;
+                const newAnn = {
+                  id: `ann-${Date.now()}`,
+                  title: newAnnTitle.trim(),
+                  content: newAnnContent.trim(),
+                  priority: newAnnPriority,
+                  audience: newAnnAudience,
+                  author: currentSession?.user?.user_metadata?.name || 'Office of the Registrar',
+                  publishedAt: new Date().toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
+                  })
+                };
+                if (onAddAnnouncement) {
+                  onAddAnnouncement(newAnn);
+                }
+                setNewAnnTitle('');
+                setNewAnnContent('');
+                setNewAnnPriority('NORMAL');
+                setNewAnnAudience('ALL');
+                setIsAnnModalOpen(false);
+              }}
+              className="p-5 space-y-4"
+            >
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                  Announcement Headline *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. End Semester Exam Schedule Released"
+                  value={newAnnTitle}
+                  onChange={(e) => setNewAnnTitle(e.target.value)}
+                  className="w-full px-3.5 py-2 text-xs bg-slate-50 border border-slate-300 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-500 font-medium"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                    Priority
+                  </label>
+                  <select
+                    value={newAnnPriority}
+                    onChange={(e) => setNewAnnPriority(e.target.value)}
+                    className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-xl text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-slate-900/10"
+                  >
+                    <option value="NORMAL">Standard Notice</option>
+                    <option value="URGENT">Urgent / High Priority</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                    Audience
+                  </label>
+                  <select
+                    value={newAnnAudience}
+                    onChange={(e) => setNewAnnAudience(e.target.value)}
+                    className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-xl text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-slate-900/10"
+                  >
+                    <option value="ALL">Entire Campus (All)</option>
+                    <option value="FACULTY_ONLY">Faculty Only</option>
+                    <option value="STUDENT_ONLY">Students Only</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                  Circular Body *
+                </label>
+                <textarea
+                  required
+                  rows={4}
+                  placeholder="Enter the full text of the statutory notification..."
+                  value={newAnnContent}
+                  onChange={(e) => setNewAnnContent(e.target.value)}
+                  className="w-full px-3.5 py-2 text-xs bg-slate-50 border border-slate-300 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-500 font-medium resize-none"
+                />
+              </div>
+
+              <div className="pt-2 flex items-center justify-end gap-2 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setIsAnnModalOpen(false)}
+                  className="px-4 py-2 rounded-xl bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-semibold transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-sm transition"
+                >
+                  Broadcast Announcement
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
 
       {/* Bulk Student & Faculty Ingestion Modal */}

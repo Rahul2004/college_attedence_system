@@ -90,13 +90,13 @@ export default function DynamicQrAttendanceModal({
 
   return (
     <div className={`fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-950/80 backdrop-blur-md transition-all ${isFullScreen ? 'p-0' : ''}`}>
-      <div className={`bg-white rounded-3xl shadow-2xl border border-slate-200/90 w-full flex flex-col overflow-hidden max-h-[94vh] ${
+      <div className={`bg-white rounded-xl shadow-2xl border border-slate-300 w-full flex flex-col overflow-hidden max-h-[94vh] ${
         isFullScreen ? 'h-screen max-h-screen rounded-none' : 'max-w-5xl'
       }`}>
         {/* Header Bar */}
         <div className="bg-slate-900 text-white px-4 sm:px-8 py-3.5 sm:py-4 flex items-center justify-between border-b border-slate-800 shrink-0">
           <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-indigo-600 flex items-center justify-center shadow-md shadow-indigo-600/30 text-white shrink-0">
+            <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-white shrink-0">
               <QrCode className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <div className="min-w-0">
@@ -160,7 +160,7 @@ export default function DynamicQrAttendanceModal({
         {/* Main Content: Split Projector View */}
         <div className="flex-1 overflow-y-auto p-5 sm:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Left Column: QR Code + Live OTP Card */}
-          <div className="lg:col-span-7 flex flex-col items-center justify-center bg-gradient-to-b from-slate-50 to-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-xs text-center">
+          <div className="lg:col-span-7 flex flex-col items-center justify-center bg-white rounded-xl border border-slate-200 p-6 sm:p-8 shadow-xs text-center">
             {/* Top OTP Security Block */}
             <div className="w-full mb-6">
               <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
@@ -269,8 +269,8 @@ export default function DynamicQrAttendanceModal({
                 <Wifi className="w-3.5 h-3.5 text-emerald-600" />
                 Campus Wi-Fi Geofence: Active
               </span>
-              <span className="flex items-center gap-1.5 bg-indigo-50 text-indigo-800 px-3 py-1 rounded-xl border border-indigo-200 font-semibold">
-                <ShieldCheck className="w-3.5 h-3.5 text-indigo-600" />
+              <span className="flex items-center gap-1.5 bg-slate-100 text-indigo-800 px-3 py-1 rounded-xl border border-slate-300 font-semibold">
+                <ShieldCheck className="w-3.5 h-3.5 text-slate-900" />
                 MAC / Device ID Bound
               </span>
             </div>
@@ -282,12 +282,12 @@ export default function DynamicQrAttendanceModal({
             <div className="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-xs">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
-                  <Users className="w-4 h-4 text-indigo-600" />
+                  <Users className="w-4 h-4 text-slate-900" />
                   <h3 className="font-bold text-sm text-slate-900">
                     Live Verified Punches
                   </h3>
                 </div>
-                <span className="font-mono font-bold text-xs px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
+                <span className="font-mono font-bold text-xs px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 border border-slate-300">
                   {scannedStudents.length} / {students.length} Present
                 </span>
               </div>
@@ -295,7 +295,7 @@ export default function DynamicQrAttendanceModal({
               {/* Progress Bar */}
               <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden mb-1">
                 <div 
-                  className="bg-indigo-600 h-full rounded-full transition-all duration-300"
+                  className="bg-slate-900 h-full rounded-full transition-all duration-300"
                   style={{ width: `${(scannedStudents.length / (students.length || 1)) * 100}%` }}
                 />
               </div>
@@ -309,7 +309,7 @@ export default function DynamicQrAttendanceModal({
             <div className="flex-1 bg-white rounded-2xl border border-slate-200/90 p-3 shadow-xs min-h-[280px] max-h-[380px] overflow-y-auto space-y-2">
               {scannedStudents.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center p-8 text-center text-slate-400">
-                  <Smartphone className="w-8 h-8 text-slate-300 mb-2 animate-bounce" />
+                  <Smartphone className="w-8 h-8 text-slate-300 mb-2 " />
                   <p className="text-xs font-semibold text-slate-600">Waiting for student check-ins...</p>
                   <p className="text-[11px] text-slate-400 mt-1">
                     Students in lecture hall are scanning QR code right now.
@@ -348,7 +348,7 @@ export default function DynamicQrAttendanceModal({
                 type="button"
                 onClick={handleSyncToRoster}
                 disabled={scannedStudents.length === 0}
-                className="w-full py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md shadow-indigo-600/20 active:scale-[0.99] transition-all disabled:opacity-50"
+                className="w-full py-2.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-xs transition-colors disabled:opacity-50"
               >
                 <CheckCircle2 className="w-4 h-4" />
                 Finalize &amp; Apply {scannedStudents.length} Punches to Class Roster
@@ -363,7 +363,7 @@ export default function DynamicQrAttendanceModal({
                       handleManualAddStudent(remaining[0]);
                     }
                   }}
-                  className="text-indigo-600 hover:text-indigo-700 font-semibold text-[11px] underline"
+                  className="text-slate-900 hover:text-slate-800 font-semibold text-[11px] underline"
                 >
                   + Simulate Next Student Scan
                 </button>

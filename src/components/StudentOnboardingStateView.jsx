@@ -98,11 +98,11 @@ export default function StudentOnboardingStateView({ profile, onRefreshProfile }
   const StatusIcon = config.icon;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-indigo-50/40 flex flex-col items-center justify-center p-4 sm:p-6 font-sans">
+    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4 sm:p-6 font-sans">
       <div className="max-w-xl w-full">
         {/* University Header Brand */}
         <div className="flex items-center justify-center gap-3 mb-6">
-          <div className="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-md shadow-indigo-600/30">
+          <div className="w-10 h-10 rounded-lg bg-slate-900 text-white flex items-center justify-center shadow-xs">
             <Building2 className="w-6 h-6" />
           </div>
           <div>
@@ -116,7 +116,7 @@ export default function StudentOnboardingStateView({ profile, onRefreshProfile }
         </div>
 
         {/* Status Card */}
-        <div className="bg-white rounded-3xl border border-slate-200/80 shadow-xl p-6 sm:p-8 backdrop-blur-xl">
+        <div className="bg-white rounded-lg border border-slate-300 shadow-sm p-6 sm:p-8">
           {/* Status Badge */}
           <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
             <span
@@ -130,17 +130,17 @@ export default function StudentOnboardingStateView({ profile, onRefreshProfile }
               type="button"
               onClick={handleManualRefresh}
               disabled={isRefreshing}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition cursor-pointer"
               title="Refresh status"
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-indigo-600' : ''}`} />
+              <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-slate-800' : ''}`} />
               <span>{isRefreshing ? 'Checking...' : 'Refresh Status'}</span>
             </button>
           </div>
 
           {/* Icon & Title */}
           <div className="flex flex-col items-center text-center">
-            <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-4 ${config.iconBg} shadow-sm`}>
+            <div className={`w-12 h-12 rounded-lg flex items-center justify-center mb-4 ${config.iconBg} shadow-sm`}>
               <StatusIcon className="w-8 h-8" />
             </div>
 
@@ -213,7 +213,7 @@ export default function StudentOnboardingStateView({ profile, onRefreshProfile }
                 <span
                   className={`text-[9px] font-medium ${
                     status === 'details_pending_review'
-                      ? 'text-indigo-600'
+                      ? 'text-slate-800'
                       : status === 'active'
                       ? 'text-emerald-600'
                       : 'text-slate-400'
@@ -241,7 +241,7 @@ export default function StudentOnboardingStateView({ profile, onRefreshProfile }
           </div>
 
           {/* User & Session Details */}
-          <div className="mt-6 p-4 rounded-2xl bg-slate-50 border border-slate-100 text-xs space-y-1.5">
+          <div className="mt-6 p-4 rounded-lg bg-slate-50 border border-slate-100 text-xs space-y-1.5">
             <div className="flex items-center justify-between">
               <span className="text-slate-500">Registered Email:</span>
               <strong className="text-slate-800 font-mono">{session?.user?.email || profile?.email}</strong>
@@ -279,7 +279,7 @@ export default function StudentOnboardingStateView({ profile, onRefreshProfile }
           </div>
 
           {/* Next Steps Note */}
-          <div className="mt-4 p-3 rounded-xl bg-blue-50/60 border border-blue-100 text-xs text-blue-900 flex items-start gap-2">
+          <div className="mt-4 p-3 rounded-lg bg-blue-50/60 border border-blue-100 text-xs text-blue-900 flex items-start gap-2">
             <Sparkles className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
             <p className="text-[11px] leading-relaxed">{config.nextStepText}</p>
           </div>
@@ -292,7 +292,7 @@ export default function StudentOnboardingStateView({ profile, onRefreshProfile }
                 await handleLogout();
                 window.location.href = '/login';
               }}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-rose-600 hover:text-rose-700 hover:bg-rose-50 transition cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold text-rose-600 hover:text-rose-700 hover:bg-rose-50 transition cursor-pointer"
             >
               <LogOut className="w-3.5 h-3.5" />
               <span>Sign Out</span>

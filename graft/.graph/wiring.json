@@ -1,0 +1,2282 @@
+{
+  "meta": {
+    "version": 1,
+    "nodeCount": 91,
+    "edgeCount": 159,
+    "languages": [
+      "javascript",
+      "jsx"
+    ],
+    "scopes": [
+      {
+        "prefix": "",
+        "label": "",
+        "markers": [
+          "package.json"
+        ]
+      }
+    ]
+  },
+  "nodes": [
+    {
+      "id": "postcss.config.js",
+      "name": "postcss.config.js",
+      "kind": "file",
+      "path": "postcss.config.js",
+      "span": "L1-L7",
+      "signature": null,
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "374f669f08b18e67d0a7264fa45b71228017e604fe7f6db8a5c1bd5ba27e5c98",
+      "chars": 86,
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/App.jsx",
+      "name": "App.jsx",
+      "kind": "file",
+      "path": "src/App.jsx",
+      "span": "L1-L674",
+      "signature": null,
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "9b8c4f2c3aeaad9b462c731bced3946c3c5fe1e521b82a245d1ede6ce1c594fa",
+      "chars": 27875,
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/App.jsx#AdminRoute",
+      "name": "AdminRoute",
+      "kind": "function",
+      "path": "src/App.jsx",
+      "span": "L20-L32",
+      "signature": "function AdminRoute({ role, children })",
+      "exported": false,
+      "origin": "ast",
+      "body_hash": "ef395ed468af52b179485fc6eb2283e3717499758cec92d38b9d5759ef5dc41e",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/App.jsx#App",
+      "name": "App",
+      "kind": "function",
+      "path": "src/App.jsx",
+      "span": "L34-L673",
+      "signature": "function App()",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "f3d59f40f258f8165ff310bafb321da5a2d5913430f6e305b3abb3c6d92599bf",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/App.jsx#App.fetchStudents",
+      "name": "fetchStudents",
+      "kind": "function",
+      "path": "src/App.jsx",
+      "span": "L172-L223",
+      "signature": "fetchStudents = async ()",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "b94a138f990efb93378276381667b063287bfecb8ef7cf6b211b0a3e3b29c056",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/App.jsx#App.handleCommit",
+      "name": "handleCommit",
+      "kind": "function",
+      "path": "src/App.jsx",
+      "span": "L246-L299",
+      "signature": "handleCommit = async ()",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "8402a89a94e0525b92b8f3b1a5766def8eeca26123b689c26717cd41f7cd79ac",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/App.jsx#App.resolveRoleAndSetSession",
+      "name": "resolveRoleAndSetSession",
+      "kind": "function",
+      "path": "src/App.jsx",
+      "span": "L104-L153",
+      "signature": "resolveRoleAndSetSession = async (currentSession)",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "d0a70e3252ac4796c88a568752905f95c764da2a33fb62ff0ef4f73f635c893a",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/AdminAcademicSetup.jsx",
+      "name": "AdminAcademicSetup.jsx",
+      "kind": "file",
+      "path": "src/components/AdminAcademicSetup.jsx",
+      "span": "L1-L186",
+      "signature": null,
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "c1a286a772454516d9a10205be5ddcadb808fd3e470cdfdadc61a3a92a915588",
+      "chars": 8163,
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/AdminAcademicSetup.jsx#AdminAcademicSetup",
+      "name": "AdminAcademicSetup",
+      "kind": "function",
+      "path": "src/components/AdminAcademicSetup.jsx",
+      "span": "L16-L185",
+      "signature": "function AdminAcademicSetup()",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "3e36cc7a499b65374b7c898da3b4ce9e824ac9fe5a090d0a51fcd708aa3f52a7",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/AdminBulkImporter.jsx",
+      "name": "AdminBulkImporter.jsx",
+      "kind": "file",
+      "path": "src/components/AdminBulkImporter.jsx",
+      "span": "L1-L294",
+      "signature": null,
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "d562bb00921c12bdf8b788496bda7ee6554040009e5ba1cea503b1100b89b495",
+      "chars": 13994,
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/AdminBulkImporter.jsx#AdminBulkImporter",
+      "name": "AdminBulkImporter",
+      "kind": "function",
+      "path": "src/components/AdminBulkImporter.jsx",
+      "span": "L15-L293",
+      "signature": "function AdminBulkImporter({ onClose, onImportSuccess })",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "a192ecee9b6f59a6c6089cb025c1019126cd2046846e164dd8fd52856953ffec",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/AdminBulkImporter.jsx#AdminBulkImporter.handleDownloadSample",
+      "name": "handleDownloadSample",
+      "kind": "function",
+      "path": "src/components/AdminBulkImporter.jsx",
+      "span": "L23-L41",
+      "signature": "handleDownloadSample = ()",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "dd9ab7b5c3611183e2c324be17c922dfd615c895e9500e6515ea256ed828d92e",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/AdminBulkImporter.jsx#AdminBulkImporter.handleExecuteImport",
+      "name": "handleExecuteImport",
+      "kind": "function",
+      "path": "src/components/AdminBulkImporter.jsx",
+      "span": "L103-L112",
+      "signature": "handleExecuteImport = ()",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "d64fe75ff6ac125026dc3bc74b8216fc25ef102dcab803d4c33e0f7435b3d620",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/AdminBulkImporter.jsx#AdminBulkImporter.handleFileUpload",
+      "name": "handleFileUpload",
+      "kind": "function",
+      "path": "src/components/AdminBulkImporter.jsx",
+      "span": "L60-L101",
+      "signature": "handleFileUpload = (e)",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "1bed6dcdb7f8cb850c26b5905261f0de9dc72df15f977730337e96fee0376b4e",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/AdminBulkImporter.jsx#AdminBulkImporter.handleLoadSampleData",
+      "name": "handleLoadSampleData",
+      "kind": "function",
+      "path": "src/components/AdminBulkImporter.jsx",
+      "span": "L44-L58",
+      "signature": "handleLoadSampleData = ()",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "13fcb8ee8d51f76c575404a8bf7bd156db443ae460835882b6b416cb053b40a3",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/AdminDashboard.jsx",
+      "name": "AdminDashboard.jsx",
+      "kind": "file",
+      "path": "src/components/AdminDashboard.jsx",
+      "span": "L1-L502",
+      "signature": null,
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "24a70073bcc9918118cbebd582318019e9b2f7723aa1a83f291db914f61ada88",
+      "chars": 24427,
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/AdminDashboard.jsx#AdminDashboard",
+      "name": "AdminDashboard",
+      "kind": "function",
+      "path": "src/components/AdminDashboard.jsx",
+      "span": "L35-L501",
+      "signature": "function AdminDashboard({ currentSession })",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "664186bbf7c37838ea5ce7295040f26382076b4a7a5442b439fd56b8bb24382c",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/AdminDashboard.jsx#AdminDashboard.fetchProfiles",
+      "name": "fetchProfiles",
+      "kind": "function",
+      "path": "src/components/AdminDashboard.jsx",
+      "span": "L48-L73",
+      "signature": "fetchProfiles = async ()",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "d486ccf313f7c59eddd62e7cb56809e2d04764007d4ea19a3c41fcec512ad589",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/AdminDashboard.jsx#AdminDashboard.handleApproveStatus",
+      "name": "handleApproveStatus",
+      "kind": "function",
+      "path": "src/components/AdminDashboard.jsx",
+      "span": "L99-L114",
+      "signature": "handleApproveStatus = async (userId)",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "63018248c777c9ad73e6d0971e06c5a01f62d425b4e3e4d95bb1a93eee3d20be",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/AdminDashboard.jsx#AdminDashboard.handleUpdateRole",
+      "name": "handleUpdateRole",
+      "kind": "function",
+      "path": "src/components/AdminDashboard.jsx",
+      "span": "L78-L97",
+      "signature": "handleUpdateRole = async (userId, newRole)",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "9343d290048b2af2ba3a4cc12c139cfb54a126982e0d04c78c58443836a6ff03",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/AdminDashboard.jsx#AdminDashboard.showToast",
+      "name": "showToast",
+      "kind": "function",
+      "path": "src/components/AdminDashboard.jsx",
+      "span": "L116-L119",
+      "signature": "showToast = (msg)",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "19eebd02da61a329482403d4d89987a5deb510a442fca0ddef3523b96bcae3ab",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/AdminDebarmentNoticeModal.jsx",
+      "name": "AdminDebarmentNoticeModal.jsx",
+      "kind": "file",
+      "path": "src/components/AdminDebarmentNoticeModal.jsx",
+      "span": "L1-L204",
+      "signature": null,
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "b77c23e45dfe75b17a7e96baf92c76e755c2605c32274cc4b1193827160adee2",
+      "chars": 10413,
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/AdminDebarmentNoticeModal.jsx#AdminDebarmentNoticeModal",
+      "name": "AdminDebarmentNoticeModal",
+      "kind": "function",
+      "path": "src/components/AdminDebarmentNoticeModal.jsx",
+      "span": "L13-L203",
+      "signature": "function AdminDebarmentNoticeModal({ defaulters, course, onClose })",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "cfb79a98a5cfdfc83d8c8c6276d2931b086ec643c44c02f3e097f3054ec12236",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/AnalyticsDashboard.jsx",
+      "name": "AnalyticsDashboard.jsx",
+      "kind": "file",
+      "path": "src/components/AnalyticsDashboard.jsx",
+      "span": "L1-L430",
+      "signature": null,
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "90e9974a815a8740c3b126a9d6281f0aba8da2502379e4653444c8339d85d880",
+      "chars": 20950,
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/AnalyticsDashboard.jsx#AnalyticsDashboard",
+      "name": "AnalyticsDashboard",
+      "kind": "function",
+      "path": "src/components/AnalyticsDashboard.jsx",
+      "span": "L47-L429",
+      "signature": "function AnalyticsDashboard()",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "185648cf0ae567c5edc939ff2f1375ccd60897128ac81fefb17c25b2f115acf9",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/AnalyticsDashboard.jsx#AnalyticsDashboard.fetchLogs",
+      "name": "fetchLogs",
+      "kind": "function",
+      "path": "src/components/AnalyticsDashboard.jsx",
+      "span": "L53-L68",
+      "signature": "fetchLogs = async ()",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "4f1c831b9bbaee7f971dfecc15dcf4e76c7dc24c2ffa28c751ab7f42232f3315",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/AttendanceGrid.jsx",
+      "name": "AttendanceGrid.jsx",
+      "kind": "file",
+      "path": "src/components/AttendanceGrid.jsx",
+      "span": "L1-L316",
+      "signature": null,
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "137b2aaad98f5e3e7392192b9192f11523534379ed61cc065987d5a9b893370f",
+      "chars": 14075,
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/AttendanceGrid.jsx#AttendanceGrid",
+      "name": "AttendanceGrid",
+      "kind": "function",
+      "path": "src/components/AttendanceGrid.jsx",
+      "span": "L13-L315",
+      "signature": "function AttendanceGrid({ students, onToggleStatus, onMarkAll, selectedDate, onDateChange, onCommit, isCommitting, hasPendingChanges })",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "605d77e7fda810ad1ad86c42fd5d417fea45ceb7ae8b5c176a56aab28fdf1fc3",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/AuthScreen.jsx",
+      "name": "AuthScreen.jsx",
+      "kind": "file",
+      "path": "src/components/AuthScreen.jsx",
+      "span": "L1-L871",
+      "signature": null,
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "7d0663d557b29871c1086b5b34bd0abe05e62f3f894b110fec18e41ceadb261c",
+      "chars": 33772,
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/AuthScreen.jsx#AuthScreen",
+      "name": "AuthScreen",
+      "kind": "function",
+      "path": "src/components/AuthScreen.jsx",
+      "span": "L17-L870",
+      "signature": "function AuthScreen({ onLogin })",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "c35f956e79b7f5be832fcfc431a87567c036d8a19e698b0b9fff7527e1107e8b",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/AuthScreen.jsx#AuthScreen.handleSendResetCode",
+      "name": "handleSendResetCode",
+      "kind": "function",
+      "path": "src/components/AuthScreen.jsx",
+      "span": "L276-L319",
+      "signature": "handleSendResetCode = async (e)",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "62b556242fb06014d4c2e6ece9af5dc19c9ac0e1b5fdbeac043eba72009f076e",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/AuthScreen.jsx#AuthScreen.handleSubmit",
+      "name": "handleSubmit",
+      "kind": "function",
+      "path": "src/components/AuthScreen.jsx",
+      "span": "L57-L273",
+      "signature": "handleSubmit = async (e)",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "a5524f44b6c0792cccc7207cfeebd033e4501074a2f305ec179914f0d38afbb2",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/AuthScreen.jsx#AuthScreen.handleUpdatePassword",
+      "name": "handleUpdatePassword",
+      "kind": "function",
+      "path": "src/components/AuthScreen.jsx",
+      "span": "L360-L396",
+      "signature": "handleUpdatePassword = async (e)",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "ae62989d4b1f36d9b6a30efa8f353ba324abd272ea5519a1b2a486ec6e1716ba",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/AuthScreen.jsx#AuthScreen.handleVerifyOtp",
+      "name": "handleVerifyOtp",
+      "kind": "function",
+      "path": "src/components/AuthScreen.jsx",
+      "span": "L321-L358",
+      "signature": "handleVerifyOtp = async (e)",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "4a630c0ac84991c21aa3e4c9396df50fe5d4bfa156465f10cbc933f16bc0a941",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/BentoMetrics.jsx",
+      "name": "BentoMetrics.jsx",
+      "kind": "file",
+      "path": "src/components/BentoMetrics.jsx",
+      "span": "L1-L123",
+      "signature": null,
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "ea2b650a18cd9a9db4dca0118ed1b0d19827fc11fcfcc13cfb8badf9bd231532",
+      "chars": 5507,
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/BentoMetrics.jsx#BentoMetrics",
+      "name": "BentoMetrics",
+      "kind": "function",
+      "path": "src/components/BentoMetrics.jsx",
+      "span": "L12-L122",
+      "signature": "function BentoMetrics({ metrics = {} })",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "976001a59c7191d84207da0fbb0d375dcba1dd7c2e83f43aa7e71682ef14d618",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/DynamicQrAttendanceModal.jsx",
+      "name": "DynamicQrAttendanceModal.jsx",
+      "kind": "file",
+      "path": "src/components/DynamicQrAttendanceModal.jsx",
+      "span": "L1-L357",
+      "signature": null,
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "5c46cac5ca94af65476d8b5e46d364e74acabe247a19951c5d70e6e939120535",
+      "chars": 17524,
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/DynamicQrAttendanceModal.jsx#DynamicQrAttendanceModal",
+      "name": "DynamicQrAttendanceModal",
+      "kind": "function",
+      "path": "src/components/DynamicQrAttendanceModal.jsx",
+      "span": "L18-L356",
+      "signature": "function DynamicQrAttendanceModal({ course, students = [], onClose, onApplyScannedStudents })",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "c2d75bed54da57964379e36ef232f5c1c058b0acc549ac7e6ee688ba2714cd6a",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/DynamicQrAttendanceModal.jsx#DynamicQrAttendanceModal.handleManualAddStudent",
+      "name": "handleManualAddStudent",
+      "kind": "function",
+      "path": "src/components/DynamicQrAttendanceModal.jsx",
+      "span": "L66-L71",
+      "signature": "handleManualAddStudent = (student)",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "220981545125ca5b4b336aacdaa896ad8ac3300d270b47a24080d4ebc8035f18",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/DynamicQrAttendanceModal.jsx#DynamicQrAttendanceModal.handleSyncToRoster",
+      "name": "handleSyncToRoster",
+      "kind": "function",
+      "path": "src/components/DynamicQrAttendanceModal.jsx",
+      "span": "L73-L78",
+      "signature": "handleSyncToRoster = ()",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "b9edf3ff0fe63ca61e1b125e4579f5c77adde604149c5fb96e0f756efb0a2f5b",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/ExportReporting.jsx",
+      "name": "ExportReporting.jsx",
+      "kind": "file",
+      "path": "src/components/ExportReporting.jsx",
+      "span": "L1-L214",
+      "signature": null,
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "8bcd45dcc7b33c18108048134528b1bf4034bfee7d3488064399119a04c68c5d",
+      "chars": 8743,
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/ExportReporting.jsx#ExportReporting",
+      "name": "ExportReporting",
+      "kind": "function",
+      "path": "src/components/ExportReporting.jsx",
+      "span": "L11-L213",
+      "signature": "function ExportReporting({ students = [], course })",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "18bf5e299d8d232dca0bc088f53488645e2936ae3376ef8f01b0e8019f677aa7",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/ExportReporting.jsx#ExportReporting.handleExportDefaultersCSV",
+      "name": "handleExportDefaultersCSV",
+      "kind": "function",
+      "path": "src/components/ExportReporting.jsx",
+      "span": "L52-L93",
+      "signature": "handleExportDefaultersCSV = ()",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "4afe15c77299c67f0b6c7958cc36e19dfc60b60959b010b11140e9ecb955cdda",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/ExportReporting.jsx#ExportReporting.handleExportRosterCSV",
+      "name": "handleExportRosterCSV",
+      "kind": "function",
+      "path": "src/components/ExportReporting.jsx",
+      "span": "L14-L50",
+      "signature": "handleExportRosterCSV = ()",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "d26bd4f3f91d66c9dc4ccedafd016bbdeb3f6395d7cd3dfee4f379cf8d02c779",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/ExportReporting.jsx#ExportReporting.handlePrint",
+      "name": "handlePrint",
+      "kind": "function",
+      "path": "src/components/ExportReporting.jsx",
+      "span": "L95-L97",
+      "signature": "handlePrint = ()",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "179ac3b37469e04bf02ddb7e8700fcc022cfc94de296b8279630da744b2fc9e8",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/ExportReporting.jsx#ExportReporting.triggerDownload",
+      "name": "triggerDownload",
+      "kind": "function",
+      "path": "src/components/ExportReporting.jsx",
+      "span": "L99-L111",
+      "signature": "triggerDownload = (content, filename)",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "6873701ae8f852e976a5ab195de971abd2b3ea82a359e887bd454fb1cced17db",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/FacultyLeaveApprovals.jsx",
+      "name": "FacultyLeaveApprovals.jsx",
+      "kind": "file",
+      "path": "src/components/FacultyLeaveApprovals.jsx",
+      "span": "L1-L185",
+      "signature": null,
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "7fa0662d641226d835ee38471d8968c221027e5d9aed58388799024580a5e5d5",
+      "chars": 7327,
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/FacultyLeaveApprovals.jsx#FacultyLeaveApprovals",
+      "name": "FacultyLeaveApprovals",
+      "kind": "function",
+      "path": "src/components/FacultyLeaveApprovals.jsx",
+      "span": "L15-L184",
+      "signature": "function FacultyLeaveApprovals({ activeCourse })",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "e4e1a05be42593be3675e53cf30c8ee804a317c1463d109119d9ccd750336413",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/FacultyLeaveApprovals.jsx#FacultyLeaveApprovals.handleAction",
+      "name": "handleAction",
+      "kind": "function",
+      "path": "src/components/FacultyLeaveApprovals.jsx",
+      "span": "L60-L70",
+      "signature": "handleAction = (id, newStatus)",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "9be7e16ca360a68982c92edf1080fbfe22434c010ff929587f842f7be5a8b46a",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/Header.jsx",
+      "name": "Header.jsx",
+      "kind": "file",
+      "path": "src/components/Header.jsx",
+      "span": "L1-L87",
+      "signature": null,
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "3503cfde99c8de02534a78f47bc033379fdc40e065b78a793fc7bbc61b511402",
+      "chars": 4500,
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/Header.jsx#Header",
+      "name": "Header",
+      "kind": "function",
+      "path": "src/components/Header.jsx",
+      "span": "L10-L86",
+      "signature": "function Header({ role, onRoleChange, course, isLiveDatabase = false })",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "489c984c842159a435a46676ce1fbc63e20ad940d6ec00541706ff583f470090",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/MateSidebar.jsx",
+      "name": "MateSidebar.jsx",
+      "kind": "file",
+      "path": "src/components/MateSidebar.jsx",
+      "span": "L1-L503",
+      "signature": null,
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "86ad55f3c8f06d88a5d1debd02d074d8f96a583c5c28b130fba8903be7a76448",
+      "chars": 26262,
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/MateSidebar.jsx#MateSidebar",
+      "name": "MateSidebar",
+      "kind": "function",
+      "path": "src/components/MateSidebar.jsx",
+      "span": "L22-L502",
+      "signature": "function MateSidebar({ activeTab, onTabChange, lowWarningCount, course, role, currentStudent, session, onLogout, isSidebarOpen = false, onMobileClose, isExpanded = true, onToggleExpand })",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "bc79008f28cc4458f6029cc77cd51ca45f0710baf27d8fe92a07b6e8ad51db03",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/OrdersTableRoster.jsx",
+      "name": "OrdersTableRoster.jsx",
+      "kind": "file",
+      "path": "src/components/OrdersTableRoster.jsx",
+      "span": "L1-L692",
+      "signature": null,
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "3fb30dca6ef494e1fc8b8098a41ec3ba645ffded30fe417e614cfd66b5f26d20",
+      "chars": 31462,
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/OrdersTableRoster.jsx#OrdersTableRoster",
+      "name": "OrdersTableRoster",
+      "kind": "function",
+      "path": "src/components/OrdersTableRoster.jsx",
+      "span": "L34-L691",
+      "signature": "function OrdersTableRoster({ students, onToggleStatus, onMarkAll, selectedDate, onDateChange, onCommit, isCommitting, hasPendingChanges, onSelectStudentDetail, activeDetailStudent, programs = [], lecturePeriods = [], selectedProgramId = 'btech-cse', onProgramChange, selectedSemNumber = 'VI', onSemChange, selectedSubjectCode = 'CS-602', onSubjectChange, selectedSlotId = 'P2', onSlotChange, activeCourse, role = 'faculty' })",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "d9762a3554ed689f488ff57f2d8d046f8df04349a3642a15ec4f2ab947736caf",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/OrdersTableRoster.jsx#OrdersTableRoster.handleBatchMarkSelected",
+      "name": "handleBatchMarkSelected",
+      "kind": "function",
+      "path": "src/components/OrdersTableRoster.jsx",
+      "span": "L110-L114",
+      "signature": "handleBatchMarkSelected = (status)",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "8dbb399255fa0b6aab9b99a8efdbc75e2a49a786fd50d98e85df30a86171d09c",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/OrdersTableRoster.jsx#OrdersTableRoster.handleSelectAll",
+      "name": "handleSelectAll",
+      "kind": "function",
+      "path": "src/components/OrdersTableRoster.jsx",
+      "span": "L89-L95",
+      "signature": "handleSelectAll = ()",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "3ebd9953d873534afa427f27ce3eabf0d84972df4d3cc6740876c9ad74e83c90",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/OrdersTableRoster.jsx#OrdersTableRoster.handleSelectRow",
+      "name": "handleSelectRow",
+      "kind": "function",
+      "path": "src/components/OrdersTableRoster.jsx",
+      "span": "L97-L108",
+      "signature": "handleSelectRow = (id, e)",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "b9a36078d36c54116ea46e2080fa21924058ad4ae70c5dd3a0aa867011d0fbe6",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/RightMetricsPanel.jsx",
+      "name": "RightMetricsPanel.jsx",
+      "kind": "file",
+      "path": "src/components/RightMetricsPanel.jsx",
+      "span": "L1-L194",
+      "signature": null,
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "ae569ea0f971fc76eca03365e6a913d0c5e30b62ce1548924436c1299cc6dfe7",
+      "chars": 8731,
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/RightMetricsPanel.jsx#RightMetricsPanel",
+      "name": "RightMetricsPanel",
+      "kind": "function",
+      "path": "src/components/RightMetricsPanel.jsx",
+      "span": "L12-L193",
+      "signature": "function RightMetricsPanel({ students = [], course, onSelectDefaulterFilter })",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "5af9288a054d561ed8fb0bc4b59f3ab0646266845ae162382b214954471c7a15",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/StudentBunkCalculator.jsx",
+      "name": "StudentBunkCalculator.jsx",
+      "kind": "file",
+      "path": "src/components/StudentBunkCalculator.jsx",
+      "span": "L1-L225",
+      "signature": null,
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "a2f51a1c5a83a72c43fe3c3d31a207eb4f9258c4d7872bdcc6d0bdf1237f201d",
+      "chars": 10291,
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/StudentBunkCalculator.jsx#StudentBunkCalculator",
+      "name": "StudentBunkCalculator",
+      "kind": "function",
+      "path": "src/components/StudentBunkCalculator.jsx",
+      "span": "L14-L224",
+      "signature": "function StudentBunkCalculator({ student, subjects })",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "fde274613fb5f8a13084d137b2d69f5209900eec9102576e57a689a533cd2d94",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/StudentBunkCalculator.jsx#StudentBunkCalculator.handleResetSimulation",
+      "name": "handleResetSimulation",
+      "kind": "function",
+      "path": "src/components/StudentBunkCalculator.jsx",
+      "span": "L66-L69",
+      "signature": "handleResetSimulation = ()",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "cf02c4392a7b6a909861c17661c47b27ef82929ca0ba2053b3ce44f6475aab3c",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/StudentBunkCalculator.jsx#StudentBunkCalculator.handleSimulateAttend",
+      "name": "handleSimulateAttend",
+      "kind": "function",
+      "path": "src/components/StudentBunkCalculator.jsx",
+      "span": "L57-L60",
+      "signature": "handleSimulateAttend = ()",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "c14b3d32dad5f79cf95f010905e1c380f227e849b947ceacb3b870c526af5254",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/StudentBunkCalculator.jsx#StudentBunkCalculator.handleSimulateMiss",
+      "name": "handleSimulateMiss",
+      "kind": "function",
+      "path": "src/components/StudentBunkCalculator.jsx",
+      "span": "L62-L64",
+      "signature": "handleSimulateMiss = ()",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "1b7b7fd615b895256cace570f366cd887ae7554ae30944560690b40ae0140763",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/StudentDetailCard.jsx",
+      "name": "StudentDetailCard.jsx",
+      "kind": "file",
+      "path": "src/components/StudentDetailCard.jsx",
+      "span": "L1-L174",
+      "signature": null,
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "c2f81d7677cf4a659e7faaa7d0de999bb7d6794d4867c8064a5f3c94a84163f0",
+      "chars": 7313,
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/StudentDetailCard.jsx#StudentDetailCard",
+      "name": "StudentDetailCard",
+      "kind": "function",
+      "path": "src/components/StudentDetailCard.jsx",
+      "span": "L16-L173",
+      "signature": "function StudentDetailCard({ student, onClose, onToggleStatus })",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "5495b7cf79bb4b12cabf3eed8533af84b3e49ba52335341e7adbf84f770f6d6d",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/StudentPunchModal.jsx",
+      "name": "StudentPunchModal.jsx",
+      "kind": "file",
+      "path": "src/components/StudentPunchModal.jsx",
+      "span": "L1-L150",
+      "signature": null,
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "2e5cd006c01094c6437db13b93d15d5a30a44749d4a962bbd3e3caa35f582701",
+      "chars": 6023,
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/StudentPunchModal.jsx#StudentPunchModal",
+      "name": "StudentPunchModal",
+      "kind": "function",
+      "path": "src/components/StudentPunchModal.jsx",
+      "span": "L13-L149",
+      "signature": "function StudentPunchModal({ student, onClose, onPunchSuccess })",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "32a00457702001a4375647ce793b7ce94e7ff3f04349fdddc15f7e6382e0820f",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/StudentPunchModal.jsx#StudentPunchModal.handlePunch",
+      "name": "handlePunch",
+      "kind": "function",
+      "path": "src/components/StudentPunchModal.jsx",
+      "span": "L23-L40",
+      "signature": "handlePunch = (e)",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "e9e2f24b07764503941a5cca1a4c1033240a16e851d079e8cf7dd212d527caaf",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/StudentView.jsx",
+      "name": "StudentView.jsx",
+      "kind": "file",
+      "path": "src/components/StudentView.jsx",
+      "span": "L1-L905",
+      "signature": null,
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "3db63e754b93b2ece10417a2fddc07d80eccb391c1e88b6184de4681ac332a58",
+      "chars": 42549,
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/StudentView.jsx#StudentView",
+      "name": "StudentView",
+      "kind": "function",
+      "path": "src/components/StudentView.jsx",
+      "span": "L36-L904",
+      "signature": "function StudentView({ student, activeTab = 'overview' })",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "d580b23d4c9fcdf8ec9c6594067924388dc46ce7273b9607289b8b4570981d10",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/StudentView.jsx#StudentView.handleApplyLeave",
+      "name": "handleApplyLeave",
+      "kind": "function",
+      "path": "src/components/StudentView.jsx",
+      "span": "L211-L230",
+      "signature": "handleApplyLeave = (e)",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "f43ae38913ac9311ad6128ff66e62d0ddaaaccffc3c4279ecc126c8ceb134315",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/ui/ImagesBadge.jsx",
+      "name": "ImagesBadge.jsx",
+      "kind": "file",
+      "path": "src/components/ui/ImagesBadge.jsx",
+      "span": "L1-L47",
+      "signature": null,
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "431f0b61d13636f775ec5d1b097aacd6e41467c96f363595856f1d52762c2952",
+      "chars": 1867,
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/ui/ImagesBadge.jsx#ImagesBadge",
+      "name": "ImagesBadge",
+      "kind": "function",
+      "path": "src/components/ui/ImagesBadge.jsx",
+      "span": "L12-L44",
+      "signature": "function ImagesBadge({ text, images = [], className = '', onClick })",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "f6183b1612fed3364d5d20cbaa0a3acb42706622785f3e023c9019bf94e22563",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/ui/ImagesBadgeDemo.jsx",
+      "name": "ImagesBadgeDemo.jsx",
+      "kind": "file",
+      "path": "src/components/ui/ImagesBadgeDemo.jsx",
+      "span": "L1-L20",
+      "signature": null,
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "c77a30c61d60337ae0e1d5330c800382049dbf1f3a3873df7c27df0a37c9c34c",
+      "chars": 715,
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/ui/ImagesBadgeDemo.jsx#ImagesBadgeDemo",
+      "name": "ImagesBadgeDemo",
+      "kind": "function",
+      "path": "src/components/ui/ImagesBadgeDemo.jsx",
+      "span": "L4-L17",
+      "signature": "function ImagesBadgeDemo()",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "32df3b902e45ef4a22a6f1864af3a1eac3ff11535f05fd778146e9de7e10d567",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/WarningDeficitEngine.jsx",
+      "name": "WarningDeficitEngine.jsx",
+      "kind": "file",
+      "path": "src/components/WarningDeficitEngine.jsx",
+      "span": "L1-L282",
+      "signature": null,
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "bc2a7c61e728c45f21e9424da5a692c6d2db9d010b64abdf57e02959beb9f46d",
+      "chars": 11637,
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/WarningDeficitEngine.jsx#WarningDeficitEngine",
+      "name": "WarningDeficitEngine",
+      "kind": "function",
+      "path": "src/components/WarningDeficitEngine.jsx",
+      "span": "L17-L281",
+      "signature": "function WarningDeficitEngine({ students = [], onDispatchAlert, course })",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "60715c5d5c8c46790add723bdc4adcd4739ea014b2fb464468887290e95867e1",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/WarningDeficitEngine.jsx#WarningDeficitEngine.handleIssueAllNotices",
+      "name": "handleIssueAllNotices",
+      "kind": "function",
+      "path": "src/components/WarningDeficitEngine.jsx",
+      "span": "L60-L72",
+      "signature": "handleIssueAllNotices = ()",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "bb7962534b581eaa21f5c9ebeca1f73416192b56298c9a68a38dc76e3ce3da42",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/WarningDeficitEngine.jsx#WarningDeficitEngine.handleIssueNotice",
+      "name": "handleIssueNotice",
+      "kind": "function",
+      "path": "src/components/WarningDeficitEngine.jsx",
+      "span": "L47-L58",
+      "signature": "handleIssueNotice = (studentId)",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "f25d3072565c7648c244956060d58162402b19e0b381273be155d7878097a489",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/WhatsAppAlertModal.jsx",
+      "name": "WhatsAppAlertModal.jsx",
+      "kind": "file",
+      "path": "src/components/WhatsAppAlertModal.jsx",
+      "span": "L1-L256",
+      "signature": null,
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "9c16c2bc2ca82d89505dffbea6aaffcc63adca53580d3423ba06094230b9f8ab",
+      "chars": 10947,
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/WhatsAppAlertModal.jsx#WhatsAppAlertModal",
+      "name": "WhatsAppAlertModal",
+      "kind": "function",
+      "path": "src/components/WhatsAppAlertModal.jsx",
+      "span": "L14-L255",
+      "signature": "function WhatsAppAlertModal({ defaulter, course, onClose, onDispatched })",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "9a9d5aa93b899eabf9cf9f5d619f33894defd5677de819298a0715db3f2ed0dd",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/WhatsAppAlertModal.jsx#WhatsAppAlertModal.handleCopy",
+      "name": "handleCopy",
+      "kind": "function",
+      "path": "src/components/WhatsAppAlertModal.jsx",
+      "span": "L83-L87",
+      "signature": "handleCopy = ()",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "bfcb10b95ee31817a2d945634b8694ade88a3d2d28945b8f51e0794799ec8444",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/WhatsAppAlertModal.jsx#WhatsAppAlertModal.handleOpenWhatsAppWeb",
+      "name": "handleOpenWhatsAppWeb",
+      "kind": "function",
+      "path": "src/components/WhatsAppAlertModal.jsx",
+      "span": "L89-L93",
+      "signature": "handleOpenWhatsAppWeb = ()",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "299b1751e067d46d9a9d3d98fdab1fe179cacf117d0f9f2154a834db733e3942",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/components/WhatsAppAlertModal.jsx#WhatsAppAlertModal.handleSend",
+      "name": "handleSend",
+      "kind": "function",
+      "path": "src/components/WhatsAppAlertModal.jsx",
+      "span": "L72-L81",
+      "signature": "handleSend = ()",
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "f1f8a71cb7736de0678558610c45a3d1204a61aec4130cccd357ab9b5fc91a3d",
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/data/mockData.js",
+      "name": "mockData.js",
+      "kind": "file",
+      "path": "src/data/mockData.js",
+      "span": "L1-L1026",
+      "signature": null,
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "4bc97515b0db9e8132741d9b737bfc58671a58fe2added7797d9a48728feb766",
+      "chars": 69886,
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/lib/supabase.js",
+      "name": "supabase.js",
+      "kind": "file",
+      "path": "src/lib/supabase.js",
+      "span": "L1-L21",
+      "signature": null,
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "36cf2adb59c12ae69bd75d0b55af36120be2e4489de21ac86723edff3ba252a3",
+      "chars": 609,
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "src/main.jsx",
+      "name": "main.jsx",
+      "kind": "file",
+      "path": "src/main.jsx",
+      "span": "L1-L11",
+      "signature": null,
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "35b4f072e629db34acbd5a89a7e57eb41fe9981d09f9efb60c88d2394cf9351c",
+      "chars": 245,
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "tailwind.config.js",
+      "name": "tailwind.config.js",
+      "kind": "file",
+      "path": "tailwind.config.js",
+      "span": "L1-L81",
+      "signature": null,
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "2059b4c35625f7ed0c4ceb185a25eb2f2b8a21746a3423b6a9c652e612753d9b",
+      "chars": 2109,
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    },
+    {
+      "id": "vite.config.js",
+      "name": "vite.config.js",
+      "kind": "file",
+      "path": "vite.config.js",
+      "span": "L1-L7",
+      "signature": null,
+      "exported": true,
+      "origin": "ast",
+      "body_hash": "cc7bbf633fb8eca24dee5c645027f8741d1a79e8ae84734965bf21cb3cc406ea",
+      "chars": 142,
+      "summary_state": "pending",
+      "summary": null,
+      "crux": null
+    }
+  ],
+  "edges": [
+    {
+      "source": "src/App.jsx",
+      "target": "src/App.jsx#AdminRoute",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/App.jsx",
+      "target": "src/App.jsx#App",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/App.jsx",
+      "target": "lucide-react",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/App.jsx",
+      "target": "react",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/App.jsx",
+      "target": "src/components/AdminAcademicSetup.jsx",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/App.jsx",
+      "target": "src/components/AdminDashboard.jsx",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/App.jsx",
+      "target": "src/components/AnalyticsDashboard.jsx",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/App.jsx",
+      "target": "src/components/AttendanceGrid.jsx",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/App.jsx",
+      "target": "src/components/AuthScreen.jsx",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/App.jsx",
+      "target": "src/components/ExportReporting.jsx",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/App.jsx",
+      "target": "src/components/FacultyLeaveApprovals.jsx",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/App.jsx",
+      "target": "src/components/MateSidebar.jsx",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/App.jsx",
+      "target": "src/components/OrdersTableRoster.jsx",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/App.jsx",
+      "target": "src/components/RightMetricsPanel.jsx",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/App.jsx",
+      "target": "src/components/StudentDetailCard.jsx",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/App.jsx",
+      "target": "src/components/StudentView.jsx",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/App.jsx",
+      "target": "src/components/WarningDeficitEngine.jsx",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/App.jsx",
+      "target": "src/data/mockData.js",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/App.jsx",
+      "target": "src/lib/supabase.js",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/App.jsx#App",
+      "target": "src/App.jsx#App.fetchStudents",
+      "relation": "calls",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/App.jsx#App",
+      "target": "src/App.jsx#App.resolveRoleAndSetSession",
+      "relation": "calls",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/App.jsx#App",
+      "target": "src/App.jsx#App.fetchStudents",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/App.jsx#App",
+      "target": "src/App.jsx#App.handleCommit",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/App.jsx#App",
+      "target": "src/App.jsx#App.resolveRoleAndSetSession",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/AdminAcademicSetup.jsx",
+      "target": "src/components/AdminAcademicSetup.jsx#AdminAcademicSetup",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/AdminAcademicSetup.jsx",
+      "target": "lucide-react",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/AdminAcademicSetup.jsx",
+      "target": "react",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/AdminAcademicSetup.jsx",
+      "target": "src/data/mockData.js",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/AdminBulkImporter.jsx",
+      "target": "src/components/AdminBulkImporter.jsx#AdminBulkImporter",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/AdminBulkImporter.jsx",
+      "target": "lucide-react",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/AdminBulkImporter.jsx",
+      "target": "react",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/AdminBulkImporter.jsx#AdminBulkImporter",
+      "target": "src/components/AdminBulkImporter.jsx#AdminBulkImporter.handleDownloadSample",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/AdminBulkImporter.jsx#AdminBulkImporter",
+      "target": "src/components/AdminBulkImporter.jsx#AdminBulkImporter.handleExecuteImport",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/AdminBulkImporter.jsx#AdminBulkImporter",
+      "target": "src/components/AdminBulkImporter.jsx#AdminBulkImporter.handleFileUpload",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/AdminBulkImporter.jsx#AdminBulkImporter",
+      "target": "src/components/AdminBulkImporter.jsx#AdminBulkImporter.handleLoadSampleData",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/AdminDashboard.jsx",
+      "target": "src/components/AdminDashboard.jsx#AdminDashboard",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/AdminDashboard.jsx",
+      "target": "lucide-react",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/AdminDashboard.jsx",
+      "target": "react",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/AdminDashboard.jsx",
+      "target": "src/components/AdminBulkImporter.jsx",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/AdminDashboard.jsx",
+      "target": "src/components/AdminDebarmentNoticeModal.jsx",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/AdminDashboard.jsx",
+      "target": "src/lib/supabase.js",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/AdminDashboard.jsx#AdminDashboard",
+      "target": "src/components/AdminDashboard.jsx#AdminDashboard.fetchProfiles",
+      "relation": "calls",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/AdminDashboard.jsx#AdminDashboard",
+      "target": "src/components/AdminDashboard.jsx#AdminDashboard.handleApproveStatus",
+      "relation": "calls",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/AdminDashboard.jsx#AdminDashboard",
+      "target": "src/components/AdminDashboard.jsx#AdminDashboard.handleUpdateRole",
+      "relation": "calls",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/AdminDashboard.jsx#AdminDashboard",
+      "target": "src/components/AdminDashboard.jsx#AdminDashboard.showToast",
+      "relation": "calls",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/AdminDashboard.jsx#AdminDashboard",
+      "target": "src/components/AdminDashboard.jsx#AdminDashboard.fetchProfiles",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/AdminDashboard.jsx#AdminDashboard",
+      "target": "src/components/AdminDashboard.jsx#AdminDashboard.handleApproveStatus",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/AdminDashboard.jsx#AdminDashboard",
+      "target": "src/components/AdminDashboard.jsx#AdminDashboard.handleUpdateRole",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/AdminDashboard.jsx#AdminDashboard",
+      "target": "src/components/AdminDashboard.jsx#AdminDashboard.showToast",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/AdminDashboard.jsx#AdminDashboard.handleApproveStatus",
+      "target": "src/components/AdminDashboard.jsx#AdminDashboard.showToast",
+      "relation": "calls",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/AdminDashboard.jsx#AdminDashboard.handleUpdateRole",
+      "target": "src/components/AdminDashboard.jsx#AdminDashboard.showToast",
+      "relation": "calls",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/AdminDebarmentNoticeModal.jsx",
+      "target": "src/components/AdminDebarmentNoticeModal.jsx#AdminDebarmentNoticeModal",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/AdminDebarmentNoticeModal.jsx",
+      "target": "lucide-react",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/AdminDebarmentNoticeModal.jsx",
+      "target": "react",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/AnalyticsDashboard.jsx",
+      "target": "src/components/AnalyticsDashboard.jsx#AnalyticsDashboard",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/AnalyticsDashboard.jsx",
+      "target": "lucide-react",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/AnalyticsDashboard.jsx",
+      "target": "react",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/AnalyticsDashboard.jsx",
+      "target": "src/lib/supabase.js",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/AnalyticsDashboard.jsx#AnalyticsDashboard",
+      "target": "src/components/AnalyticsDashboard.jsx#AnalyticsDashboard.fetchLogs",
+      "relation": "calls",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/AnalyticsDashboard.jsx#AnalyticsDashboard",
+      "target": "src/components/AnalyticsDashboard.jsx#AnalyticsDashboard.fetchLogs",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/AttendanceGrid.jsx",
+      "target": "src/components/AttendanceGrid.jsx#AttendanceGrid",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/AttendanceGrid.jsx",
+      "target": "lucide-react",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/AttendanceGrid.jsx",
+      "target": "react",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/AuthScreen.jsx",
+      "target": "src/components/AuthScreen.jsx#AuthScreen",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/AuthScreen.jsx",
+      "target": "lucide-react",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/AuthScreen.jsx",
+      "target": "react",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/AuthScreen.jsx",
+      "target": "src/lib/supabase.js",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/AuthScreen.jsx#AuthScreen",
+      "target": "src/components/AuthScreen.jsx#AuthScreen.handleSendResetCode",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/AuthScreen.jsx#AuthScreen",
+      "target": "src/components/AuthScreen.jsx#AuthScreen.handleSubmit",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/AuthScreen.jsx#AuthScreen",
+      "target": "src/components/AuthScreen.jsx#AuthScreen.handleUpdatePassword",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/AuthScreen.jsx#AuthScreen",
+      "target": "src/components/AuthScreen.jsx#AuthScreen.handleVerifyOtp",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/BentoMetrics.jsx",
+      "target": "src/components/BentoMetrics.jsx#BentoMetrics",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/BentoMetrics.jsx",
+      "target": "lucide-react",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/BentoMetrics.jsx",
+      "target": "react",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/DynamicQrAttendanceModal.jsx",
+      "target": "src/components/DynamicQrAttendanceModal.jsx#DynamicQrAttendanceModal",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/DynamicQrAttendanceModal.jsx",
+      "target": "lucide-react",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/DynamicQrAttendanceModal.jsx",
+      "target": "react",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/DynamicQrAttendanceModal.jsx#DynamicQrAttendanceModal",
+      "target": "src/components/DynamicQrAttendanceModal.jsx#DynamicQrAttendanceModal.handleManualAddStudent",
+      "relation": "calls",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/DynamicQrAttendanceModal.jsx#DynamicQrAttendanceModal",
+      "target": "src/components/DynamicQrAttendanceModal.jsx#DynamicQrAttendanceModal.handleManualAddStudent",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/DynamicQrAttendanceModal.jsx#DynamicQrAttendanceModal",
+      "target": "src/components/DynamicQrAttendanceModal.jsx#DynamicQrAttendanceModal.handleSyncToRoster",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/ExportReporting.jsx",
+      "target": "src/components/ExportReporting.jsx#ExportReporting",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/ExportReporting.jsx",
+      "target": "lucide-react",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/ExportReporting.jsx",
+      "target": "react",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/ExportReporting.jsx#ExportReporting",
+      "target": "src/components/ExportReporting.jsx#ExportReporting.handleExportDefaultersCSV",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/ExportReporting.jsx#ExportReporting",
+      "target": "src/components/ExportReporting.jsx#ExportReporting.handleExportRosterCSV",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/ExportReporting.jsx#ExportReporting",
+      "target": "src/components/ExportReporting.jsx#ExportReporting.handlePrint",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/ExportReporting.jsx#ExportReporting",
+      "target": "src/components/ExportReporting.jsx#ExportReporting.triggerDownload",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/ExportReporting.jsx#ExportReporting.handleExportDefaultersCSV",
+      "target": "src/components/ExportReporting.jsx#ExportReporting.triggerDownload",
+      "relation": "calls",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/ExportReporting.jsx#ExportReporting.handleExportRosterCSV",
+      "target": "src/components/ExportReporting.jsx#ExportReporting.triggerDownload",
+      "relation": "calls",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/FacultyLeaveApprovals.jsx",
+      "target": "src/components/FacultyLeaveApprovals.jsx#FacultyLeaveApprovals",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/FacultyLeaveApprovals.jsx",
+      "target": "lucide-react",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/FacultyLeaveApprovals.jsx",
+      "target": "react",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/FacultyLeaveApprovals.jsx#FacultyLeaveApprovals",
+      "target": "src/components/FacultyLeaveApprovals.jsx#FacultyLeaveApprovals.handleAction",
+      "relation": "calls",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/FacultyLeaveApprovals.jsx#FacultyLeaveApprovals",
+      "target": "src/components/FacultyLeaveApprovals.jsx#FacultyLeaveApprovals.handleAction",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/Header.jsx",
+      "target": "src/components/Header.jsx#Header",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/Header.jsx",
+      "target": "lucide-react",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/Header.jsx",
+      "target": "react",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/MateSidebar.jsx",
+      "target": "src/components/MateSidebar.jsx#MateSidebar",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/MateSidebar.jsx",
+      "target": "lucide-react",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/MateSidebar.jsx",
+      "target": "react",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/OrdersTableRoster.jsx",
+      "target": "src/components/OrdersTableRoster.jsx#OrdersTableRoster",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/OrdersTableRoster.jsx",
+      "target": "lucide-react",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/OrdersTableRoster.jsx",
+      "target": "react",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/OrdersTableRoster.jsx",
+      "target": "src/components/DynamicQrAttendanceModal.jsx",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/OrdersTableRoster.jsx",
+      "target": "src/components/ui/ImagesBadge.jsx",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/OrdersTableRoster.jsx#OrdersTableRoster",
+      "target": "src/components/OrdersTableRoster.jsx#OrdersTableRoster.handleBatchMarkSelected",
+      "relation": "calls",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/OrdersTableRoster.jsx#OrdersTableRoster",
+      "target": "src/components/OrdersTableRoster.jsx#OrdersTableRoster.handleSelectRow",
+      "relation": "calls",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/OrdersTableRoster.jsx#OrdersTableRoster",
+      "target": "src/components/OrdersTableRoster.jsx#OrdersTableRoster.handleBatchMarkSelected",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/OrdersTableRoster.jsx#OrdersTableRoster",
+      "target": "src/components/OrdersTableRoster.jsx#OrdersTableRoster.handleSelectAll",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/OrdersTableRoster.jsx#OrdersTableRoster",
+      "target": "src/components/OrdersTableRoster.jsx#OrdersTableRoster.handleSelectRow",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/RightMetricsPanel.jsx",
+      "target": "src/components/RightMetricsPanel.jsx#RightMetricsPanel",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/RightMetricsPanel.jsx",
+      "target": "lucide-react",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/RightMetricsPanel.jsx",
+      "target": "react",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/StudentBunkCalculator.jsx",
+      "target": "src/components/StudentBunkCalculator.jsx#StudentBunkCalculator",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/StudentBunkCalculator.jsx",
+      "target": "lucide-react",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/StudentBunkCalculator.jsx",
+      "target": "react",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/StudentBunkCalculator.jsx#StudentBunkCalculator",
+      "target": "src/components/StudentBunkCalculator.jsx#StudentBunkCalculator.handleResetSimulation",
+      "relation": "calls",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/StudentBunkCalculator.jsx#StudentBunkCalculator",
+      "target": "src/components/StudentBunkCalculator.jsx#StudentBunkCalculator.handleResetSimulation",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/StudentBunkCalculator.jsx#StudentBunkCalculator",
+      "target": "src/components/StudentBunkCalculator.jsx#StudentBunkCalculator.handleSimulateAttend",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/StudentBunkCalculator.jsx#StudentBunkCalculator",
+      "target": "src/components/StudentBunkCalculator.jsx#StudentBunkCalculator.handleSimulateMiss",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/StudentDetailCard.jsx",
+      "target": "src/components/StudentDetailCard.jsx#StudentDetailCard",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/StudentDetailCard.jsx",
+      "target": "lucide-react",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/StudentDetailCard.jsx",
+      "target": "react",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/StudentPunchModal.jsx",
+      "target": "src/components/StudentPunchModal.jsx#StudentPunchModal",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/StudentPunchModal.jsx",
+      "target": "lucide-react",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/StudentPunchModal.jsx",
+      "target": "react",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/StudentPunchModal.jsx#StudentPunchModal",
+      "target": "src/components/StudentPunchModal.jsx#StudentPunchModal.handlePunch",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/StudentView.jsx",
+      "target": "src/components/StudentView.jsx#StudentView",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/StudentView.jsx",
+      "target": "lucide-react",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/StudentView.jsx",
+      "target": "react",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/StudentView.jsx",
+      "target": "src/components/StudentBunkCalculator.jsx",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/StudentView.jsx",
+      "target": "src/components/StudentPunchModal.jsx",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/StudentView.jsx#StudentView",
+      "target": "src/components/StudentView.jsx#StudentView.handleApplyLeave",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/ui/ImagesBadge.jsx",
+      "target": "src/components/ui/ImagesBadge.jsx#ImagesBadge",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/ui/ImagesBadge.jsx",
+      "target": "react",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/ui/ImagesBadgeDemo.jsx",
+      "target": "src/components/ui/ImagesBadgeDemo.jsx#ImagesBadgeDemo",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/ui/ImagesBadgeDemo.jsx",
+      "target": "react",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/ui/ImagesBadgeDemo.jsx",
+      "target": "src/components/ui/ImagesBadge.jsx",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/WarningDeficitEngine.jsx",
+      "target": "src/components/WarningDeficitEngine.jsx#WarningDeficitEngine",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/WarningDeficitEngine.jsx",
+      "target": "lucide-react",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/WarningDeficitEngine.jsx",
+      "target": "react",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/WarningDeficitEngine.jsx",
+      "target": "src/components/AdminDebarmentNoticeModal.jsx",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/WarningDeficitEngine.jsx",
+      "target": "src/components/WhatsAppAlertModal.jsx",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/WarningDeficitEngine.jsx#WarningDeficitEngine",
+      "target": "src/components/WarningDeficitEngine.jsx#WarningDeficitEngine.handleIssueNotice",
+      "relation": "calls",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/WarningDeficitEngine.jsx#WarningDeficitEngine",
+      "target": "src/components/WarningDeficitEngine.jsx#WarningDeficitEngine.handleIssueAllNotices",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/WarningDeficitEngine.jsx#WarningDeficitEngine",
+      "target": "src/components/WarningDeficitEngine.jsx#WarningDeficitEngine.handleIssueNotice",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/WhatsAppAlertModal.jsx",
+      "target": "src/components/WhatsAppAlertModal.jsx#WhatsAppAlertModal",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/WhatsAppAlertModal.jsx",
+      "target": "lucide-react",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/WhatsAppAlertModal.jsx",
+      "target": "react",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/WhatsAppAlertModal.jsx#WhatsAppAlertModal",
+      "target": "src/components/WhatsAppAlertModal.jsx#WhatsAppAlertModal.handleCopy",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/WhatsAppAlertModal.jsx#WhatsAppAlertModal",
+      "target": "src/components/WhatsAppAlertModal.jsx#WhatsAppAlertModal.handleOpenWhatsAppWeb",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/components/WhatsAppAlertModal.jsx#WhatsAppAlertModal",
+      "target": "src/components/WhatsAppAlertModal.jsx#WhatsAppAlertModal.handleSend",
+      "relation": "contains",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/lib/supabase.js",
+      "target": "@supabase/supabase-js",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/main.jsx",
+      "target": "./index.css",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/main.jsx",
+      "target": "react",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/main.jsx",
+      "target": "react-dom/client",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "src/main.jsx",
+      "target": "src/App.jsx",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "vite.config.js",
+      "target": "@vitejs/plugin-react",
+      "relation": "imports",
+      "confidence": "extracted"
+    },
+    {
+      "source": "vite.config.js",
+      "target": "vite",
+      "relation": "imports",
+      "confidence": "extracted"
+    }
+  ]
+}

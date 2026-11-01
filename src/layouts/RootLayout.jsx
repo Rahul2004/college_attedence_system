@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { Menu, Sparkles, UserCheck } from 'lucide-react';
+import { Menu, Sparkles, UserCheck, Zap, Shield, GraduationCap } from 'lucide-react';
 import MateSidebar from '../components/MateSidebar';
 import ProfileSettingsModal from '../components/ProfileSettingsModal';
 import AppleSpotlightSearch from '../components/ui/AppleSpotlightSearch';
@@ -45,10 +45,18 @@ export default function RootLayout() {
   const [isSiriOpen, setIsSiriOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
+  // Developer Bypass Check
+  const isDevBypass =
+    role === 'developer' ||
+    role === 'dev' ||
+    session?.isDeveloper ||
+    session?.user?.user_metadata?.isDeveloper ||
+    (typeof window !== 'undefined' && localStorage.getItem('college_dev_bypass') === 'true');
+
   // Student Onboarding State Gatekeeper
-  // If user is a student and status is NOT active, render the dedicated onboarding view
+  // If user is a student and status is NOT active, render the dedicated onboarding view (bypassed in dev mode)
   const currentStatus = userProfile?.status || session?.user?.user_metadata?.status || 'active';
-  if (role === 'student' && currentStatus !== 'active') {
+  if (role === 'student' && !isDevBypass && currentStatus !== 'active') {
     if (currentStatus === 'details_required') {
       return (
         <StudentAcademicDetailsModal
@@ -68,10 +76,11 @@ export default function RootLayout() {
   // Derive active tab from URL path (e.g. /faculty/roster -> activeTab = 'roster')
   const pathParts = location.pathname.split('/').filter(Boolean);
   const currentTab = pathParts[1] || (role === 'admin' ? 'admin' : role === 'faculty' ? 'roster' : 'overview');
+  const activePortal = pathParts[0] || (role === 'developer' ? 'admin' : role);
 
   const handleTabChange = (tab) => {
     setIsSidebarOpen(false);
-    navigate(`/${role}/${tab}`);
+    navigate(`/${activePortal}/${tab}`);
   };
 
   // Resolve student matching authenticated session email, or dynamically construct authentic student object
@@ -110,7 +119,8 @@ export default function RootLayout() {
         onTabChange={handleTabChange}
         lowWarningCount={lowWarningCount}
         course={activeCourse}
-        role={role}
+        role={role === 'developer' ? activePortal : role}
+        isDevMode={isDevBypass}
         currentStudent={authenticatedStudent}
         session={session}
         userProfile={userProfile}
@@ -118,7 +128,7 @@ export default function RootLayout() {
         onMobileClose={() => setIsSidebarOpen(false)}
         isExpanded={isSidebarExpanded}
         onToggleExpand={() => setIsSidebarExpanded(prev => !prev)}
-        onOpenProfile={() => setIsProfileModalOpen(true)}
+        onOpenProfile={() => navigate(`/${activePortal}/profile`)}
         onLogout={async () => {
           await handleLogout();
           navigate('/login', { replace: true });
@@ -127,74 +137,80 @@ export default function RootLayout() {
 
       {/* 2. Main Workspace Layout */}
       <div className="flex-1 flex flex-col min-w-0 overflow-y-auto w-full transition-all duration-300 bg-[#F5F5F7]">
-        <header className="h-16 bg-white/75 backdrop-blur-2xl border-b border-black/[0.08] px-4 sm:px-6 flex items-center justify-between shrink-0 sticky top-0 z-30 shadow-[0_2px_12px_rgba(0,0,0,0.02)] transition-all">
-          <div className="flex items-center gap-2.5 text-xs text-[#86868B]">
+        <header className="h-14 sm:h-16 bg-white/95 backdrop-blur-md border-b border-slate-200/90 px-3 sm:px-6 flex items-center justify-between shrink-0 sticky top-0 z-30 transition-all">
+          {/* Left Title & Mobile Hamburger */}
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             {/* Hamburger Toggle (Visible on mobile and tablet) */}
             <button
               type="button"
               onClick={() => setIsSidebarOpen(prev => !prev)}
-              className="xl:hidden p-2 text-ink hover:text-sky-deep rounded-xl hover:bg-black/[0.04] active:scale-95 transition-all flex items-center justify-center cursor-pointer"
+              className="xl:hidden p-1.5 sm:p-2 text-slate-800 hover:text-sky-700 rounded-lg hover:bg-slate-100 transition-colors flex items-center justify-center cursor-pointer shrink-0"
               title="Toggle Navigation Menu"
             >
               <Menu className="w-5 h-5 text-slate-800" />
             </button>
 
-            <span className="font-bold text-ink text-sm font-display tracking-tight">
-              {role === 'admin' ? 'Administration Portal' : role === 'student' ? 'Student Workspace' : activeCourse.code || 'Faculty Portal'}
+            <span className="font-bold text-slate-900 text-sm sm:text-base tracking-tight truncate">
+              {role === 'admin' ? 'Administration' : role === 'student' ? 'Student Workspace' : activeCourse.code || 'Faculty Portal'}
             </span>
             {role === 'faculty' && activeCourse.name && (
               <>
-                <span className="hidden sm:inline text-outline-strong">•</span>
-                <span className="hidden sm:inline truncate max-w-[200px] md:max-w-none text-ink-muted font-medium">{activeCourse.name}</span>
-                <span className="hidden md:inline text-outline-strong">•</span>
-                <span className="text-ink-subtle font-mono hidden md:inline text-[11px] bg-surface-sunken px-2 py-0.5 rounded-full">{activeCourse.room}</span>
+                <span className="hidden md:inline text-slate-300">|</span>
+                <span className="hidden md:inline truncate max-w-[220px] text-slate-600 font-normal text-xs">{activeCourse.name}</span>
+                <span className="hidden lg:inline text-slate-300">|</span>
+                <span className="text-slate-600 font-mono hidden lg:inline text-[11px] bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200">{activeCourse.room}</span>
               </>
             )}
           </div>
 
-          <div className="flex items-center gap-1.5 sm:gap-3">
-            <span className={`text-[11px] sm:text-xs font-semibold px-2 sm:px-2.5 py-1 rounded-full flex items-center gap-1 sm:gap-1.5 border shrink-0 ${
-              isSupabaseConfigured
-                ? 'bg-leaf-soft text-leaf-deep border-leaf-soft'
-                : 'bg-sun-soft text-sun-deep border-amber-200'
-            }`}>
-              <span className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${isSupabaseConfigured ? 'bg-leaf' : 'bg-sun'}`} />
-              <span className="hidden sm:inline">{isSupabaseConfigured ? 'Supabase Live' : 'Demo Local'}</span>
+          {/* Right Action Icons & Controls */}
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            {/* Cloud Sync Status Indicator */}
+            <span
+              title={isSupabaseConfigured ? 'Real-time Supabase Cloud Synced' : 'Local Device Sandbox Active'}
+              className={`text-[11px] font-medium px-2 py-1 rounded-full flex items-center gap-1.5 border shrink-0 ${
+                isSupabaseConfigured
+                  ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                  : 'bg-amber-50 text-amber-800 border-amber-200'
+              }`}
+            >
+              <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${isSupabaseConfigured ? 'bg-emerald-600' : 'bg-amber-600'}`} />
+              <span className="hidden md:inline">{isSupabaseConfigured ? 'Cloud Synced' : 'Local Sandbox'}</span>
             </span>
 
             {/* Profile Settings Quick Button */}
             <button
               type="button"
-              onClick={() => setIsProfileModalOpen(true)}
-              className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold border border-slate-200/90 shadow-2xs transition-all cursor-pointer shrink-0"
+              onClick={() => navigate(`/${activePortal}/profile`)}
+              className="flex items-center gap-1.5 p-2 sm:px-3 sm:py-1.5 rounded-lg bg-white hover:bg-slate-50 active:bg-slate-100 text-slate-700 text-xs font-medium border border-slate-300 shadow-xs transition-colors cursor-pointer shrink-0"
               title="Open Profile Settings"
             >
-              <UserCheck className="w-3.5 h-3.5 text-indigo-600" />
+              <UserCheck className="w-3.5 h-3.5 text-slate-700 shrink-0" />
               <span className="hidden sm:inline">Profile</span>
             </button>
 
-            {/* Spotlight Search Shortcut */}
+            {/* Spotlight Search Shortcut (Desktop only) */}
             <button
               type="button"
               onClick={() => setIsSpotlightOpen(true)}
-              className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#E8E8ED]/80 hover:bg-[#E8E8ED] text-[#1D1D1F] text-xs font-medium border border-black/[0.04] transition-all shrink-0"
+              className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200/80 text-slate-700 text-xs font-medium border border-slate-200 transition-colors shrink-0"
               title="Command Search (Ctrl + K)"
             >
-              <span className="text-[#86868B]">Search</span>
-              <kbd className="text-[10px] bg-white px-1.5 py-0.5 rounded shadow-2xs font-mono text-[#86868B] border border-black/[0.06]">
-                ⌘K
+              <span className="text-slate-500">Search</span>
+              <kbd className="text-[10px] bg-white px-1.5 py-0.5 rounded font-mono text-slate-600 border border-slate-300">
+                Ctrl K
               </kbd>
             </button>
 
-            {/* AI Assistant */}
+            {/* Institutional Academic Assistant (Clean minimal on mobile) */}
             <button
               type="button"
               onClick={() => setIsSiriOpen(true)}
-              className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 text-white text-xs font-semibold shadow-md shadow-purple-500/20 hover:scale-105 active:scale-95 transition-all cursor-pointer shrink-0"
-              title="Open AttendOS AI Assistant"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 active:bg-slate-950 text-white text-xs font-medium border border-slate-800 transition-colors cursor-pointer shrink-0"
+              title="Open Academic Regulations & Leave Help Desk"
             >
-              <Sparkles className="w-3.5 h-3.5 text-white animate-pulse" />
-              <span className="hidden sm:inline">Ask AI</span>
+              <Sparkles className="w-3.5 h-3.5 text-sky-400" />
+              <span>Portal Assistant</span>
             </button>
 
             {/* Direct Header Sign Out */}
@@ -204,7 +220,7 @@ export default function RootLayout() {
                 await handleLogout();
                 navigate('/login', { replace: true });
               }}
-              className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-full bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold border border-rose-200 transition-all cursor-pointer shrink-0"
+              className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 active:bg-red-200 text-red-700 text-xs font-semibold border border-red-200 transition-colors cursor-pointer shrink-0"
               title="Sign Out of Portal"
             >
               <span>Sign Out</span>
@@ -212,15 +228,77 @@ export default function RootLayout() {
           </div>
         </header>
 
-        {/* 1. Live Session Attendance Status Pill (Faculty Classroom Stream) */}
-        {role === 'faculty' && (
-          <AppleDynamicIsland
-            course={activeCourse}
-            presentCount={(students || []).filter(s => s.todayStatus === 'PRESENT').length}
-            totalStudents={(students || []).length}
-            lowWarningCount={lowWarningCount || 0}
-            threshold={attendanceThreshold || 75}
-          />
+        {/* Developer Bypass Portal Switcher Banner */}
+        {isDevBypass && (
+          <div className="bg-amber-500/10 border-b border-amber-500/25 px-4 sm:px-6 py-2 flex items-center justify-between text-xs text-amber-950 sticky top-16 z-20 backdrop-blur-md">
+            <div className="flex items-center gap-2">
+              <span className="font-mono font-bold text-[10px] bg-amber-600 text-white px-2.5 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1 shadow-xs">
+                <Zap className="w-3 h-3 fill-current" /> Dev Bypass Active
+              </span>
+              <span className="text-slate-600 hidden md:inline text-xs">
+                Bypass all role restrictions enabled — switch active portal in 1 click:
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  switchRole('admin');
+                  navigate('/admin/admin');
+                }}
+                className={`px-2.5 py-1 rounded-md text-xs font-semibold transition cursor-pointer flex items-center gap-1 ${
+                  activePortal === 'admin'
+                    ? 'bg-amber-600 text-white shadow-xs'
+                    : 'bg-white hover:bg-amber-50 text-slate-700 border border-slate-200'
+                }`}
+              >
+                <Shield className="w-3 h-3" />
+                <span>Admin</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  switchRole('faculty');
+                  navigate('/faculty/roster');
+                }}
+                className={`px-2.5 py-1 rounded-md text-xs font-semibold transition cursor-pointer flex items-center gap-1 ${
+                  activePortal === 'faculty'
+                    ? 'bg-amber-600 text-white shadow-xs'
+                    : 'bg-white hover:bg-amber-50 text-slate-700 border border-slate-200'
+                }`}
+              >
+                <UserCheck className="w-3 h-3" />
+                <span>Faculty</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  switchRole('student');
+                  navigate('/student/overview');
+                }}
+                className={`px-2.5 py-1 rounded-md text-xs font-semibold transition cursor-pointer flex items-center gap-1 ${
+                  activePortal === 'student'
+                    ? 'bg-amber-600 text-white shadow-xs'
+                    : 'bg-white hover:bg-amber-50 text-slate-700 border border-slate-200'
+                }`}
+              >
+                <GraduationCap className="w-3 h-3" />
+                <span>Student</span>
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  localStorage.removeItem('college_dev_bypass');
+                  await handleLogout();
+                  navigate('/login', { replace: true });
+                }}
+                className="px-2 py-1 rounded-md text-xs font-medium text-slate-500 hover:text-red-700 hover:bg-red-50 ml-1 transition cursor-pointer"
+                title="Exit Developer Mode & Sign Out"
+              >
+                Exit
+              </button>
+            </div>
+          </div>
         )}
 
         {/* Global Toast */}
@@ -319,49 +397,7 @@ export default function RootLayout() {
         }
       />
 
-      {/* 4. Dedicated Profile & Account Settings Modal (All 3 Roles) */}
-      <ProfileSettingsModal
-        isOpen={isProfileModalOpen}
-        onClose={() => setIsProfileModalOpen(false)}
-        role={role}
-        session={session}
-        userProfile={userProfile}
-        currentStudent={authenticatedStudent}
-        activeCourse={activeCourse}
-        users={users}
-        onUpdateCurrentUser={async (updated) => {
-          // 1. Sync directly through AcademicContext's updateUserProfile
-          if (updateUserProfile) {
-            await updateUserProfile({
-              full_name: updated.name,
-              name: updated.name,
-              phone: updated.phone,
-              department: updated.department
-            });
-          }
 
-          // 2. Update students roster state if student
-          if (role === 'student' && setStudents && authenticatedStudent) {
-            setStudents(prev => prev.map(s => 
-              (s.id === authenticatedStudent.id || s.email?.toLowerCase() === authenticatedStudent.email?.toLowerCase())
-                ? { ...s, ...updated }
-                : s
-            ));
-          }
-
-          // 3. Update users directory state
-          if (setUsers) {
-            const targetEmail = session?.user?.email?.toLowerCase() || authenticatedStudent?.email?.toLowerCase();
-            setUsers(prev => prev.map(u => u.email?.toLowerCase() === targetEmail ? { ...u, ...updated } : u));
-          }
-
-          // 4. Reload full profile from Supabase
-          if (reloadUserProfile) {
-            await reloadUserProfile();
-          }
-        }}
-        setToast={setToast}
-      />
     </div>
   );
 }

@@ -14,8 +14,13 @@ export default function LoginPage() {
 
   // If user is already authenticated and navigates back to /login, redirect cleanly to their portal
   React.useEffect(() => {
+    // If student is currently filling out the admission form, do NOT redirect them!
+    if (typeof window !== 'undefined' && localStorage.getItem('college_in_admission_flow') === 'true') {
+      return;
+    }
     if (session) {
-      const targetPath = role === 'admin' ? '/admin/admin' : role === 'faculty' ? '/faculty/roster' : '/student/overview';
+      const isDev = role === 'developer' || session?.isDeveloper || (typeof window !== 'undefined' && localStorage.getItem('college_dev_bypass') === 'true');
+      const targetPath = (role === 'admin' || isDev) ? '/admin/admin' : role === 'faculty' ? '/faculty/roster' : '/student/overview';
       navigate(targetPath, { replace: true });
     }
   }, [session, role, navigate]);
@@ -24,21 +29,31 @@ export default function LoginPage() {
     const targetRole = userRole || 'faculty';
     setRole(targetRole);
 
+    const isDev = targetRole === 'developer' || userSession?.isDeveloper || (typeof window !== 'undefined' && localStorage.getItem('college_dev_bypass') === 'true');
+
     const activeSess = userSession || {
       user: {
-        id: targetRole === 'admin' ? 'admin-system' : `user-${targetRole}`,
-        email: targetRole === 'admin' ? ADMIN_EMAIL : `${targetRole}@university.edu`,
-        user_metadata: { role: targetRole, name: targetRole === 'admin' ? 'System Administrator' : undefined }
-      }
+        id: targetRole === 'admin' ? 'admin-system' : targetRole === 'developer' ? 'dev-system' : `user-${targetRole}`,
+        email: targetRole === 'admin' ? ADMIN_EMAIL : targetRole === 'developer' ? 'dev@attendos.internal' : `${targetRole}@university.edu`,
+        user_metadata: {
+          role: targetRole,
+          name: targetRole === 'admin' ? 'System Administrator' : targetRole === 'developer' ? 'Lead Developer (Bypass All Roles)' : undefined,
+          isDeveloper: isDev
+        }
+      },
+      isDeveloper: isDev
     };
 
     setSession(activeSess);
     if (typeof window !== 'undefined') {
       localStorage.setItem('college_active_role', targetRole);
       localStorage.setItem('college_active_session', JSON.stringify(activeSess));
+      if (isDev) {
+        localStorage.setItem('college_dev_bypass', 'true');
+      }
     }
 
-    const targetPath = targetRole === 'admin' ? '/admin/admin' : targetRole === 'faculty' ? '/faculty/roster' : '/student/overview';
+    const targetPath = (targetRole === 'admin' || isDev) ? '/admin/admin' : targetRole === 'faculty' ? '/faculty/roster' : '/student/overview';
     navigate(targetPath, { replace: true });
   };
 

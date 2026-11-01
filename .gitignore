@@ -17,20 +17,6 @@ dist-ssr/
 *.ps1
 test_api.ps1
 
-# AI, MCP, Agent & Tooling metadata (Strictly excluded from Git)
-.agents/
-.claude/
-.remember/
-.mcp.json
-mcp_config.json
-hooks.json
-.gemini/
-.agy/
-/graft/
-/rea/
-/figma-prototype-plugin/
-/mcp-server-guide/
-
 # IDE & Editor metadata
 .vscode/
 .idea/

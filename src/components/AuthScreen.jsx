@@ -17,7 +17,11 @@ import {
   Calendar,
   Users,
   Shield,
-  ArrowRight
+  ArrowRight,
+  Code,
+  Zap,
+  FileCheck2,
+  FileText
 } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { 
@@ -26,6 +30,12 @@ import {
   clearRateLimit, 
   sanitizeAuthInput 
 } from '../lib/securityGuard';
+import StudentEnrollmentFormModal from './StudentEnrollmentFormModal';
+import { 
+  saveSystemSettingToCloud, 
+  saveAdmissionsFormsToCloud, 
+  fetchCloudAdmissionsForms 
+} from '../lib/syncService';
 
 export default function AuthScreen({ onLogin }) {
   const FACULTY_PASSKEY = import.meta.env.VITE_FACULTY_PASSKEY || 'FACULTY@2026';
@@ -35,6 +45,7 @@ export default function AuthScreen({ onLogin }) {
   const [selectedRole, setSelectedRole] = useState('student'); // 'student' | 'faculty'
   const [isAdminPortal, setIsAdminPortal] = useState(false);
   const [facultyPasskey, setFacultyPasskey] = useState('');
+  const [showFacultyPasskey, setShowFacultyPasskey] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -42,6 +53,7 @@ export default function AuthScreen({ onLogin }) {
   const [agreeTerms, setAgreeTerms] = useState(true);
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
+  const [isEnrollmentFormOpen, setIsEnrollmentFormOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loginTransitioning, setLoginTransitioning] = useState(false);
   const [transitionStatus, setTransitionStatus] = useState('');
@@ -118,6 +130,31 @@ export default function AuthScreen({ onLogin }) {
         onLogin(role, session);
       }, 700);
     }, 700);
+  };
+
+  // Developer Mode Bypass - instant access without passwords, OTP, or role blocks
+  const handleDevBypass = (targetRole) => {
+    setErrorMsg('');
+    setSuccessMsg('');
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('college_dev_bypass', 'true');
+    }
+    const isDevRole = targetRole === 'developer';
+    const devUser = {
+      id: isDevRole ? 'dev-root' : `dev-${targetRole}`,
+      email: isDevRole ? 'dev@attendos.internal' : targetRole === 'admin' ? ADMIN_EMAIL : targetRole === 'faculty' ? 'prof.vance@univ.edu' : 'aarav.sharma@collegemail.edu.in',
+      user_metadata: {
+        role: targetRole,
+        name: isDevRole ? 'Lead Developer (All Roles Unlocked)' : targetRole === 'admin' ? 'Dr. Evelyn Carter (Admin)' : targetRole === 'faculty' ? 'Prof. Rajesh Verma' : 'Aarav Sharma',
+        isDeveloper: true,
+        status: 'active'
+      }
+    };
+    const devSession = {
+      user: devUser,
+      isDeveloper: true
+    };
+    executeSmoothLogin(targetRole, devSession);
   };
 
   // Standard Login / Signup Handler
@@ -213,7 +250,7 @@ export default function AuthScreen({ onLogin }) {
         // Both Student and Faculty accounts start as 'pending' awaiting Admin/Faculty approval
         const initialStatus = 'pending';
 
-        // 1. Initiate Supabase sign up with credentials
+        // 1. Initiate Supabase sign up with credentials (dispatches verification OTP to the entered email)
         const { data, error } = await supabase.auth.signUp({
           email: normalizedEmail,
           password,
@@ -228,28 +265,19 @@ export default function AuthScreen({ onLogin }) {
 
         if (error) throw error;
 
-        // If email confirmation is disabled on Supabase and session returned immediately
-        if (data?.session) {
-          await supabase.auth.signOut();
-          const targetApproval = selectedRole === 'student' ? 'Faculty or Administration' : 'Administration';
-          setSuccessMsg(`Account created! Your registration is currently PENDING. Please wait for the ${targetApproval} to approve your account.`);
-          setIsSignUp(false);
-          setPassword('');
-          setFacultyPasskey('');
-          return;
-        }
-
-        // Switch directly to 6-digit OTP verification screen
+        // Route student or faculty directly to 6-digit OTP verification screen immediately
         setResetEmail(normalizedEmail);
         setSignupPendingData({
           email: normalizedEmail,
           role: selectedRole,
+          name: name || '',
           status: initialStatus
         });
         setOtpInput('');
         setResendCooldown(60);
         setAuthMode('signup_otp');
-        setSuccessMsg(`6-Digit Verification Code sent to ${normalizedEmail}. Please check your inbox.`);
+        setSuccessMsg(`6-Digit Verification Code sent to ${normalizedEmail}. Please check your inbox and verify below.`);
+        setLoading(false);
         return;
       } else {
         // Standard Sign In
@@ -451,18 +479,43 @@ export default function AuthScreen({ onLogin }) {
 
       const { data } = verifyRes;
 
+      const userRole = signupPendingData?.role || selectedRole || 'student';
+
+      if (userRole === 'student') {
+        // Mark admission flow active to prevent premature dashboard redirect
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('college_in_admission_flow', 'true');
+        }
+
+        // Sign out temporary session so user is not prematurely logged in before completing admission form
+        try {
+          if (supabase && isSupabaseConfigured) {
+            await supabase.auth.signOut();
+          }
+        } catch {}
+
+        // Automatically open the A-to-Z Google Admission form for the student
+        setEmail(targetEmail);
+        setName(signupPendingData?.name || name);
+        setIsEnrollmentFormOpen(true);
+        setAuthMode('login');
+        setIsSignUp(false);
+        setPassword('');
+        setOtpInput('');
+        return;
+      }
+
       if (data?.session) {
-        const userRole = signupPendingData?.role || 'student';
         await supabase.auth.signOut();
-        const reviewer = userRole === 'student' ? 'Faculty or Administration' : 'College Administration';
-        setSuccessMsg(`Email successfully verified! Your ${userRole.toUpperCase()} account is registered and awaiting approval from ${reviewer}.`);
+        const reviewer = 'College Administration';
+        setSuccessMsg(`Email successfully verified! Your FACULTY account is registered and awaiting approval from ${reviewer}.`);
         setAuthMode('login');
         setIsSignUp(false);
         setPassword('');
         setOtpInput('');
         return;
       } else {
-        setSuccessMsg('Email successfully verified! Your account is registered and awaiting approval from Faculty or Administration.');
+        setSuccessMsg('Email successfully verified! Your account is registered and awaiting approval.');
         setAuthMode('login');
         setIsSignUp(false);
         setPassword('');
@@ -625,96 +678,86 @@ export default function AuthScreen({ onLogin }) {
       {/* Split-Screen Container Card */}
       <div className="w-full max-w-[1280px] min-h-screen md:min-h-[720px] bg-white md:rounded-3xl shadow-[0_20px_60px_-15px_rgba(15,23,42,0.12)] border border-slate-100 overflow-hidden grid grid-cols-1 lg:grid-cols-12">
         
-        {/* ================= LEFT SECTION: BLUE COLLEGE BRANDING & HERO (order-2 on mobile, order-1 on lg+) ================= */}
-        <div className="order-2 lg:order-1 lg:col-span-5 bg-gradient-to-br from-[#1E56C8] via-[#1A4BB5] to-[#0F358C] text-white p-6 sm:p-10 lg:p-12 flex flex-col justify-between relative overflow-hidden">
-          {/* Subtle background glow effects */}
-          <div className="absolute -top-24 -left-24 w-80 h-80 rounded-full bg-blue-400/20 blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-24 -right-24 w-80 h-80 rounded-full bg-indigo-500/20 blur-3xl pointer-events-none" />
-
-          {/* Top Brand & Tagline */}
+        {/* ================= LEFT SECTION: INSTITUTIONAL BRANDING & CAMPUS SHOWCASE ================= */}
+        <div className="order-2 lg:order-1 lg:col-span-5 bg-slate-900 text-white p-6 sm:p-10 lg:p-12 flex flex-col justify-between relative overflow-hidden border-r border-slate-800">
+          
+          {/* Top Brand & Title */}
           <div className="relative z-10">
-            <div className="flex items-center gap-3.5 mb-3">
-              <div className="w-12 h-12 rounded-2xl bg-white/15 backdrop-blur-md border border-white/25 flex items-center justify-center shadow-lg shadow-black/10 shrink-0">
-                <GraduationCap className="w-7 h-7 text-white" />
+            <div className="flex items-center gap-3.5 mb-4">
+              <div className="w-11 h-11 rounded-xl bg-slate-800 border border-slate-700/80 flex items-center justify-center text-sky-400 shrink-0">
+                <GraduationCap className="w-6 h-6" />
               </div>
               <div className="leading-tight">
-                <h1 className="text-xl sm:text-2xl font-bold font-display tracking-tight text-white">
-                  College Attendance
+                <span className="block text-xs font-semibold text-sky-400 tracking-wide uppercase">Institutional Portal</span>
+                <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white mt-0.5">
+                  Attendance &amp; Academic Operations
                 </h1>
-                <h2 className="text-xl sm:text-2xl font-bold font-display tracking-tight text-white/95">
-                  Management System
-                </h2>
               </div>
             </div>
 
-            <p className="text-xs sm:text-sm text-blue-100/80 font-medium tracking-wide flex items-center gap-2 mt-2">
-              <span>Smart Attendance</span>
-              <span className="opacity-40">•</span>
-              <span>Better Learning</span>
-              <span className="opacity-40">•</span>
-              <span>Brighter Future</span>
+            <p className="text-xs sm:text-sm text-slate-300 font-normal leading-relaxed mt-2 max-w-sm">
+              Integrated real-time biometric tracking, proxy-resistant dynamic QR verification, and statutory debarment intelligence.
             </p>
 
-            {/* Feature Highlights List */}
-            <div className="mt-8 sm:mt-10 space-y-4">
+            {/* Structured Capability List */}
+            <div className="mt-8 space-y-4">
               <div className="flex items-start gap-3.5">
-                <div className="w-9 h-9 rounded-xl bg-white/15 backdrop-blur-md border border-white/20 flex items-center justify-center shrink-0 mt-0.5">
-                  <Calendar className="w-4 h-4 text-white" />
+                <div className="w-8 h-8 rounded-lg bg-slate-800/90 border border-slate-700 flex items-center justify-center shrink-0 mt-0.5 text-slate-300">
+                  <Calendar className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-xs sm:text-sm font-bold text-white tracking-tight">
-                    Track Attendance
-                  </h3>
-                  <p className="text-[11px] sm:text-xs text-blue-100/70 mt-0.5 leading-relaxed">
-                    Monitor student attendance with ease and real-time accuracy.
+                  <h2 className="text-xs sm:text-sm font-semibold text-white tracking-tight">
+                    Attendance Monitoring
+                  </h2>
+                  <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5 leading-relaxed">
+                    Automated period-wise marking, deficit calculations, and 75% compliance tracking.
                   </p>
                 </div>
               </div>
 
               <div className="flex items-start gap-3.5">
-                <div className="w-9 h-9 rounded-xl bg-white/15 backdrop-blur-md border border-white/20 flex items-center justify-center shrink-0 mt-0.5">
-                  <Users className="w-4 h-4 text-white" />
+                <div className="w-8 h-8 rounded-lg bg-slate-800/90 border border-slate-700 flex items-center justify-center shrink-0 mt-0.5 text-slate-300">
+                  <Users className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-xs sm:text-sm font-bold text-white tracking-tight">
-                    Manage Students &amp; Faculty
-                  </h3>
-                  <p className="text-[11px] sm:text-xs text-blue-100/70 mt-0.5 leading-relaxed">
-                    Streamlined and organized departmental academic workflows.
+                  <h2 className="text-xs sm:text-sm font-semibold text-white tracking-tight">
+                    Role-Separated Portals
+                  </h2>
+                  <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5 leading-relaxed">
+                    Dedicated environments for students, verified faculty, and academic deans.
                   </p>
                 </div>
               </div>
 
               <div className="flex items-start gap-3.5">
-                <div className="w-9 h-9 rounded-xl bg-white/15 backdrop-blur-md border border-white/20 flex items-center justify-center shrink-0 mt-0.5">
-                  <Shield className="w-4 h-4 text-white" />
+                <div className="w-8 h-8 rounded-lg bg-slate-800/90 border border-slate-700 flex items-center justify-center shrink-0 mt-0.5 text-slate-300">
+                  <ShieldCheck className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-xs sm:text-sm font-bold text-white tracking-tight">
-                    Secure &amp; Reliable
-                  </h3>
-                  <p className="text-[11px] sm:text-xs text-blue-100/70 mt-0.5 leading-relaxed">
-                    Powered by Supabase cloud with Row Level Security.
+                  <h2 className="text-xs sm:text-sm font-semibold text-white tracking-tight">
+                    Audit &amp; Cloud Security
+                  </h2>
+                  <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5 leading-relaxed">
+                    Protected by Supabase Row-Level Security and tamper-proof audit trails.
                   </p>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Bottom Campus Building Graphic with Script Slogan */}
+          {/* Bottom Campus Building Real Photograph */}
           <div className="relative z-10 mt-8 pt-4">
-            <div className="relative rounded-2xl overflow-hidden border border-white/20 shadow-xl shadow-blue-950/40">
+            <figure className="relative rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
               <img
                 src="/assets/auth/campus_building.jpg"
-                alt="College Campus Building"
-                className="w-full h-44 sm:h-52 object-cover object-center filter brightness-95"
+                alt="University Academic Building"
+                className="w-full h-44 sm:h-48 object-cover object-center filter brightness-90"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-blue-950/70 via-transparent to-transparent flex items-end justify-center pb-4">
-                <span className="font-serif italic text-white/95 text-base sm:text-lg font-medium tracking-wide drop-shadow-md">
-                  Building a Better Tomorrow
-                </span>
-              </div>
-            </div>
+              <figcaption className="p-3 bg-slate-950/90 border-t border-slate-800 text-[11px] text-slate-400 flex items-center justify-between">
+                <span>Academic Wing &amp; Research Centers</span>
+                <span className="font-mono text-[10px] text-slate-400">Campus North</span>
+              </figcaption>
+            </figure>
           </div>
         </div>
 
@@ -745,19 +788,19 @@ export default function AuthScreen({ onLogin }) {
           <div className="max-w-md w-full mx-auto my-auto py-4">
             {/* Header */}
             <div className="mb-6">
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight font-display">
-                {authMode === 'login' && (isSignUp ? 'Create an Account' : 'Welcome Back')}
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
+                {authMode === 'login' && (isSignUp ? 'Create Institutional Account' : 'Sign in to Portal')}
                 {authMode === 'mfa_totp' && 'Security Verification'}
                 {authMode === 'forgot_email' && 'Reset Password'}
                 {authMode === 'forgot_otp' && 'Verify 6-Digit Code'}
                 {authMode === 'forgot_new_password' && 'Set New Password'}
                 {authMode === 'signup_otp' && 'Email Verification'}
               </h2>
-              <p className="text-xs sm:text-sm text-slate-500 mt-1.5 font-normal">
+              <p className="text-xs sm:text-sm text-slate-600 mt-1.5 font-normal">
                 {authMode === 'login' && (
                   isSignUp
-                    ? 'Enter your institutional credentials to register for portal access.'
-                    : 'Login to your account to continue to your dashboard.'
+                    ? 'Enter your institutional email to register student or faculty access.'
+                    : 'Access your academic roster, timetable schedules, and attendance records.'
                 )}
                 {authMode === 'mfa_totp' && 'Enter your 6-digit authenticator code to access your role portal.'}
                 {authMode === 'forgot_email' && 'Enter your registered college email address to receive a reset code.'}
@@ -769,14 +812,14 @@ export default function AuthScreen({ onLogin }) {
 
             {/* Error & Success Alerts */}
             {errorMsg && (
-              <div className="mb-5 flex items-start gap-2.5 p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold animate-in fade-in">
-                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-600" />
+              <div role="alert" className="mb-5 flex items-start gap-2.5 p-3.5 rounded-lg bg-red-50 border border-red-200 text-red-900 text-xs font-medium animate-in fade-in">
+                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-red-600" />
                 <span className="leading-relaxed">{errorMsg}</span>
               </div>
             )}
 
             {successMsg && (
-              <div className="mb-5 flex items-start gap-2.5 p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold animate-in fade-in">
+              <div role="status" className="mb-5 flex items-start gap-2.5 p-3.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-medium animate-in fade-in">
                 <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-emerald-600" />
                 <span className="leading-relaxed">{successMsg}</span>
               </div>
@@ -788,7 +831,7 @@ export default function AuthScreen({ onLogin }) {
                 
                 {/* 3-Role Selection Tabs (Student / Faculty / Admin) */}
                 <div>
-                  <div className="grid grid-cols-3 gap-2.5 p-1 bg-slate-50 rounded-2xl border border-slate-200/80">
+                  <div className="grid grid-cols-3 gap-1.5 p-1 bg-slate-100/80 rounded-xl border border-slate-200">
                     <button
                       type="button"
                       onClick={() => {
@@ -796,13 +839,13 @@ export default function AuthScreen({ onLogin }) {
                         setIsAdminPortal(false);
                         setErrorMsg('');
                       }}
-                      className={`flex flex-col sm:flex-row items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      className={`flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
                         !isAdminPortal && selectedRole === 'student'
-                          ? 'bg-blue-600 text-white shadow-md shadow-blue-600/25'
-                          : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                          ? 'bg-white text-slate-950 shadow-xs border border-slate-200/80'
+                          : 'text-slate-600 hover:text-slate-900'
                       }`}
                     >
-                      <GraduationCap className="w-4 h-4" />
+                      <GraduationCap className="w-4 h-4 text-sky-600" />
                       <span>Student</span>
                     </button>
 
@@ -813,13 +856,13 @@ export default function AuthScreen({ onLogin }) {
                         setIsAdminPortal(false);
                         setErrorMsg('');
                       }}
-                      className={`flex flex-col sm:flex-row items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      className={`flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
                         !isAdminPortal && selectedRole === 'faculty'
-                          ? 'bg-blue-600 text-white shadow-md shadow-blue-600/25'
-                          : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                          ? 'bg-white text-slate-950 shadow-xs border border-slate-200/80'
+                          : 'text-slate-600 hover:text-slate-900'
                       }`}
                     >
-                      <UserCheck className="w-4 h-4" />
+                      <UserCheck className="w-4 h-4 text-emerald-600" />
                       <span>Faculty</span>
                     </button>
 
@@ -831,13 +874,13 @@ export default function AuthScreen({ onLogin }) {
                         setIsSignUp(false);
                         setErrorMsg('');
                       }}
-                      className={`flex flex-col sm:flex-row items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      className={`flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
                         isAdminPortal
-                          ? 'bg-blue-600 text-white shadow-md shadow-blue-600/25'
-                          : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                          ? 'bg-white text-slate-950 shadow-xs border border-slate-200/80'
+                          : 'text-slate-600 hover:text-slate-900'
                       }`}
                     >
-                      <Shield className="w-4 h-4" />
+                      <Shield className="w-4 h-4 text-amber-600" />
                       <span>Admin</span>
                     </button>
                   </div>
@@ -864,43 +907,53 @@ export default function AuthScreen({ onLogin }) {
 
                 {/* Faculty Secret Key in Signup */}
                 {isSignUp && selectedRole === 'faculty' && (
-                  <div className="p-3.5 bg-amber-50/70 border border-amber-200 rounded-xl">
-                    <div className="flex items-center justify-between mb-1">
-                      <label className="text-xs font-bold text-amber-900 flex items-center gap-1.5 font-display">
-                        <KeyRound className="w-3.5 h-3.5 text-amber-600" />
-                        Faculty Authorization Passkey
+                  <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-semibold text-slate-800 flex items-center gap-1.5">
+                        <KeyRound className="w-3.5 h-3.5 text-slate-700" />
+                        <span>Faculty Passkey</span>
                       </label>
-                      <span className="text-[10px] text-amber-700 font-bold">Teachers Only</span>
+                      <button
+                        type="button"
+                        onClick={() => setShowFacultyPasskey(!showFacultyPasskey)}
+                        className="text-[11px] font-semibold text-slate-600 hover:text-slate-900 transition-colors flex items-center gap-1 cursor-pointer"
+                      >
+                        {showFacultyPasskey ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                        <span>{showFacultyPasskey ? 'Hide' : 'Show'}</span>
+                      </button>
                     </div>
-                    <input
-                      type="password"
-                      placeholder="Enter College Faculty Passkey"
-                      value={facultyPasskey}
-                      onChange={e => setFacultyPasskey(e.target.value)}
-                      className="w-full text-sm text-slate-800 bg-white border border-amber-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 rounded-lg px-3 py-2 outline-none font-mono"
-                      required
-                    />
-                    <p className="text-[11px] text-amber-800 mt-1">
-                      Issued by University Administration for teacher verification.
+                    <div className="relative">
+                      <input
+                        type={showFacultyPasskey ? 'text' : 'password'}
+                        placeholder="Enter Faculty Passkey"
+                        value={facultyPasskey}
+                        onChange={e => setFacultyPasskey(e.target.value)}
+                        className="w-full text-xs font-mono text-slate-900 bg-white border border-slate-300 focus:border-slate-800 focus:ring-2 focus:ring-slate-900/10 rounded-lg px-3 py-2 outline-none transition"
+                        required
+                      />
+                    </div>
+                    <p className="text-[11px] text-slate-500 font-normal">
+                      Confidential key issued by University Administration for teacher verification.
                     </p>
                   </div>
                 )}
 
                 {/* Email Field with Icon */}
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                    Email Address
+                  <label htmlFor="auth-email-input" className="block text-xs font-medium text-slate-700 mb-1.5">
+                    Institutional Email Address
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                       <Mail className="w-4 h-4" />
                     </div>
                     <input
+                      id="auth-email-input"
                       type="email"
-                      placeholder="Enter your email address"
+                      placeholder="name@college.edu.in"
                       value={email}
                       onChange={e => setEmail(e.target.value)}
-                      className="w-full text-sm text-slate-800 bg-white border border-slate-200 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 rounded-xl pl-10 pr-4 py-2.5 outline-none transition"
+                      className="w-full text-sm text-slate-900 bg-white border border-slate-300 focus:border-sky-600 rounded-lg pl-10 pr-4 py-2.5 outline-none transition"
                       required
                     />
                   </div>
@@ -908,7 +961,7 @@ export default function AuthScreen({ onLogin }) {
 
                 {/* Password Field with Show/Hide */}
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                  <label htmlFor="auth-password-input" className="block text-xs font-medium text-slate-700 mb-1.5">
                     Password
                   </label>
                   <div className="relative">
@@ -916,11 +969,12 @@ export default function AuthScreen({ onLogin }) {
                       <Lock className="w-4 h-4" />
                     </div>
                     <input
+                      id="auth-password-input"
                       type={showPassword ? 'text' : 'password'}
-                      placeholder="Enter your password"
+                      placeholder="Enter account password"
                       value={password}
                       onChange={e => setPassword(e.target.value)}
-                      className="w-full text-sm text-slate-800 bg-white border border-slate-200 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 rounded-xl pl-10 pr-10 py-2.5 outline-none transition"
+                      className="w-full text-sm text-slate-900 bg-white border border-slate-300 focus:border-sky-600 rounded-lg pl-10 pr-10 py-2.5 outline-none transition"
                       required
                     />
                     <button
@@ -935,25 +989,25 @@ export default function AuthScreen({ onLogin }) {
 
                   {/* Password requirements in Signup */}
                   {isSignUp && (
-                    <div className="mt-2.5 p-3 bg-slate-50 rounded-xl border border-slate-200/80 text-[11px] text-slate-600 space-y-1">
+                    <div className="mt-2.5 p-3 bg-slate-50 rounded-lg border border-slate-200 text-[11px] text-slate-600 space-y-1">
                       <div className="font-semibold text-slate-800 mb-1">Password Requirements:</div>
                       <div className="flex items-center gap-1.5">
-                        <span className={password.length >= 8 ? 'text-emerald-600 font-bold' : 'text-slate-400'}>
+                        <span className={password.length >= 8 ? 'text-emerald-700 font-medium' : 'text-slate-500'}>
                           {password.length >= 8 ? '✓' : '•'} At least 8 characters
                         </span>
                       </div>
                       <div className="flex items-center gap-1.5">
-                        <span className={/[A-Z]/.test(password) ? 'text-emerald-600 font-bold' : 'text-slate-400'}>
+                        <span className={/[A-Z]/.test(password) ? 'text-emerald-700 font-medium' : 'text-slate-500'}>
                           {/[A-Z]/.test(password) ? '✓' : '•'} At least 1 uppercase letter (A-Z)
                         </span>
                       </div>
                       <div className="flex items-center gap-1.5">
-                        <span className={/[0-9]/.test(password) ? 'text-emerald-600 font-bold' : 'text-slate-400'}>
+                        <span className={/[0-9]/.test(password) ? 'text-emerald-700 font-medium' : 'text-slate-500'}>
                           {/[0-9]/.test(password) ? '✓' : '•'} At least 1 number (0-9)
                         </span>
                       </div>
                       <div className="flex items-center gap-1.5">
-                        <span className={/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password) ? 'text-emerald-600 font-bold' : 'text-slate-400'}>
+                        <span className={/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password) ? 'text-emerald-700 font-medium' : 'text-slate-500'}>
                           {/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password) ? '✓' : '•'} At least 1 special character (!@#$%^&*)
                         </span>
                       </div>
@@ -963,13 +1017,13 @@ export default function AuthScreen({ onLogin }) {
 
                 {/* Remember Me & Forgot Password Row */}
                 <div className="flex items-center justify-between text-xs pt-1">
-                  <label className="flex items-center gap-2 cursor-pointer select-none">
+                  <label htmlFor="remember-me" className="flex items-center gap-2 cursor-pointer select-none">
                     <input
                       id="remember-me"
                       type="checkbox"
                       checked={agreeTerms}
                       onChange={e => setAgreeTerms(e.target.checked)}
-                      className="w-4 h-4 rounded text-blue-600 border-slate-300 focus:ring-blue-600/20 cursor-pointer accent-blue-600 shrink-0"
+                      className="w-4 h-4 rounded text-sky-600 border-slate-300 focus:ring-sky-600/20 cursor-pointer accent-sky-600 shrink-0"
                     />
                     <span className="text-slate-600 font-medium">Remember me</span>
                   </label>
@@ -983,7 +1037,7 @@ export default function AuthScreen({ onLogin }) {
                         setSuccessMsg('');
                         setAuthMode('forgot_email');
                       }}
-                      className="text-xs font-semibold text-blue-600 hover:text-blue-700 hover:underline cursor-pointer"
+                      className="text-xs font-semibold text-sky-600 hover:text-sky-700 hover:underline cursor-pointer"
                     >
                       Forgot password?
                     </button>
@@ -1001,16 +1055,16 @@ export default function AuthScreen({ onLogin }) {
                         setBotVerified(true);
                       }, 700);
                     }}
-                    className={`flex items-center justify-between p-2.5 rounded-xl border text-xs cursor-pointer select-none transition ${
+                    className={`flex items-center justify-between p-2.5 rounded-lg border text-xs cursor-pointer select-none transition-colors ${
                       botVerified 
-                        ? 'bg-emerald-50/70 border-emerald-300 text-emerald-800' 
+                        ? 'bg-emerald-50 border-emerald-200 text-emerald-900' 
                         : botVerifying 
-                        ? 'bg-blue-50/70 border-blue-300 text-blue-800'
+                        ? 'bg-sky-50 border-sky-200 text-sky-900'
                         : 'bg-slate-50 border-slate-200 text-slate-700 hover:border-slate-300'
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
-                      <div className={`w-4 h-4 rounded border flex items-center justify-center transition ${
+                      <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
                         botVerified 
                           ? 'bg-emerald-600 border-emerald-600 text-white' 
                           : 'border-slate-300 bg-white'
@@ -1018,42 +1072,96 @@ export default function AuthScreen({ onLogin }) {
                         {botVerified ? (
                           <CheckCircle2 className="w-3.5 h-3.5 text-white" />
                         ) : botVerifying ? (
-                          <div className="w-2.5 h-2.5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                          <div className="w-2.5 h-2.5 border-2 border-sky-600 border-t-transparent rounded-full animate-spin" />
                         ) : null}
                       </div>
                       <span className="font-medium text-[11px]">
                         {botVerified 
-                          ? 'Human verification verified' 
+                          ? 'Browser security verification confirmed' 
                           : botVerifying 
                           ? 'Verifying browser environment...' 
-                          : 'Verify you are human (Security Challenge)'}
+                          : 'Verify browser security (Challenge)'}
                       </span>
                     </div>
                     <div className="flex items-center gap-1 opacity-60">
-                      <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
-                      <span className="text-[10px] uppercase tracking-wider font-mono">Anti-Bot</span>
+                      <ShieldCheck className="w-3.5 h-3.5 text-sky-600" />
+                      <span className="text-[10px] uppercase tracking-wider font-mono">Secured</span>
                     </div>
                   </div>
                 </div>
 
-                {/* Primary Login Button with Arrow */}
+                {/* Primary Action Button */}
                 <button
                   type="submit"
                   disabled={loading || botVerifying}
-                  className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold transition-all shadow-md shadow-blue-600/25 active:scale-[0.99] disabled:opacity-60 cursor-pointer flex items-center justify-center gap-2 mt-2"
+                  className="w-full py-2.5 rounded-lg bg-sky-600 hover:bg-sky-700 active:bg-sky-800 text-white text-sm font-semibold transition-colors disabled:opacity-60 cursor-pointer flex items-center justify-center gap-2 mt-2"
                 >
                   {loading ? (
                     <>
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      <span>Authenticating...</span>
+                      <span>Verifying &amp; Sending OTP...</span>
                     </>
                   ) : (
                     <>
-                      <span>{isSignUp ? 'Create Account' : 'Login'}</span>
+                      <span>{isSignUp ? 'Send OTP & Verify Email' : 'Sign In'}</span>
                       <ArrowRight className="w-4 h-4" />
                     </>
                   )}
                 </button>
+
+                {/* Developer Bypass Panel */}
+                <div className="mt-5 pt-4 border-t border-slate-200">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800">
+                      <Code className="w-4 h-4 text-amber-500" />
+                      <span>Developer Bypass (All Roles)</span>
+                    </div>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-bold border border-amber-200">
+                      ⚡ Dev Mode
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 mb-2.5 leading-snug">
+                    Instantly bypass authentication, password verification, OTP, and 403 role restrictions for development & testing.
+                  </p>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleDevBypass('developer')}
+                      className="py-2 px-2 bg-slate-900 hover:bg-slate-800 active:scale-[0.98] text-amber-400 rounded-lg text-xs font-bold flex flex-col items-center justify-center gap-1 transition shadow-xs cursor-pointer border border-slate-700 group"
+                      title="Bypass all role restrictions with Super Developer privileges"
+                    >
+                      <Zap className="w-3.5 h-3.5 text-amber-400 group-hover:scale-115 transition-transform" />
+                      <span className="text-[10px] uppercase font-mono tracking-tight text-amber-300">Bypass All</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDevBypass('admin')}
+                      className="py-2 px-2 bg-amber-50 hover:bg-amber-100 active:scale-[0.98] text-amber-900 rounded-lg text-xs font-semibold flex flex-col items-center justify-center gap-1 transition border border-amber-200 cursor-pointer group"
+                      title="Bypass directly into Administrator Portal"
+                    >
+                      <Shield className="w-3.5 h-3.5 text-amber-600 group-hover:scale-115 transition-transform" />
+                      <span className="text-[10px] font-mono tracking-tight">Admin</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDevBypass('faculty')}
+                      className="py-2 px-2 bg-emerald-50 hover:bg-emerald-100 active:scale-[0.98] text-emerald-900 rounded-lg text-xs font-semibold flex flex-col items-center justify-center gap-1 transition border border-emerald-200 cursor-pointer group"
+                      title="Bypass directly into Faculty Portal"
+                    >
+                      <UserCheck className="w-3.5 h-3.5 text-emerald-600 group-hover:scale-115 transition-transform" />
+                      <span className="text-[10px] font-mono tracking-tight">Faculty</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDevBypass('student')}
+                      className="py-2 px-2 bg-sky-50 hover:bg-sky-100 active:scale-[0.98] text-sky-900 rounded-lg text-xs font-semibold flex flex-col items-center justify-center gap-1 transition border border-sky-200 cursor-pointer group"
+                      title="Bypass directly into Student Portal"
+                    >
+                      <GraduationCap className="w-3.5 h-3.5 text-sky-600 group-hover:scale-115 transition-transform" />
+                      <span className="text-[10px] font-mono tracking-tight">Student</span>
+                    </button>
+                  </div>
+                </div>
               </form>
             )}
 
@@ -1369,6 +1477,50 @@ export default function AuthScreen({ onLogin }) {
           </div>
         </div>
       </div>
+
+      {/* Student A-to-Z Admission Google Form Modal */}
+      {isEnrollmentFormOpen && (
+        <StudentEnrollmentFormModal
+          isOpen={isEnrollmentFormOpen}
+          initialEmail={email}
+          initialName={name}
+          onClose={() => {
+            setIsEnrollmentFormOpen(false);
+            if (typeof window !== 'undefined') {
+              localStorage.removeItem('college_in_admission_flow');
+            }
+          }}
+          onSubmitSuccess={async (newApp) => {
+            if (typeof window !== 'undefined') {
+              localStorage.removeItem('college_in_admission_flow');
+            }
+            // Save application to localStorage and Supabase cloud
+            try {
+              let existingForms = [];
+              const cloudForms = await fetchCloudAdmissionsForms();
+              if (cloudForms && Array.isArray(cloudForms) && cloudForms.length > 0) {
+                existingForms = cloudForms;
+              } else {
+                const saved = localStorage.getItem('college_student_admissions_forms');
+                if (saved) {
+                  try { existingForms = JSON.parse(saved); } catch {}
+                }
+              }
+              // Prevent duplicate ID or email if resubmitted
+              const filtered = existingForms.filter(f => f.email?.toLowerCase() !== newApp.email?.toLowerCase());
+              const updatedForms = [newApp, ...filtered];
+              localStorage.setItem('college_student_admissions_forms', JSON.stringify(updatedForms));
+              await saveAdmissionsFormsToCloud(updatedForms);
+            } catch (err) {
+              console.warn('Save admission form notice:', err);
+            }
+
+            // Set state to waiting view with message
+            setIsSignUp(false);
+            setSuccessMsg(`Official Admission Form submitted for ${newApp.fullName}! Your application is currently WAITING FOR APPROVAL by Faculty & Admin.`);
+          }}
+        />
+      )}
 
       {/* ================= TERMS & POLICY MODAL ================= */}
       {showTermsModal && (

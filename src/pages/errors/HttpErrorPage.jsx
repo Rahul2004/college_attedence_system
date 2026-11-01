@@ -144,80 +144,95 @@ export default function HttpErrorPage({
   const illustrationSrc = isServerError ? '/illustrations/error_server.jpg' : '/illustrations/error_404.jpg';
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 via-sky-50/20 to-slate-100 flex items-center justify-center p-4 sm:p-6 font-sans">
-      <div className="w-full max-w-xl bg-white border border-slate-200/90 rounded-3xl shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-        
-        {/* Dynamic High-End Error Illustration Banner */}
-        <div className="w-full h-48 sm:h-56 bg-slate-100 relative overflow-hidden border-b border-slate-100">
-          <img 
-            src={illustrationSrc} 
-            alt={`Error ${code} illustration`} 
-            className="w-full h-full object-cover object-center"
-            loading="eager"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent opacity-90" />
-          
-          {/* Floating HTTP Code Pill */}
-          <div className="absolute top-4 right-4">
-            <span className={`text-[11px] font-mono font-bold px-3 py-1 rounded-full border shadow-sm backdrop-blur-md bg-white/90 ${colorStyles.badge}`}>
-              HTTP Status {code}
+    <div className="min-h-screen w-full bg-slate-900 text-slate-100 flex flex-col justify-between p-4 sm:p-8 md:p-12 font-sans selection:bg-rose-500 selection:text-white">
+      {/* Top University Incident Banner */}
+      <header className="flex items-center justify-between pb-4 border-b border-slate-800">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center">
+            <Icon className="w-4 h-4 text-rose-400" />
+          </div>
+          <div>
+            <span className="font-bold text-sm tracking-tight text-white block">
+              University Attendance Gateway
+            </span>
+            <span className="text-[11px] text-slate-400">
+              Diagnostic &amp; Error Recovery Center
             </span>
           </div>
         </div>
 
-        <div className="p-6 sm:p-8 pt-4 text-center">
-          {/* Error Icon Badge */}
-          <div className={`w-12 h-12 rounded-2xl ${colorStyles.iconBg} flex items-center justify-center mx-auto mb-3 shadow-xs border ${colorStyles.border}`}>
-            <Icon className="w-6 h-6" />
+        <span className="font-mono text-xs font-bold px-3 py-1 rounded-full bg-rose-950/80 text-rose-400 border border-rose-800/80">
+          HTTP {code}
+        </span>
+      </header>
+
+      {/* Center Full-Screen Error Stage */}
+      <main className="my-auto py-8 sm:py-12 max-w-4xl mx-auto w-full space-y-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-slate-800 border border-slate-700 flex items-center justify-center text-rose-400 shrink-0 shadow-lg">
+            <Icon className="w-8 h-8 sm:w-10 sm:h-10" />
           </div>
+          <div className="space-y-1">
+            <span className="text-xs font-mono font-bold uppercase tracking-wider text-rose-400">
+              System Gateway Exception
+            </span>
+            <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
+              {displayTitle}
+            </h1>
+          </div>
+        </div>
 
-          {/* Title */}
-          <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight font-display mb-2">
-            {displayTitle}
-          </h1>
-
-          {/* Explanation */}
-          <p className="text-xs sm:text-sm text-slate-500 max-w-md mx-auto mb-6 leading-relaxed">
+        {/* Detailed Diagnostic Terminal Box */}
+        <div className="bg-slate-950 rounded-2xl border border-slate-800 p-5 sm:p-6 font-mono text-xs text-slate-300 space-y-3 shadow-2xl overflow-x-auto">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-800/80 text-[11px] text-slate-500">
+            <span className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block animate-pulse" />
+              Exception Trace &amp; Diagnostic Log
+            </span>
+            <span>Error Status: {code}</span>
+          </div>
+          <p className="text-slate-300 leading-relaxed font-sans text-sm">
             {displayMessage}
           </p>
+        </div>
 
         {/* Action Controls */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 pt-2 border-t border-outline">
-          <button
-            type="button"
-            onClick={() => navigate(-1)}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 rounded-sk-btn bg-surface-sunken hover:bg-slate-200 text-ink text-xs font-bold transition border border-outline cursor-pointer"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            Go Back
-          </button>
-
+        <div className="flex flex-wrap items-center gap-3 pt-2">
           {showRetry && onRetry && (
             <button
               type="button"
               onClick={onRetry}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 rounded-sk-btn bg-sky hover:bg-sky-hover text-white text-xs font-bold transition shadow-xs cursor-pointer"
+              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-white hover:bg-slate-100 text-slate-900 text-xs font-bold transition shadow-sm cursor-pointer"
             >
-              <RefreshCw className="w-3.5 h-3.5" />
-              Try Again
+              <RefreshCw className="w-4 h-4" />
+              <span>Try Again / Reload</span>
             </button>
           )}
 
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold border border-slate-700 transition cursor-pointer"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Go Back</span>
+          </button>
+
           <Link
             to={actionLink || getDashboardPath()}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 rounded-sk-btn bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition shadow-xs"
+            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold border border-slate-700 transition cursor-pointer"
           >
-            <Home className="w-3.5 h-3.5" />
-            {actionText || (session ? 'My Dashboard' : 'Sign In')}
+            <Home className="w-4 h-4" />
+            <span>{actionText || (session ? 'My Dashboard' : 'Sign In Gateway')}</span>
           </Link>
         </div>
+      </main>
 
-        {/* Security Note Footer */}
-        <div className="mt-6 pt-4 border-t border-outline text-[11px] text-ink-subtle">
-          University Attendance Suite • Secure Access Gateway • Incident Logged
-        </div>
-      </div>
-      </div>
+      {/* Footer */}
+      <footer className="pt-4 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-slate-500">
+        <span>University Attendance Suite • Secure Incident Logged</span>
+        <span className="font-mono">Timestamp: {new Date().toISOString()}</span>
+      </footer>
     </div>
   );
 }

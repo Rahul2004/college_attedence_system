@@ -39,7 +39,7 @@ export default function StudentDetailCard({ student, onClose, onToggleStatus, th
     : 0;
 
   return (
-    <div className="bg-white/85 backdrop-blur-2xl rounded-[28px] border border-black/[0.08] shadow-[0_24px_60px_rgba(0,0,0,0.12)] p-6 text-[#1D1D1F] w-full animate-in fade-in zoom-in-95 duration-200">
+    <div className="bg-white rounded-lg border border-slate-300 shadow-sm p-6 text-slate-900 w-full">
       {/* Card Header */}
       <div className="flex items-center justify-between pb-3.5 border-b border-black/[0.06]">
         <div className="flex items-center gap-2">
@@ -136,7 +136,7 @@ export default function StudentDetailCard({ student, onClose, onToggleStatus, th
         </div>
 
         {/* Turnout summary item (like items list in reference) */}
-        <div className="bg-slate-50 rounded-xl p-3 border border-slate-100 text-xs space-y-1.5">
+        <div className="bg-slate-50 rounded-lg p-3 border border-slate-100 text-xs space-y-1.5">
           <div className="flex justify-between text-slate-600">
             <span>Lectures Attended:</span>
             <span className="font-semibold text-slate-800">{effectiveAttended}</span>
@@ -154,10 +154,10 @@ export default function StudentDetailCard({ student, onClose, onToggleStatus, th
         </div>
 
         {/* Shortage or Buffer Guidance */}
-        <div className={`p-3 rounded-xl border text-xs ${
+        <div className={`p-3 rounded-lg border text-xs ${
           isDefaulter
-            ? 'bg-rose-50/70 border-rose-200/80 text-rose-800'
-            : 'bg-emerald-50/70 border-emerald-200/80 text-emerald-800'
+            ? 'bg-rose-50 border border-rose-200 text-rose-800'
+            : 'bg-emerald-50 border border-emerald-200 text-emerald-800'
         }`}>
           {isDefaulter ? (
             <div className="flex items-start gap-2">
@@ -184,7 +184,7 @@ export default function StudentDetailCard({ student, onClose, onToggleStatus, th
         <button
           type="button"
           onClick={() => onToggleStatus && onToggleStatus(student.id, isPresent ? 'ABSENT' : 'PRESENT')}
-          className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-colors ${
+          className={`px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 transition-colors ${
             isPresent
               ? 'bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200'
               : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200'

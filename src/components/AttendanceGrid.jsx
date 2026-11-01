@@ -42,9 +42,9 @@ export default function AttendanceGrid({
   });
 
   return (
-    <section className="bg-white rounded-sk-card border border-outline p-5 sm:p-6 shadow-sk-card mb-8">
+    <section className="bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-6 shadow-xs mb-8">
       {/* Session Workflow Bar */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-outline">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-slate-100">
         <div>
           <div className="flex items-center gap-2.5">
             <h2 className="text-lg sm:text-xl font-extrabold text-ink tracking-tight font-display">
@@ -62,7 +62,7 @@ export default function AttendanceGrid({
         {/* Date Selector & Session Commit */}
         <div className="flex items-center flex-wrap gap-2.5">
           {onDateChange && (
-            <div className="flex items-center gap-2 bg-surface-sunken border border-outline px-3.5 py-2 rounded-sk-btn">
+            <div className="flex items-center gap-2 bg-slate-50 border border-slate-300 px-3 py-1.5 rounded-xl">
               <span className="text-xs font-bold text-ink-subtle">Date:</span>
               <input
                 id="session-date-picker"

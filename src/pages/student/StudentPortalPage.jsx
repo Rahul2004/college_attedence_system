@@ -31,25 +31,39 @@ export default function StudentPortalPage() {
       const matched = (students || []).find(s => s.email?.toLowerCase() === studentEmail);
       if (matched) return matched;
 
+      // Check admissions forms for real submitted details
+      let admissionDetail = null;
+      if (typeof window !== 'undefined') {
+        try {
+          const rawAdmissions = localStorage.getItem('college_student_admissions_forms');
+          if (rawAdmissions) {
+            const list = JSON.parse(rawAdmissions);
+            if (Array.isArray(list)) {
+              admissionDetail = list.find(f => f.email?.toLowerCase() === studentEmail);
+            }
+          }
+        } catch {}
+      }
+
       // Dynamically construct authentic student record for the currently logged-in user
       const metadata = session?.user?.user_metadata || {};
       const profile = userProfile || {};
-      const studentName = profile.full_name || metadata.name || session?.user?.email?.split('@')[0] || 'Student User';
+      const studentName = admissionDetail?.fullName || profile.full_name || metadata.name || session?.user?.email?.split('@')[0] || 'Student User';
       const studentId = session?.user?.id || 'stu-active';
       return {
         id: studentId,
-        rollNo: profile.roll_no || metadata.rollNo || metadata.roll_no || 'Pending UID',
+        rollNo: admissionDetail?.rollNo || profile.roll_no || metadata.rollNo || metadata.roll_no || 'Pending UID',
         name: studentName,
         email: session?.user?.email,
-        phone: profile.emergency_contact || metadata.phone || '+91 98000 00000',
-        program: profile.program_name || metadata.program || 'Undergraduate Degree',
-        semester: profile.semester || metadata.semester || 'Semester I',
-        section: profile.section || 'A',
+        phone: admissionDetail?.phone || profile.emergency_contact || metadata.phone || '+91 98000 00000',
+        program: admissionDetail?.branch || admissionDetail?.programName || profile.program_name || metadata.program || 'Undergraduate Degree',
+        semester: admissionDetail?.semester || profile.semester || metadata.semester || 'Semester I',
+        section: admissionDetail?.section || profile.section || 'A',
         attendancePercentage: 0,
         attendedClasses: 0,
         totalClasses: 0,
         todayStatus: 'ABSENT',
-        status: profile.status || metadata.status || 'active',
+        status: admissionDetail?.status === 'APPROVED' ? 'active' : (profile.status || metadata.status || 'active'),
         academicStanding: 'Enrolled'
       };
     }

@@ -26,11 +26,11 @@ export default function AdminDebarmentNoticeModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-950/80 backdrop-blur-md">
-      <div className="bg-white rounded-3xl shadow-2xl border border-slate-200/90 w-full max-w-4xl overflow-hidden flex flex-col max-h-[94vh]">
+      <div className="bg-white rounded-xl shadow-2xl border border-slate-300 w-full max-w-4xl overflow-hidden flex flex-col max-h-[94vh]">
         {/* Modal Toolbar (not printed) */}
         <div className="bg-slate-900 text-white px-6 py-3.5 flex items-center justify-between border-b border-slate-800 shrink-0 print:hidden">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-rose-600 flex items-center justify-center text-white">
+            <div className="w-8 h-8 rounded-lg bg-rose-700 flex items-center justify-center text-white">
               <ShieldAlert className="w-4 h-4" />
             </div>
             <div>
@@ -47,7 +47,7 @@ export default function AdminDebarmentNoticeModal({
             <button
               type="button"
               onClick={() => window.print()}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white text-slate-900 text-xs font-bold hover:bg-slate-100 transition-colors shadow-xs"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white text-slate-900 text-xs font-semibold hover:bg-slate-100 transition-colors shadow-sm"
             >
               <Printer className="w-3.5 h-3.5" />
               Print / Save PDF
@@ -55,7 +55,7 @@ export default function AdminDebarmentNoticeModal({
             <button
               type="button"
               onClick={onClose}
-              className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
             >
               <X className="w-5 h-5" />
             </button>

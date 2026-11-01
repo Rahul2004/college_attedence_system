@@ -49,11 +49,11 @@ export default function StudentPunchModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-950/80 backdrop-blur-md">
-      <div className="bg-white rounded-3xl shadow-2xl border border-slate-200/90 w-full max-w-md overflow-hidden flex flex-col">
+      <div className="bg-white rounded-lg shadow-xl border border-slate-300 w-full max-w-md overflow-hidden flex flex-col">
         {/* Header */}
         <div className="bg-slate-900 text-white px-6 py-4 flex items-center justify-between border-b border-slate-800">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-600/30">
+            <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-white shrink-0">
               <Smartphone className="w-5 h-5" />
             </div>
             <div>
@@ -69,7 +69,7 @@ export default function StudentPunchModal({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -92,7 +92,7 @@ export default function StudentPunchModal({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="w-full py-2.5 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition-colors"
+                  className="w-full py-2.5 rounded-lg bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition-colors"
                 >
                   Return to Dashboard
                 </button>
@@ -101,8 +101,8 @@ export default function StudentPunchModal({
           ) : (
             <form onSubmit={handlePunch} className="space-y-4">
               {/* Geofence verified badge */}
-              <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-3 flex items-center gap-3 text-xs text-emerald-800">
-                <div className="w-8 h-8 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-700 shrink-0">
+              <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3 flex items-center gap-3 text-xs text-emerald-800">
+                <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-700 shrink-0">
                   <Wifi className="w-4 h-4" />
                 </div>
                 <div>
@@ -122,7 +122,7 @@ export default function StudentPunchModal({
                     value={otpInput}
                     onChange={e => setOtpInput(e.target.value.replace(/\D/g, ''))}
                     placeholder="• • • •"
-                    className="w-48 text-center text-3xl font-mono font-black tracking-widest bg-slate-50 border-2 border-slate-200 focus:border-indigo-600 rounded-2xl py-2.5 outline-none text-slate-900 focus:bg-white transition-all shadow-inner"
+                    className="w-48 text-center text-3xl font-mono font-black tracking-widest bg-slate-50 border-2 border-slate-200 focus:border-slate-900 rounded-lg py-2.5 outline-none text-slate-900 focus:bg-white transition-all shadow-inner"
                     autoFocus
                   />
                 </div>
@@ -139,7 +139,7 @@ export default function StudentPunchModal({
               <button
                 type="submit"
                 disabled={isPunching || otpInput.length < 4}
-                className="w-full py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition-all shadow-md shadow-indigo-600/20 active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
+                className="w-full py-3 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition-all shadow-md shadow-indigo-600/20 active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {isPunching ? (
                   <span className="inline-block animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />

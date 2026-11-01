@@ -117,11 +117,11 @@ export default function ExportReporting({ students = [], course, threshold = 75 
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200/80 p-5 sm:p-6 shadow-sm mb-8">
+    <div className="bg-white rounded-xl border border-slate-300 p-5 sm:p-6 shadow-xs mb-8">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-5 border-b border-slate-100 gap-4">
         <div>
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-800 flex items-center justify-center">
               <Download className="w-4 h-4" />
             </div>
             <h2 className="text-lg sm:text-xl font-bold text-slate-900">
@@ -143,10 +143,10 @@ export default function ExportReporting({ students = [], course, threshold = 75 
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
         {/* Export 1: Daily Roster */}
-        <div className="border border-slate-200/80 rounded-xl p-5 bg-slate-50/40 hover:bg-slate-50 transition-colors flex flex-col justify-between">
+        <div className="border border-slate-200/80 rounded-lg p-5 bg-slate-50/60 hover:bg-slate-50 transition-colors flex flex-col justify-between border border-slate-200">
           <div>
-            <div className="w-10 h-10 rounded-xl bg-white border border-slate-200/80 flex items-center justify-center mb-3 shadow-xs">
-              <FileSpreadsheet className="w-5 h-5 text-indigo-600" />
+            <div className="w-9 h-9 rounded-lg bg-white border border-slate-300 flex items-center justify-center mb-3 shadow-xs">
+              <FileSpreadsheet className="w-5 h-5 text-slate-800" />
             </div>
             <h3 className="font-semibold text-sm text-slate-900">
               Full Attendance Roster
@@ -159,7 +159,7 @@ export default function ExportReporting({ students = [], course, threshold = 75 
           <button
             type="button"
             onClick={handleExportRosterCSV}
-            className="mt-5 w-full py-2.5 text-xs font-semibold rounded-xl bg-white hover:bg-slate-900 text-slate-800 hover:text-white border border-slate-200 hover:border-slate-900 transition-all flex items-center justify-center gap-2 shadow-xs"
+            className="mt-5 w-full py-2.5 text-xs font-semibold rounded-lg bg-white hover:bg-slate-900 text-slate-800 hover:text-white border border-slate-300 hover:border-slate-900 transition-colors flex items-center justify-center gap-2 shadow-xs"
           >
             <Download className="w-3.5 h-3.5" />
             Download CSV Roster
@@ -167,7 +167,7 @@ export default function ExportReporting({ students = [], course, threshold = 75 
         </div>
 
         {/* Export 2: Defaulter Report */}
-        <div className="border border-rose-200/80 rounded-xl p-5 bg-rose-50/30 hover:bg-rose-50/50 transition-colors flex flex-col justify-between">
+        <div className="border border-rose-200 rounded-lg p-5 bg-rose-50/40 hover:bg-rose-50/70 transition-colors flex flex-col justify-between">
           <div>
             <div className="w-10 h-10 rounded-xl bg-white border border-rose-200 flex items-center justify-center mb-3 shadow-xs">
               <FileText className="w-5 h-5 text-rose-600" />
@@ -183,7 +183,7 @@ export default function ExportReporting({ students = [], course, threshold = 75 
           <button
             type="button"
             onClick={handleExportDefaultersCSV}
-            className="mt-5 w-full py-2.5 text-xs font-semibold rounded-xl bg-rose-600 hover:bg-rose-700 text-white transition-all flex items-center justify-center gap-2 shadow-sm shadow-rose-600/20"
+            className="mt-5 w-full py-2.5 text-xs font-semibold rounded-lg bg-rose-700 hover:bg-rose-800 text-white transition-colors flex items-center justify-center gap-2 shadow-xs"
           >
             <Download className="w-3.5 h-3.5" />
             Download Defaulters CSV
@@ -191,9 +191,9 @@ export default function ExportReporting({ students = [], course, threshold = 75 
         </div>
 
         {/* Export 3: Print Sheet */}
-        <div className="border border-slate-200/80 rounded-xl p-5 bg-slate-50/40 hover:bg-slate-50 transition-colors flex flex-col justify-between">
+        <div className="border border-slate-200/80 rounded-lg p-5 bg-slate-50/60 hover:bg-slate-50 transition-colors flex flex-col justify-between border border-slate-200">
           <div>
-            <div className="w-10 h-10 rounded-xl bg-white border border-slate-200/80 flex items-center justify-center mb-3 shadow-xs">
+            <div className="w-9 h-9 rounded-lg bg-white border border-slate-300 flex items-center justify-center mb-3 shadow-xs">
               <Printer className="w-5 h-5 text-slate-700" />
             </div>
             <h3 className="font-semibold text-sm text-slate-900">
@@ -207,7 +207,7 @@ export default function ExportReporting({ students = [], course, threshold = 75 
           <button
             type="button"
             onClick={handlePrint}
-            className="mt-5 w-full py-2.5 text-xs font-semibold rounded-xl bg-slate-900 hover:bg-slate-800 text-white transition-all flex items-center justify-center gap-2 shadow-sm shadow-slate-900/20"
+            className="mt-5 w-full py-2.5 text-xs font-semibold rounded-lg bg-slate-900 hover:bg-slate-800 text-white transition-colors flex items-center justify-center gap-2 shadow-xs"
           >
             <Printer className="w-3.5 h-3.5" />
             Print Official Sheet

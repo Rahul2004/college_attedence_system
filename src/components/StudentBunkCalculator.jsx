@@ -70,11 +70,11 @@ export default function StudentBunkCalculator({ student, subjects }) {
   };
 
   return (
-    <div className="bg-white rounded-3xl border border-slate-200/90 p-5 sm:p-7 shadow-xs">
+    <div className="bg-white rounded-xl border border-slate-300 p-5 sm:p-7 shadow-xs">
       {/* Title */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 mb-5 border-b border-slate-100">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
+          <div className="w-8 h-8 rounded-lg bg-slate-100 border border-slate-300 flex items-center justify-center text-slate-800">
             <Calculator className="w-5 h-5" />
           </div>
           <div>
@@ -82,7 +82,7 @@ export default function StudentBunkCalculator({ student, subjects }) {
               <h3 className="font-bold text-base text-slate-900 tracking-tight">
                 Bunk &amp; Attendance Target Predictor
               </h3>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-800 border border-slate-300">
                 What-If Engine
               </span>
             </div>
@@ -117,7 +117,7 @@ export default function StudentBunkCalculator({ student, subjects }) {
           <div>
             <div className="flex items-center justify-between text-xs font-semibold mb-2">
               <span className="text-slate-700">Target Attendance Goal:</span>
-              <span className="text-indigo-600 font-bold font-mono text-sm px-2.5 py-0.5 rounded-lg bg-indigo-50 border border-indigo-100">
+              <span className="text-slate-900 font-bold font-mono text-sm px-2.5 py-0.5 rounded-lg bg-slate-100 border border-indigo-100">
                 {targetPercentage}%
               </span>
             </div>
@@ -140,7 +140,7 @@ export default function StudentBunkCalculator({ student, subjects }) {
 
           {/* Large Result Box */}
           {currentPercentage < targetPercentage ? (
-            <div className="rounded-2xl border-2 border-rose-200 bg-rose-50/70 p-5 space-y-2">
+            <div className="rounded-lg border-2 border-rose-200 bg-rose-50/70 p-5 space-y-2">
               <div className="flex items-center gap-2 text-rose-700 font-bold text-xs uppercase tracking-wider">
                 <Flame className="w-4 h-4 text-rose-600" />
                 Attendance Deficit Alert
@@ -153,7 +153,7 @@ export default function StudentBunkCalculator({ student, subjects }) {
               </p>
             </div>
           ) : (
-            <div className="rounded-2xl border-2 border-emerald-200 bg-emerald-50/70 p-5 space-y-2">
+            <div className="rounded-lg border-2 border-emerald-200 bg-emerald-50/70 p-5 space-y-2">
               <div className="flex items-center gap-2 text-emerald-700 font-bold text-xs uppercase tracking-wider">
                 <Coffee className="w-4 h-4 text-emerald-600" />
                 Safe Bunk Margin Available
@@ -169,10 +169,10 @@ export default function StudentBunkCalculator({ student, subjects }) {
         </div>
 
         {/* Right Column: "What-If" Future Lecture Simulator */}
-        <div className="lg:col-span-5 bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-4">
+        <div className="lg:col-span-5 bg-slate-50 border border-slate-200 rounded-lg p-5 space-y-4">
           <div className="flex items-center justify-between">
             <h4 className="font-bold text-xs uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
-              <TrendingUp className="w-3.5 h-3.5 text-indigo-600" />
+              <TrendingUp className="w-3.5 h-3.5 text-slate-900" />
               Attendance Target Simulator
             </h4>
             {(simulatedAttendedDelta !== 0 || simulatedTotalDelta !== 0) && (

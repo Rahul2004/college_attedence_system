@@ -19,7 +19,7 @@ export default function BentoMetrics({ metrics = {}, threshold = 75 }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
       {/* Metric 1: Total Classes */}
-      <div className="group relative overflow-hidden bg-white/80 backdrop-blur-xl rounded-[24px] border border-black/[0.06] p-7 shadow-[0_4px_24px_rgba(0,0,0,0.03)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-400 ease-[cubic-bezier(0.25,1,0.5,1)] flex flex-col justify-between">
+      <div className="group relative overflow-hidden bg-white/80 backdrop-blur-xl rounded-xl border border-slate-300 p-6 shadow-xs bg-white transition-colors flex flex-col justify-between">
         <div className="absolute top-0 right-0 -mr-8 -mt-8 w-28 h-28 bg-[#0071E3]/5 rounded-full blur-2xl group-hover:bg-[#0071E3]/10 transition-all duration-500"></div>
 
         <div className="flex items-start justify-between relative z-10">
@@ -31,7 +31,7 @@ export default function BentoMetrics({ metrics = {}, threshold = 75 }) {
               Conducted Classes
             </h3>
           </div>
-          <div className="w-11 h-11 rounded-2xl bg-[#F5F5F7] group-hover:bg-[#E8F2FF] flex items-center justify-center text-[#1D1D1F] group-hover:text-[#0071E3] transition-all duration-300">
+          <div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center text-slate-800">
             <BookOpen className="w-5 h-5 transition-transform duration-300 group-hover:scale-110" />
           </div>
         </div>
@@ -54,7 +54,7 @@ export default function BentoMetrics({ metrics = {}, threshold = 75 }) {
       </div>
 
       {/* Metric 2: Present Today */}
-      <div className="group relative overflow-hidden bg-white/80 backdrop-blur-xl rounded-[24px] border border-black/[0.06] p-7 shadow-[0_4px_24px_rgba(0,0,0,0.03)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-400 ease-[cubic-bezier(0.25,1,0.5,1)] flex flex-col justify-between">
+      <div className="group relative overflow-hidden bg-white/80 backdrop-blur-xl rounded-xl border border-slate-300 p-6 shadow-xs bg-white transition-colors flex flex-col justify-between">
         <div className="absolute top-0 right-0 -mr-8 -mt-8 w-28 h-28 bg-[#34C759]/5 rounded-full blur-2xl group-hover:bg-[#34C759]/10 transition-all duration-500"></div>
 
         <div className="flex items-start justify-between relative z-10">
@@ -66,7 +66,7 @@ export default function BentoMetrics({ metrics = {}, threshold = 75 }) {
               Present Today
             </h3>
           </div>
-          <div className="w-11 h-11 rounded-2xl bg-[#F5F5F7] group-hover:bg-[#EBF9EE] flex items-center justify-center text-[#1D1D1F] group-hover:text-[#34C759] transition-all duration-300">
+          <div className="w-11 h-11 rounded-lg bg-[#F5F5F7] group-hover:bg-[#EBF9EE] flex items-center justify-center text-[#1D1D1F] group-hover:text-[#34C759] transition-all duration-300">
             <Users className="w-5 h-5 transition-transform duration-300 group-hover:scale-110" />
           </div>
         </div>
@@ -89,7 +89,7 @@ export default function BentoMetrics({ metrics = {}, threshold = 75 }) {
       </div>
 
       {/* Metric 3: Low Warnings (< 75%) */}
-      <div className="group relative overflow-hidden bg-white/80 backdrop-blur-xl rounded-[24px] border border-black/[0.06] p-7 shadow-[0_4px_24px_rgba(0,0,0,0.03)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-400 ease-[cubic-bezier(0.25,1,0.5,1)] flex flex-col justify-between">
+      <div className="group relative overflow-hidden bg-white/80 backdrop-blur-xl rounded-xl border border-slate-300 p-6 shadow-xs bg-white transition-colors flex flex-col justify-between">
         <div className={`absolute top-0 right-0 -mr-8 -mt-8 w-28 h-28 rounded-full blur-2xl transition-all duration-500 ${
           lowWarningCount > 0 ? 'bg-[#FF3B30]/5 group-hover:bg-[#FF3B30]/10' : 'bg-[#34C759]/5 group-hover:bg-[#34C759]/10'
         }`}></div>
@@ -105,7 +105,7 @@ export default function BentoMetrics({ metrics = {}, threshold = 75 }) {
               Below Threshold (&lt; {threshold}%)
             </h3>
           </div>
-          <div className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 ${
+          <div className={`w-11 h-11 rounded-lg flex items-center justify-center transition-all duration-300 ${
             lowWarningCount > 0 
               ? 'bg-[#FFECEB] text-[#FF3B30] group-hover:scale-105' 
               : 'bg-[#EBF9EE] text-[#34C759] group-hover:scale-105'

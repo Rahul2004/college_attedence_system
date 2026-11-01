@@ -3,13 +3,10 @@ import {
   FileSpreadsheet, 
   Upload, 
   CheckCircle2, 
-  AlertCircle, 
   X, 
   Download, 
-  Users, 
-  ArrowRight,
-  Database,
-  FileCheck
+  Database, 
+  FileCheck 
 } from 'lucide-react';
 
 export default function AdminBulkImporter({ onClose, onImportSuccess }) {
@@ -112,25 +109,25 @@ BCA-401,Ananya Sen,ananya.s@univ.edu,BCA,IV,+91 9876543216,Computer Applications
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-950/80 backdrop-blur-md">
-      <div className="bg-white rounded-3xl shadow-2xl border border-slate-200/90 w-full max-w-4xl overflow-hidden flex flex-col max-h-[92vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-950/70 backdrop-blur-xs">
+      <div className="bg-white rounded-xl shadow-2xl border border-slate-200 w-full max-w-4xl overflow-hidden flex flex-col max-h-[92vh]">
         {/* Header */}
-        <div className="bg-slate-900 text-white px-6 py-4 flex items-center justify-between border-b border-slate-800 shrink-0">
+        <div className="bg-slate-900 text-white px-5 py-4 flex items-center justify-between border-b border-slate-800 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-600/30">
+            <div className="w-9 h-9 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center text-sky-400 shrink-0">
               <FileSpreadsheet className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-base font-bold text-white tracking-tight">
-                  Bulk Student &amp; Faculty Ingestion Suite
+                <h2 className="text-base font-semibold text-white tracking-tight">
+                  Bulk Student &amp; Faculty Ingestion
                 </h2>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                  CSV / Excel Parser
+                <span className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 border border-slate-700">
+                  CSV Parser
                 </span>
               </div>
-              <p className="text-xs text-slate-400">
-                Enroll entire batches, map semester cohorts, and seed attendance databases
+              <p className="text-xs text-slate-400 font-normal">
+                Register cohort batches, assign degree programs, and populate attendance rosters.
               </p>
             </div>
           </div>
@@ -138,52 +135,52 @@ BCA-401,Ananya Sen,ananya.s@univ.edu,BCA,IV,+91 9876543216,Computer Applications
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="p-1.5 rounded-md text-slate-400 hover:text-white transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Content Area */}
-        <div className="p-6 overflow-y-auto space-y-6">
+        <div className="p-5 overflow-y-auto space-y-5">
           {/* Upload Drop Zone & Sample Buttons */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="md:col-span-2 border-2 border-dashed border-slate-200 hover:border-indigo-500/50 bg-slate-50/50 hover:bg-indigo-50/20 rounded-2xl p-6 text-center transition-all flex flex-col items-center justify-center relative cursor-pointer group">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+            <div className="md:col-span-2 border-2 border-dashed border-slate-300 hover:border-sky-600 bg-slate-50 hover:bg-slate-100/50 rounded-xl p-5 text-center transition-colors flex flex-col items-center justify-center relative cursor-pointer">
               <input
                 type="file"
                 accept=".csv,.txt,.xlsx"
                 onChange={handleFileUpload}
                 className="absolute inset-0 opacity-0 cursor-pointer"
               />
-              <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                <Upload className="w-6 h-6" />
+              <div className="w-10 h-10 rounded-lg bg-sky-50 text-sky-700 border border-sky-200 flex items-center justify-center mb-2">
+                <Upload className="w-5 h-5" />
               </div>
-              <span className="text-xs font-bold text-slate-900 block">
-                {fileName ? fileName : 'Drag & drop student CSV file here, or browse'}
+              <span className="text-xs font-semibold text-slate-900 block">
+                {fileName ? fileName : 'Drag & drop student CSV file here, or browse file'}
               </span>
               <span className="text-[11px] text-slate-500 mt-0.5">
-                Supports standard university format with RollNo, Name, Program, Parent Contact
+                Headers: RollNo, FullName, Email, Program, Semester, ParentPhone
               </span>
             </div>
 
             {/* Quick Actions / Templates */}
-            <div className="space-y-3 flex flex-col justify-between">
+            <div className="space-y-2.5 flex flex-col justify-between">
               <button
                 type="button"
                 onClick={handleDownloadSample}
-                className="w-full flex items-center justify-center gap-2 p-3 rounded-2xl bg-white border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-xs"
+                className="w-full flex items-center justify-center gap-2 p-2.5 rounded-lg bg-white border border-slate-300 text-xs font-medium text-slate-700 hover:bg-slate-50 transition-colors shadow-xs cursor-pointer"
               >
                 <Download className="w-4 h-4 text-slate-500" />
-                Download Sample CSV
+                Download sample CSV
               </button>
 
               <button
                 type="button"
                 onClick={handleLoadSampleData}
-                className="w-full flex items-center justify-center gap-2 p-3 rounded-2xl bg-indigo-50 text-indigo-700 border border-indigo-200 text-xs font-bold hover:bg-indigo-100 transition-colors shadow-xs"
+                className="w-full flex items-center justify-center gap-2 p-2.5 rounded-lg bg-slate-100 text-slate-900 border border-slate-300 text-xs font-semibold hover:bg-slate-200/80 transition-colors cursor-pointer"
               >
-                <FileCheck className="w-4 h-4 text-indigo-600" />
-                Load Sample Batch (8 Students)
+                <FileCheck className="w-4 h-4 text-sky-600" />
+                Load sample cohort (8 students)
               </button>
             </div>
           </div>
@@ -191,48 +188,48 @@ BCA-401,Ananya Sen,ananya.s@univ.edu,BCA,IV,+91 9876543216,Computer Applications
           {/* Validation & Ingestion Preview */}
           {parsedRows.length > 0 && (
             <div>
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-3">
-                  <h3 className="font-bold text-sm text-slate-900">
-                    File Parser Preview &amp; Verification
+              <div className="flex items-center justify-between mb-2.5">
+                <div className="flex items-center gap-2.5">
+                  <h3 className="font-semibold text-sm text-slate-900">
+                    Parsed rows verification
                   </h3>
-                  <span className="text-xs font-mono font-semibold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700">
-                    {parsedRows.length} Rows Detected
+                  <span className="text-xs font-mono font-medium px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
+                    {parsedRows.length} rows detected
                   </span>
                 </div>
 
                 <div className="flex items-center gap-2 text-xs">
-                  <span className="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 font-bold border border-emerald-200">
-                    {importStats.valid} Valid
+                  <span className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 font-medium border border-emerald-200">
+                    {importStats.valid} valid
                   </span>
                   {importStats.skipped > 0 && (
-                    <span className="px-2 py-0.5 rounded-md bg-rose-50 text-rose-700 font-bold border border-rose-200">
-                      {importStats.skipped} Errors
+                    <span className="px-2 py-0.5 rounded bg-red-50 text-red-800 font-medium border border-red-200">
+                      {importStats.skipped} skipped
                     </span>
                   )}
                 </div>
               </div>
 
-              <div className="border border-slate-200 rounded-2xl overflow-hidden max-h-64 overflow-y-auto overflow-x-auto">
-                <table className="w-full text-left text-xs min-w-[500px]">
-                  <thead className="bg-slate-50 sticky top-0 border-b border-slate-200 text-slate-600 font-semibold">
+              <div className="border border-slate-200 rounded-lg overflow-hidden max-h-60 overflow-y-auto overflow-x-auto text-xs">
+                <table className="w-full text-left min-w-[500px]">
+                  <thead className="bg-slate-50 sticky top-0 border-b border-slate-200 text-slate-600 font-semibold text-[11px]">
                     <tr>
-                      <th className="py-2.5 px-3">Roll No</th>
-                      <th className="py-2.5 px-3">Full Name</th>
-                      <th className="py-2.5 px-3">Program / Sem</th>
-                      <th className="py-2.5 px-3">Parent Phone</th>
+                      <th className="py-2.5 px-3">Roll no</th>
+                      <th className="py-2.5 px-3">Full name</th>
+                      <th className="py-2.5 px-3">Program &amp; sem</th>
+                      <th className="py-2.5 px-3">Parent contact</th>
                       <th className="py-2.5 px-3 text-right">Verification</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {parsedRows.map((row, idx) => (
-                      <tr key={idx} className="hover:bg-slate-50/60">
-                        <td className="py-2.5 px-3 font-mono font-bold text-slate-800">{row.rollNo}</td>
-                        <td className="py-2.5 px-3 font-semibold text-slate-900">{row.name}</td>
+                      <tr key={idx} className="hover:bg-slate-50/60 transition-colors">
+                        <td className="py-2.5 px-3 font-mono font-medium text-slate-900">{row.rollNo}</td>
+                        <td className="py-2.5 px-3 font-medium text-slate-900">{row.name}</td>
                         <td className="py-2.5 px-3 text-slate-600">{row.program} ({row.sem})</td>
                         <td className="py-2.5 px-3 font-mono text-slate-500">{row.phone}</td>
                         <td className="py-2.5 px-3 text-right">
-                          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                          <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
                             <CheckCircle2 className="w-3 h-3 text-emerald-600" />
                             Valid
                           </span>
@@ -246,12 +243,12 @@ BCA-401,Ananya Sen,ananya.s@univ.edu,BCA,IV,+91 9876543216,Computer Applications
           )}
 
           {importDone && (
-            <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-semibold flex items-center gap-3">
+            <div className="p-4 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-950 text-xs font-normal flex items-center gap-3">
               <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
               <div>
-                <p className="font-bold text-sm">Bulk Ingestion Completed Successfully!</p>
-                <p className="text-emerald-700 font-normal mt-0.5">
-                  {parsedRows.length} student records registered into University ERP and populated across Faculty attendance rosters.
+                <p className="font-semibold text-sm text-emerald-900">Bulk Ingestion Completed Successfully</p>
+                <p className="text-emerald-800 mt-0.5">
+                  {parsedRows.length} student profiles committed and mapped to active academic terms.
                 </p>
               </div>
             </div>
@@ -259,16 +256,16 @@ BCA-401,Ananya Sen,ananya.s@univ.edu,BCA,IV,+91 9876543216,Computer Applications
         </div>
 
         {/* Footer */}
-        <div className="bg-slate-50 px-6 py-4 border-t border-slate-200 flex items-center justify-between shrink-0">
+        <div className="bg-slate-50 px-5 py-3.5 border-t border-slate-200 flex items-center justify-between shrink-0">
           <span className="text-xs text-slate-500">
-            {parsedRows.length > 0 ? `Ready to register ${parsedRows.length} candidate profiles` : 'No file loaded'}
+            {parsedRows.length > 0 ? `Ready to register ${parsedRows.length} candidates` : 'No file loaded'}
           </span>
 
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 transition-colors"
+              className="px-3.5 py-1.5 rounded-lg text-xs font-medium text-slate-700 hover:bg-slate-200 transition-colors cursor-pointer"
             >
               Cancel
             </button>
@@ -276,14 +273,14 @@ BCA-401,Ananya Sen,ananya.s@univ.edu,BCA,IV,+91 9876543216,Computer Applications
               type="button"
               onClick={handleExecuteImport}
               disabled={parsedRows.length === 0 || isProcessing || importDone}
-              className="px-5 py-2 rounded-xl text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 transition-colors shadow-md shadow-indigo-600/20 active:scale-[0.98] disabled:opacity-50 flex items-center gap-2"
+              className="px-4 py-1.5 rounded-lg text-xs font-semibold text-white bg-sky-600 hover:bg-sky-700 active:bg-sky-800 transition-colors disabled:opacity-50 flex items-center gap-2 cursor-pointer"
             >
               {isProcessing ? (
                 <span className="inline-block animate-spin rounded-full h-3.5 w-3.5 border-2 border-white border-t-transparent" />
               ) : (
                 <Database className="w-3.5 h-3.5" />
               )}
-              {isProcessing ? 'Ingesting Batch...' : importDone ? 'Ingestion Done' : `Commit Bulk Ingestion (${parsedRows.length})`}
+              <span>{isProcessing ? 'Ingesting batch...' : importDone ? 'Ingestion complete' : `Commit ingestion (${parsedRows.length})`}</span>
             </button>
           </div>
         </div>
