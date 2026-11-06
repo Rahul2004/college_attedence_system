@@ -276,12 +276,37 @@ export async function fetchCloudAttendance(classKey) {
 
 /**
  * Saves attendance records to Supabase Cloud and broadcasts to all connected students and admins.
+ * Phase 2 Normalized: Calls atomic commit_attendance_batch stored procedure with system_settings fallback.
  */
 export async function saveAttendanceToCloud(classKey, studentsList) {
   // Broadcast real-time event to all connected devices immediately
   await broadcastCloudEvent('STUDENTS_UPDATE', { classKey, students: studentsList });
 
   if (!supabase || !isSupabaseConfigured || !classKey) return;
+
+  const parts = classKey.split('_');
+  const programId = parts[0] || 'btech-cse';
+  const sem = parts[1] || 'I';
+  const subjectCode = parts[2] || 'CS-601';
+
+  // 1. Primary Normalized Relational Atomic Commit
+  try {
+    const userRes = await supabase.auth.getUser();
+    await supabase.rpc('commit_attendance_batch', {
+      p_class_key: classKey,
+      p_program_id: programId,
+      p_semester: sem,
+      p_subject_code: subjectCode,
+      p_slot_id: 'P1',
+      p_session_date: new Date().toISOString().split('T')[0],
+      p_faculty_email: userRes?.data?.user?.email || null,
+      p_records: studentsList
+    });
+  } catch {
+    // Graceful fallback to system_settings if RPC migration has not yet been executed in console
+  }
+
+  // 2. Secondary Fast Hydration Cache (Maintains 100% Backward Compatibility)
   try {
     await supabase
       .from('system_settings')
@@ -301,6 +326,31 @@ export async function saveAttendanceToCloud(classKey, studentsList) {
 export async function fetchCloudLeaves() {
   if (!supabase || !isSupabaseConfigured) return null;
   try {
+    // 1. Primary: Load from relational leave_applications table
+    const { data: relLeaves, error: relErr } = await supabase
+      .from('leave_applications')
+      .select('*')
+      .order('applied_at', { ascending: false });
+
+    if (!relErr && relLeaves && relLeaves.length > 0) {
+      return relLeaves.map(l => ({
+        id: l.id,
+        studentId: l.student_id,
+        studentName: l.student_name,
+        rollNo: l.roll_no,
+        category: l.category,
+        subject: l.subject_code,
+        dates: `${l.start_date} to ${l.end_date}`,
+        startDate: l.start_date,
+        endDate: l.end_date,
+        reason: l.reason,
+        status: l.status,
+        appliedAt: l.applied_at,
+        reviewedBy: l.reviewed_by
+      }));
+    }
+
+    // 2. Fallback: Load from system_settings
     const { data, error } = await supabase
       .from('system_settings')
       .select('value')
@@ -323,6 +373,31 @@ export async function saveLeavesToCloud(leavesList) {
   await broadcastCloudEvent('LEAVES_UPDATE', leavesList);
 
   if (!supabase || !isSupabaseConfigured) return;
+
+  // 1. Primary: Upsert into relational leave_applications
+  try {
+    if (Array.isArray(leavesList) && leavesList.length > 0) {
+      const payload = leavesList.map(l => ({
+        id: l.id?.includes('-') && l.id.length > 10 ? l.id : undefined,
+        student_id: l.studentId || 'stu-unknown',
+        student_name: l.studentName || 'Student',
+        roll_no: l.rollNo || '',
+        category: l.category || l.type || 'General',
+        subject_code: l.subject || l.subjectCode || 'All',
+        start_date: l.startDate || new Date().toISOString().split('T')[0],
+        end_date: l.endDate || new Date().toISOString().split('T')[0],
+        reason: l.reason || '',
+        status: l.status || 'PENDING',
+        reviewed_by: l.reviewedBy || null
+      })).filter(item => item.id !== undefined);
+
+      if (payload.length > 0) {
+        await supabase.from('leave_applications').upsert(payload, { onConflict: 'id' });
+      }
+    }
+  } catch {}
+
+  // 2. Secondary: Save to system_settings for instant backward-compatible fallback
   try {
     await supabase
       .from('system_settings')
@@ -342,6 +417,30 @@ export async function saveLeavesToCloud(leavesList) {
 export async function fetchCloudDisputes() {
   if (!supabase || !isSupabaseConfigured) return null;
   try {
+    // 1. Primary: Load from relational attendance_disputes table
+    const { data: relDisp, error: dispErr } = await supabase
+      .from('attendance_disputes')
+      .select('*')
+      .order('applied_at', { ascending: false });
+
+    if (!dispErr && relDisp && relDisp.length > 0) {
+      return relDisp.map(d => ({
+        id: d.id,
+        studentId: d.student_id,
+        studentName: d.student_name,
+        rollNo: d.roll_no,
+        subjectCode: d.subject_code,
+        subjectName: d.subject_name,
+        classDate: d.class_date,
+        reason: d.reason,
+        status: d.status,
+        appliedAt: d.applied_at,
+        reviewedBy: d.reviewed_by,
+        resolutionNote: d.resolution_note
+      }));
+    }
+
+    // 2. Fallback: Load from system_settings
     const { data, error } = await supabase
       .from('system_settings')
       .select('value')
@@ -364,6 +463,31 @@ export async function saveDisputesToCloud(disputesList) {
   await broadcastCloudEvent('DISPUTES_UPDATE', disputesList);
 
   if (!supabase || !isSupabaseConfigured) return;
+
+  // 1. Primary: Upsert into relational attendance_disputes
+  try {
+    if (Array.isArray(disputesList) && disputesList.length > 0) {
+      const payload = disputesList.map(d => ({
+        id: d.id?.includes('-') && d.id.length > 10 ? d.id : undefined,
+        student_id: d.studentId || 'stu-unknown',
+        student_name: d.studentName || 'Student',
+        roll_no: d.rollNo || '',
+        subject_code: d.subjectCode || 'CS-601',
+        subject_name: d.subjectName || '',
+        class_date: d.classDate || new Date().toISOString().split('T')[0],
+        reason: d.reason || '',
+        status: d.status || 'PENDING',
+        reviewed_by: d.reviewedBy || null,
+        resolution_note: d.resolutionNote || null
+      })).filter(item => item.id !== undefined);
+
+      if (payload.length > 0) {
+        await supabase.from('attendance_disputes').upsert(payload, { onConflict: 'id' });
+      }
+    }
+  } catch {}
+
+  // 2. Secondary: Save to system_settings for instant backward-compatible fallback
   try {
     await supabase
       .from('system_settings')

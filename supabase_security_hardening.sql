@@ -109,3 +109,4 @@ CREATE POLICY "Faculty can modify attendance logs"
       WHERE profiles.id = auth.uid() AND profiles.role IN ('faculty', 'admin')
     )
   );
+
