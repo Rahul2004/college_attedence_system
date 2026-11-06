@@ -1061,42 +1061,51 @@ export function AcademicProvider({ children }) {
     }
   };
 
+  // Phase 3 Optimization: Memoize the context value to eliminate unneeded re-render cascades
+  const contextValue = useMemo(() => ({
+    session, setSession,
+    role, setRole,
+    userProfile, setUserProfile,
+    updateUserProfile,
+    reloadUserProfile,
+    switchRole,
+    loading,
+    students, setStudents,
+    activeDetailStudent, setActiveDetailStudent,
+    selectedDate, setSelectedDate,
+    pendingChanges,
+    toast, setToast,
+    isCommitting,
+    attendanceThreshold, setAttendanceThreshold,
+    programs, setPrograms,
+    users, setUsers,
+    leaves, setLeaves,
+    disputes, setDisputes,
+    announcements, setAnnouncements,
+    auditLogs, setAuditLogs,
+    admissionsForms, setAdmissionsForms,
+    handleResolveDispute,
+    selectedProgramId, setSelectedProgramId,
+    selectedSemNumber, setSelectedSemNumber,
+    selectedSubjectCode, setSelectedSubjectCode,
+    selectedSlotId, setSelectedSlotId,
+    activeCourse,
+    isClassConfigured,
+    lowWarningCount,
+    handleToggleStatus,
+    handleMarkAll,
+    handleCommit,
+    handleLogout
+  }), [
+    session, role, userProfile, loading, students, activeDetailStudent,
+    selectedDate, pendingChanges, toast, isCommitting, attendanceThreshold,
+    programs, users, leaves, disputes, announcements, auditLogs, admissionsForms,
+    selectedProgramId, selectedSemNumber, selectedSubjectCode, selectedSlotId,
+    activeCourse, isClassConfigured, lowWarningCount
+  ]);
+
   return (
-    <AcademicContext.Provider value={{
-      session, setSession,
-      role, setRole,
-      userProfile, setUserProfile,
-      updateUserProfile,
-      reloadUserProfile,
-      switchRole,
-      loading,
-      students, setStudents,
-      activeDetailStudent, setActiveDetailStudent,
-      selectedDate, setSelectedDate,
-      pendingChanges,
-      toast, setToast,
-      isCommitting,
-      attendanceThreshold, setAttendanceThreshold,
-      programs, setPrograms,
-      users, setUsers,
-      leaves, setLeaves,
-      disputes, setDisputes,
-      announcements, setAnnouncements,
-      auditLogs, setAuditLogs,
-      admissionsForms, setAdmissionsForms,
-      handleResolveDispute,
-      selectedProgramId, setSelectedProgramId,
-      selectedSemNumber, setSelectedSemNumber,
-      selectedSubjectCode, setSelectedSubjectCode,
-      selectedSlotId, setSelectedSlotId,
-      activeCourse,
-      isClassConfigured,
-      lowWarningCount,
-      handleToggleStatus,
-      handleMarkAll,
-      handleCommit,
-      handleLogout
-    }}>
+    <AcademicContext.Provider value={contextValue}>
       {children}
     </AcademicContext.Provider>
   );

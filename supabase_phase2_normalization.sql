@@ -266,3 +266,4 @@ CREATE POLICY "Faculty and admin can resolve disputes"
   WITH CHECK (
     EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('faculty', 'admin'))
   );
+
