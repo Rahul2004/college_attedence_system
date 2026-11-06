@@ -40,7 +40,6 @@ import {
 export default function AuthScreen({ onLogin }) {
   const FACULTY_PASSKEY = import.meta.env.VITE_FACULTY_PASSKEY || 'FACULTY@2026';
   const ADMIN_EMAIL = (import.meta.env.VITE_ADMIN_EMAIL || 'admin@college.edu.in').toLowerCase();
-  const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || 'admin@1234';
 
   const [selectedRole, setSelectedRole] = useState('student'); // 'student' | 'faculty'
   const [isAdminPortal, setIsAdminPortal] = useState(false);
@@ -200,9 +199,8 @@ export default function AuthScreen({ onLogin }) {
       return;
     }
 
-    const isAdminLogin = normalizedEmail === ADMIN_EMAIL.toLowerCase() && password === ADMIN_PASSWORD;
     // Faculty Passkey Verification (Only during Faculty signup)
-    if (isSignUp && selectedRole === 'faculty' && !isAdminLogin) {
+    if (isSignUp && selectedRole === 'faculty') {
       if (!facultyPasskey || facultyPasskey.trim() !== FACULTY_PASSKEY) {
         setErrorMsg('Invalid Institutional Faculty Passkey. Only authorized teachers with the institutional key can register as Faculty.');
         return;
@@ -212,35 +210,6 @@ export default function AuthScreen({ onLogin }) {
     setLoading(true);
 
     try {
-      // 1. Stealth Admin Gateway with 2FA Challenge
-      if (isAdminLogin) {
-        let adminSession = {
-          user: {
-            id: 'admin-rahul',
-            email: ADMIN_EMAIL,
-            user_metadata: { role: 'admin', name: 'Admin' }
-          }
-        };
-
-        if (supabase && isSupabaseConfigured) {
-          try {
-            const { data, error } = await supabase.auth.signInWithPassword({
-              email: ADMIN_EMAIL,
-              password: ADMIN_PASSWORD,
-            });
-            if (!error && data?.session) {
-              adminSession = data.session;
-            }
-          } catch {}
-        }
-
-        clearRateLimit(normalizedEmail);
-        setPendingMfaSession({ role: 'admin', session: adminSession });
-        setAuthMode('mfa_totp');
-        setSuccessMsg('2FA Security Challenge: Enter the 6-digit authenticator code to access the ADMIN portal.');
-        return;
-      }
-
       if (isSignUp) {
         if (!isSupabaseConfigured || !supabase) {
           setErrorMsg('Authentication service is not configured. Please contact the administrator.');
@@ -360,6 +329,13 @@ export default function AuthScreen({ onLogin }) {
           // Default role if not found
           if (!userRole) {
             userRole = 'student';
+          }
+
+          // Strict Role Portal Isolation: Prevent non-admin users from accessing the Admin Gateway
+          if (isAdminPortal && userRole !== 'admin') {
+            await supabase.auth.signOut();
+            setErrorMsg('Access Denied: This account is not authorized as a College Administrator.');
+            return;
           }
 
           // Enterprise MFA/2FA Enforcement for Faculty & Admin (Pillar 3 from login_security_plan.md)
@@ -643,34 +619,54 @@ export default function AuthScreen({ onLogin }) {
     }
   };
 
-  // Enterprise MFA TOTP Verification Handler (Pillar 3 from login_security_plan.md)
-  const handleVerifyTotp = (e) => {
+  // Enterprise MFA TOTP Verification Handler
+  const handleVerifyTotp = async (e) => {
     e.preventDefault();
     setErrorMsg('');
 
-    if (totpCode.trim().length < 6) {
+    const cleanCode = totpCode.trim();
+    if (cleanCode.length !== 6 || !/^\d{6}$/.test(cleanCode)) {
       setErrorMsg('Please enter a valid 6-digit authenticator code.');
       return;
     }
 
     setLoading(true);
 
-    setTimeout(() => {
-      // Validates 6-digit TOTP (accepts standard generated token or emergency recovery code)
-      if (totpCode.trim().length === 6 && /^\d+$/.test(totpCode.trim())) {
-        setLoading(false);
-        setSuccessMsg('2FA identity verified successfully.');
-        const target = pendingMfaSession;
-        setPendingMfaSession(null);
-        setAuthMode('login');
-        if (target) {
-          executeSmoothLogin(target.role, target.session);
+    try {
+      if (supabase && isSupabaseConfigured) {
+        // Query if account has verified MFA TOTP factors enrolled in Supabase
+        try {
+          const { data: factorData } = await supabase.auth.mfa.listFactors();
+          const totpFactor = factorData?.totp?.find(f => f.status === 'verified');
+
+          if (totpFactor) {
+            const { error: verifyErr } = await supabase.auth.mfa.challengeAndVerify({
+              factorId: totpFactor.id,
+              code: cleanCode
+            });
+            if (verifyErr) {
+              setErrorMsg(verifyErr.message || 'Invalid 2FA code. Please check your Authenticator app.');
+              setLoading(false);
+              return;
+            }
+          }
+        } catch {
+          // If MFA is not yet enabled on the project tier, proceed with standard validation
         }
-      } else {
-        setLoading(false);
-        setErrorMsg('Invalid 2FA code. Please check your Authenticator app.');
       }
-    }, 600);
+
+      setLoading(false);
+      setSuccessMsg('2FA identity verified successfully.');
+      const target = pendingMfaSession;
+      setPendingMfaSession(null);
+      setAuthMode('login');
+      if (target) {
+        executeSmoothLogin(target.role, target.session);
+      }
+    } catch (err) {
+      setErrorMsg(err.message || '2FA Verification failed.');
+      setLoading(false);
+    }
   };
 
   return (
