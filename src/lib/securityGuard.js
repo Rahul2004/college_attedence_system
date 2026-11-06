@@ -5,13 +5,39 @@ const RATE_LIMIT_PREFIX = 'sec_ratelimit_';
 const MAX_ATTEMPTS = 5;
 const LOCKOUT_MINUTES = 15;
 
+// In-memory fallback for environments without browser sessionStorage (e.g. Node / SSR / Test runner)
+const memStore = new Map();
+
+function getStorageItem(key) {
+  if (typeof sessionStorage !== 'undefined') {
+    return sessionStorage.getItem(key);
+  }
+  return memStore.get(key) || null;
+}
+
+function setStorageItem(key, val) {
+  if (typeof sessionStorage !== 'undefined') {
+    sessionStorage.setItem(key, val);
+  } else {
+    memStore.set(key, val);
+  }
+}
+
+function removeStorageItem(key) {
+  if (typeof sessionStorage !== 'undefined') {
+    sessionStorage.removeItem(key);
+  } else {
+    memStore.delete(key);
+  }
+}
+
 /**
  * Checks if the user/IP is currently locked out due to multiple failed login attempts
  */
 export function checkRateLimit(identifier) {
   const key = `${RATE_LIMIT_PREFIX}${identifier.toLowerCase().trim()}`;
   try {
-    const raw = sessionStorage.getItem(key);
+    const raw = getStorageItem(key);
     if (!raw) return { allowed: true, remaining: MAX_ATTEMPTS, lockoutSecs: 0 };
 
     const record = JSON.parse(raw);
@@ -25,7 +51,7 @@ export function checkRateLimit(identifier) {
 
     // Reset if window has passed
     if (record.windowStart && now - record.windowStart > LOCKOUT_MINUTES * 60 * 1000) {
-      sessionStorage.removeItem(key);
+      removeStorageItem(key);
       return { allowed: true, remaining: MAX_ATTEMPTS, lockoutSecs: 0 };
     }
 
@@ -45,7 +71,7 @@ export function checkRateLimit(identifier) {
 export function recordFailedAttempt(identifier) {
   const key = `${RATE_LIMIT_PREFIX}${identifier.toLowerCase().trim()}`;
   try {
-    const raw = sessionStorage.getItem(key);
+    const raw = getStorageItem(key);
     const now = Date.now();
     let record = raw ? JSON.parse(raw) : { attempts: 0, windowStart: now, lockedUntil: null };
 
@@ -55,7 +81,7 @@ export function recordFailedAttempt(identifier) {
       record.lockedUntil = now + (LOCKOUT_MINUTES * 60 * 1000);
     }
 
-    sessionStorage.setItem(key, JSON.stringify(record));
+    setStorageItem(key, JSON.stringify(record));
     return record;
   } catch {
     return null;
@@ -68,7 +94,7 @@ export function recordFailedAttempt(identifier) {
 export function clearRateLimit(identifier) {
   const key = `${RATE_LIMIT_PREFIX}${identifier.toLowerCase().trim()}`;
   try {
-    sessionStorage.removeItem(key);
+    removeStorageItem(key);
   } catch {
     // ignore
   }

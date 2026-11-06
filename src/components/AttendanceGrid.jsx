@@ -18,10 +18,12 @@ export default function AttendanceGrid({
   onDateChange,
   onCommit,
   isCommitting,
-  hasPendingChanges
+  hasPendingChanges,
+  threshold = 75
 }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState('ALL'); // 'ALL' | 'WARNING' | 'ABSENT'
+  const safeThreshold = (!isNaN(Number(threshold)) && Number(threshold) > 0) ? Number(threshold) : 75;
 
   const filteredStudents = (students || []).filter(student => {
     const matchesSearch = 
@@ -33,7 +35,7 @@ export default function AttendanceGrid({
       : (student?.attendedClasses || 0);
     const effectiveTotal = (student?.totalClasses || 0) + 1;
     const percentage = effectiveTotal > 0 ? (effectiveAttended / effectiveTotal) * 100 : 0;
-    const isDefaulter = percentage < 75.0;
+    const isDefaulter = percentage < safeThreshold;
 
     if (!matchesSearch) return false;
     if (filter === 'WARNING') return isDefaulter;

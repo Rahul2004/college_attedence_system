@@ -47,7 +47,7 @@ export async function askGeminiAssistant(prompt, context = {}, role = 'student',
   let activeKey = (customKey || localStorage.getItem('attendos_gemini_api_key') || ENV_API_KEY || '').trim();
 
   if (activeKey && (activeKey.startsWith('AQ.') || activeKey.startsWith('AIzaSy') || activeKey.length > 20)) {
-    const models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+    const models = ['gemini-2.5-flash', 'gemini-3.8-flash', 'gemini-1.5-flash'];
     const systemInstruction = buildSystemInstruction(role, context);
 
     // Format chat history for Gemini API: [{ role: 'user'|'model', parts: [{ text: ... }] }]
