@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS public.attendance_sessions (
   session_date DATE NOT NULL DEFAULT CURRENT_DATE,
   faculty_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
   faculty_email TEXT,
+  faculty_name TEXT,
   total_enrolled INT DEFAULT 0,
   total_present INT DEFAULT 0,
   total_absent INT DEFAULT 0,
@@ -104,6 +105,7 @@ RETURNS JSONB AS $$
 DECLARE
   v_session_id UUID;
   v_faculty_id UUID := auth.uid();
+  v_faculty_name TEXT := NULL;
   v_rec JSONB;
   v_present_count INT := 0;
   v_absent_count INT := 0;
@@ -117,15 +119,30 @@ BEGIN
     RAISE EXCEPTION 'Access Denied: Only authorized Faculty or Administrators can commit attendance.';
   END IF;
 
+  -- Resolve real faculty name from profiles / app_users
+  SELECT coalesce(p.full_name, au.name, split_part(coalesce(p_faculty_email, ''), '@', 1))
+  INTO v_faculty_name
+  FROM public.profiles p
+  LEFT JOIN public.app_users au ON au.email = p.email
+  WHERE (v_faculty_id IS NOT NULL AND p.id = v_faculty_id) 
+     OR (p_faculty_email IS NOT NULL AND (p.email = p_faculty_email OR au.email = p_faculty_email))
+  LIMIT 1;
+
+  -- Fallback if not found in profiles
+  IF v_faculty_name IS NULL AND p_faculty_email IS NOT NULL THEN
+    SELECT name INTO v_faculty_name FROM public.app_users WHERE email = p_faculty_email LIMIT 1;
+  END IF;
+
   -- Upsert attendance session
   INSERT INTO public.attendance_sessions (
-    class_key, program_id, semester, subject_code, slot_id, session_date, faculty_id, faculty_email, updated_at
+    class_key, program_id, semester, subject_code, slot_id, session_date, faculty_id, faculty_email, faculty_name, updated_at
   ) VALUES (
-    p_class_key, p_program_id, p_semester, p_subject_code, coalesce(p_slot_id, 'P1'), coalesce(p_session_date, CURRENT_DATE), v_faculty_id, p_faculty_email, now()
+    p_class_key, p_program_id, p_semester, p_subject_code, coalesce(p_slot_id, 'P1'), coalesce(p_session_date, CURRENT_DATE), v_faculty_id, p_faculty_email, v_faculty_name, now()
   )
   ON CONFLICT (class_key, session_date, slot_id) DO UPDATE
   SET faculty_id = EXCLUDED.faculty_id,
       faculty_email = EXCLUDED.faculty_email,
+      faculty_name = coalesce(EXCLUDED.faculty_name, attendance_sessions.faculty_name),
       updated_at = now()
   RETURNING id INTO v_session_id;
 

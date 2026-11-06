@@ -45,18 +45,10 @@ export default function RootLayout() {
   const [isSiriOpen, setIsSiriOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
-  // Developer Bypass Check
-  const isDevBypass =
-    role === 'developer' ||
-    role === 'dev' ||
-    session?.isDeveloper ||
-    session?.user?.user_metadata?.isDeveloper ||
-    (typeof window !== 'undefined' && localStorage.getItem('college_dev_bypass') === 'true');
-
   // Student Onboarding State Gatekeeper
-  // If user is a student and status is NOT active, render the dedicated onboarding view (bypassed in dev mode)
+  // If user is a student and status is NOT active, render the dedicated onboarding view
   const currentStatus = userProfile?.status || session?.user?.user_metadata?.status || 'active';
-  if (role === 'student' && !isDevBypass && currentStatus !== 'active') {
+  if (role === 'student' && currentStatus !== 'active') {
     if (currentStatus === 'details_required') {
       return (
         <StudentAcademicDetailsModal
@@ -160,8 +152,7 @@ export default function RootLayout() {
         onTabChange={handleTabChange}
         lowWarningCount={lowWarningCount}
         course={activeCourse}
-        role={role === 'developer' ? activePortal : role}
-        isDevMode={isDevBypass}
+        role={role}
         currentStudent={authenticatedStudent}
         session={session}
         userProfile={userProfile}
@@ -268,79 +259,6 @@ export default function RootLayout() {
             </button>
           </div>
         </header>
-
-        {/* Developer Bypass Portal Switcher Banner */}
-        {isDevBypass && (
-          <div className="bg-amber-500/10 border-b border-amber-500/25 px-4 sm:px-6 py-2 flex items-center justify-between text-xs text-amber-950 sticky top-16 z-20 backdrop-blur-md">
-            <div className="flex items-center gap-2">
-              <span className="font-mono font-bold text-[10px] bg-amber-600 text-white px-2.5 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1 shadow-xs">
-                <Zap className="w-3 h-3 fill-current" /> Dev Bypass Active
-              </span>
-              <span className="text-slate-600 hidden md:inline text-xs">
-                Bypass all role restrictions enabled — switch active portal in 1 click:
-              </span>
-            </div>
-            <div className="flex items-center gap-1.5 sm:gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  switchRole('admin');
-                  navigate('/admin/admin');
-                }}
-                className={`px-2.5 py-1 rounded-md text-xs font-semibold transition cursor-pointer flex items-center gap-1 ${
-                  activePortal === 'admin'
-                    ? 'bg-amber-600 text-white shadow-xs'
-                    : 'bg-white hover:bg-amber-50 text-slate-700 border border-slate-200'
-                }`}
-              >
-                <Shield className="w-3 h-3" />
-                <span>Admin</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  switchRole('faculty');
-                  navigate('/faculty/roster');
-                }}
-                className={`px-2.5 py-1 rounded-md text-xs font-semibold transition cursor-pointer flex items-center gap-1 ${
-                  activePortal === 'faculty'
-                    ? 'bg-amber-600 text-white shadow-xs'
-                    : 'bg-white hover:bg-amber-50 text-slate-700 border border-slate-200'
-                }`}
-              >
-                <UserCheck className="w-3 h-3" />
-                <span>Faculty</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  switchRole('student');
-                  navigate('/student/overview');
-                }}
-                className={`px-2.5 py-1 rounded-md text-xs font-semibold transition cursor-pointer flex items-center gap-1 ${
-                  activePortal === 'student'
-                    ? 'bg-amber-600 text-white shadow-xs'
-                    : 'bg-white hover:bg-amber-50 text-slate-700 border border-slate-200'
-                }`}
-              >
-                <GraduationCap className="w-3 h-3" />
-                <span>Student</span>
-              </button>
-              <button
-                type="button"
-                onClick={async () => {
-                  localStorage.removeItem('college_dev_bypass');
-                  await handleLogout();
-                  navigate('/login', { replace: true });
-                }}
-                className="px-2 py-1 rounded-md text-xs font-medium text-slate-500 hover:text-red-700 hover:bg-red-50 ml-1 transition cursor-pointer"
-                title="Exit Developer Mode & Sign Out"
-              >
-                Exit
-              </button>
-            </div>
-          </div>
-        )}
 
         {/* Global Toast */}
         {toast.message && (

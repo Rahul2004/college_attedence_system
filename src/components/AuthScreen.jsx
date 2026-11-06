@@ -18,8 +18,6 @@ import {
   Users,
   Shield,
   ArrowRight,
-  Code,
-  Zap,
   FileCheck2,
   FileText
 } from 'lucide-react';
@@ -129,31 +127,6 @@ export default function AuthScreen({ onLogin }) {
         onLogin(role, session);
       }, 700);
     }, 700);
-  };
-
-  // Developer Mode Bypass - instant access without passwords, OTP, or role blocks
-  const handleDevBypass = (targetRole) => {
-    setErrorMsg('');
-    setSuccessMsg('');
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('college_dev_bypass', 'true');
-    }
-    const isDevRole = targetRole === 'developer';
-    const devUser = {
-      id: isDevRole ? 'dev-root' : `dev-${targetRole}`,
-      email: isDevRole ? 'dev@attendos.internal' : targetRole === 'admin' ? ADMIN_EMAIL : targetRole === 'faculty' ? 'prof.vance@univ.edu' : 'aarav.sharma@collegemail.edu.in',
-      user_metadata: {
-        role: targetRole,
-        name: isDevRole ? 'Lead Developer (All Roles Unlocked)' : targetRole === 'admin' ? 'Dr. Evelyn Carter (Admin)' : targetRole === 'faculty' ? 'Prof. Rajesh Verma' : 'Aarav Sharma',
-        isDeveloper: true,
-        status: 'active'
-      }
-    };
-    const devSession = {
-      user: devUser,
-      isDeveloper: true
-    };
-    executeSmoothLogin(targetRole, devSession);
   };
 
   // Standard Login / Signup Handler
@@ -1104,60 +1077,6 @@ export default function AuthScreen({ onLogin }) {
                     </>
                   )}
                 </button>
-
-                {/* Developer Bypass Panel */}
-                <div className="mt-5 pt-4 border-t border-slate-200">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800">
-                      <Code className="w-4 h-4 text-amber-500" />
-                      <span>Developer Bypass (All Roles)</span>
-                    </div>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-bold border border-amber-200">
-                      ⚡ Dev Mode
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-slate-500 mb-2.5 leading-snug">
-                    Instantly bypass authentication, password verification, OTP, and 403 role restrictions for development & testing.
-                  </p>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => handleDevBypass('developer')}
-                      className="py-2 px-2 bg-slate-900 hover:bg-slate-800 active:scale-[0.98] text-amber-400 rounded-lg text-xs font-bold flex flex-col items-center justify-center gap-1 transition shadow-xs cursor-pointer border border-slate-700 group"
-                      title="Bypass all role restrictions with Super Developer privileges"
-                    >
-                      <Zap className="w-3.5 h-3.5 text-amber-400 group-hover:scale-115 transition-transform" />
-                      <span className="text-[10px] uppercase font-mono tracking-tight text-amber-300">Bypass All</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleDevBypass('admin')}
-                      className="py-2 px-2 bg-amber-50 hover:bg-amber-100 active:scale-[0.98] text-amber-900 rounded-lg text-xs font-semibold flex flex-col items-center justify-center gap-1 transition border border-amber-200 cursor-pointer group"
-                      title="Bypass directly into Administrator Portal"
-                    >
-                      <Shield className="w-3.5 h-3.5 text-amber-600 group-hover:scale-115 transition-transform" />
-                      <span className="text-[10px] font-mono tracking-tight">Admin</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleDevBypass('faculty')}
-                      className="py-2 px-2 bg-emerald-50 hover:bg-emerald-100 active:scale-[0.98] text-emerald-900 rounded-lg text-xs font-semibold flex flex-col items-center justify-center gap-1 transition border border-emerald-200 cursor-pointer group"
-                      title="Bypass directly into Faculty Portal"
-                    >
-                      <UserCheck className="w-3.5 h-3.5 text-emerald-600 group-hover:scale-115 transition-transform" />
-                      <span className="text-[10px] font-mono tracking-tight">Faculty</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleDevBypass('student')}
-                      className="py-2 px-2 bg-sky-50 hover:bg-sky-100 active:scale-[0.98] text-sky-900 rounded-lg text-xs font-semibold flex flex-col items-center justify-center gap-1 transition border border-sky-200 cursor-pointer group"
-                      title="Bypass directly into Student Portal"
-                    >
-                      <GraduationCap className="w-3.5 h-3.5 text-sky-600 group-hover:scale-115 transition-transform" />
-                      <span className="text-[10px] font-mono tracking-tight">Student</span>
-                    </button>
-                  </div>
-                </div>
               </form>
             )}
 

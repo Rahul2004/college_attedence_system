@@ -29,7 +29,6 @@ export default function MateSidebar({
   lowWarningCount,
   course,
   role,
-  isDevMode = false,
   currentStudent,
   session,
   userProfile,
@@ -582,20 +581,18 @@ export default function MateSidebar({
             <div className="py-1 px-3 bg-slate-50 rounded-lg border border-slate-200 text-xs font-bold flex items-center justify-between">
               <span className="text-ink-subtle text-[10px] uppercase tracking-wider">Access</span>
               <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                isDevMode || role === 'developer'
-                  ? 'bg-amber-100 text-amber-900 border border-amber-300'
-                  : role === 'admin'
+                role === 'admin'
                   ? 'bg-berry-soft text-berry-deep border border-purple-200'
                   : role === 'faculty'
                   ? 'bg-sky-soft text-sky-deep border border-sky-200'
                   : 'bg-leaf-soft text-leaf-deep border border-green-200'
               }`}>
-                {isDevMode || role === 'developer' ? '⚡ Dev Bypass' : role === 'admin' ? 'Admin' : role === 'faculty' ? 'Faculty' : 'Student'}
+                {role === 'admin' ? 'Admin' : role === 'faculty' ? 'Faculty' : 'Student'}
               </span>
             </div>
           ) : (
-            <div className="flex justify-center" title={`Access: ${isDevMode ? 'Developer Bypass' : role}`}>
-              <span className={`w-3 h-3 rounded-full ${isDevMode || role === 'developer' ? 'bg-amber-500 ring-2 ring-amber-300' : role === 'admin' ? 'bg-berry' : role === 'faculty' ? 'bg-sky' : 'bg-leaf'}`} />
+            <div className="flex justify-center" title={`Access: ${role}`}>
+              <span className={`w-3 h-3 rounded-full ${role === 'admin' ? 'bg-berry' : role === 'faculty' ? 'bg-sky' : 'bg-leaf'}`} />
             </div>
           )}
 

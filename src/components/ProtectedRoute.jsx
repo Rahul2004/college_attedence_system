@@ -22,20 +22,6 @@ export default function ProtectedRoute({ allowedRole, children }) {
     return <Navigate to="/login" replace />;
   }
 
-  // Developer Bypass: allow unrestricted access to all roles and portals (Strictly gated to DEV mode)
-  const isDevBypass =
-    Boolean(import.meta.env.DEV) && (
-      role === 'developer' ||
-      role === 'dev' ||
-      session?.isDeveloper ||
-      session?.user?.user_metadata?.isDeveloper ||
-      (typeof window !== 'undefined' && localStorage.getItem('college_dev_bypass') === 'true')
-    );
-
-  if (isDevBypass) {
-    return children;
-  }
-
   // Strict Role Isolation: Display HTTP 403 Forbidden if user lacks role privileges
   if (allowedRole && role !== allowedRole) {
     const roleLabels = {

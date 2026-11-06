@@ -673,6 +673,7 @@ export default function OrdersTableRoster({
       {isQrModalOpen && (
         <DynamicQrAttendanceModal
           course={activeCourse}
+          facultyName={activeCourse?.faculty}
           students={students}
           onClose={() => setIsQrModalOpen(false)}
           onApplyScannedStudents={(scanned) => {

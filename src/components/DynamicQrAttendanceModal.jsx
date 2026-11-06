@@ -19,7 +19,8 @@ export default function DynamicQrAttendanceModal({
   course, 
   students = [], 
   onClose, 
-  onApplyScannedStudents 
+  onApplyScannedStudents,
+  facultyName
 }) {
   const [timeLeft, setTimeLeft] = useState(30);
   const [otpCode, setOtpCode] = useState(() => Math.floor(1000 + Math.random() * 9000).toString());
@@ -143,7 +144,7 @@ export default function DynamicQrAttendanceModal({
             </span>
             <span className="font-semibold text-slate-800">{course.name}</span>
             <span className="text-slate-400">•</span>
-            <span className="text-slate-600 font-medium">Faculty: <strong>{course.faculty}</strong></span>
+            <span className="text-slate-600 font-medium">Faculty: <strong>{facultyName || course.faculty || 'Faculty In-Charge'}</strong></span>
           </div>
           <div className="flex items-center gap-4 text-slate-500 text-[11px]">
             <span className="flex items-center gap-1 font-semibold text-slate-700">

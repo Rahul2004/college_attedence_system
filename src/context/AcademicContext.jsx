@@ -223,13 +223,19 @@ export function AcademicProvider({ children }) {
   const selectedSlot = LECTURE_PERIODS.find(l => l.id === selectedSlotId) || null;
   const isClassConfigured = Boolean(selectedProgramId && selectedSemNumber && selectedSubjectCode && selectedSlotId);
 
+  // Dynamic faculty identity resolution:
+  // Strictly display the authenticated user's actual name and details if logged in as Faculty or Admin
+  const dynamicFacultyName = (role === 'faculty' || role === 'admin')
+    ? (userProfile?.full_name || session?.user?.user_metadata?.name || (role === 'faculty' ? 'Prof. Rajesh Verma' : 'Administrator'))
+    : (selectedSubject?.faculty || 'Faculty In-Charge');
+
   const activeCourse = {
     ...COURSE_METADATA,
     degree: selectedProgram?.degree || '',
     branch: selectedProgram?.branch || '',
     code: selectedSubject?.code || '',
     name: selectedSubject?.name || '',
-    faculty: selectedSubject?.faculty || '',
+    faculty: dynamicFacultyName,
     room: selectedSubject?.room || '',
     semester: selectedSem?.semLabel || '',
     timeSlot: selectedSlot ? `${selectedSlot.time} (${selectedSlot.label})` : '',
@@ -886,14 +892,13 @@ export function AcademicProvider({ children }) {
       localStorage.setItem('college_active_role', newRole);
     }
     
-    const isDev = newRole === 'developer' || (typeof window !== 'undefined' && localStorage.getItem('college_dev_bypass') === 'true');
     // Find authentic user record from users list matching both role AND status
     const matchedUser = (users || []).find(u => u.role === newRole && u.status !== 'deleted') || {
-      id: newRole === 'developer' ? 'dev-root' : `usr-${newRole}`,
-      email: newRole === 'developer' ? 'dev@attendos.internal' : newRole === 'admin' ? ADMIN_EMAIL : newRole === 'faculty' ? 'faculty@college.edu.in' : 'student@college.edu.in',
-      name: newRole === 'developer' ? 'Lead Developer (System Root)' : newRole === 'admin' ? 'College Administrator' : newRole === 'faculty' ? 'Prof. Rajesh Verma' : 'Aarav Sharma',
+      id: `usr-${newRole}`,
+      email: newRole === 'admin' ? ADMIN_EMAIL : newRole === 'faculty' ? 'faculty@college.edu.in' : 'student@college.edu.in',
+      name: newRole === 'admin' ? 'College Administrator' : newRole === 'faculty' ? 'Prof. Rajesh Verma' : 'Aarav Sharma',
       role: newRole,
-      dept: newRole === 'developer' ? 'Core Systems Dev' : newRole === 'admin' ? 'Central Administration' : 'Computer Science & Engineering',
+      dept: newRole === 'admin' ? 'Central Administration' : 'Computer Science & Engineering',
       phone: '+91 98765-43210'
     };
 
@@ -904,11 +909,9 @@ export function AcademicProvider({ children }) {
         user_metadata: {
           role: newRole,
           name: matchedUser.name,
-          department: matchedUser.dept || matchedUser.department,
-          isDeveloper: isDev
+          department: matchedUser.dept || matchedUser.department
         }
-      },
-      isDeveloper: isDev
+      }
     };
 
     const newProfile = {
