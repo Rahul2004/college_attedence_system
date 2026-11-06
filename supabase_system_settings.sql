@@ -14,12 +14,29 @@ CREATE TABLE IF NOT EXISTS public.system_settings (
 ALTER TABLE public.system_settings ENABLE ROW LEVEL SECURITY;
 
 -- Allow read access for authenticated and anonymous users
+DROP POLICY IF EXISTS "Allow public read on system_settings" ON public.system_settings;
 CREATE POLICY "Allow public read on system_settings" 
 ON public.system_settings FOR SELECT USING (true);
 
--- Allow authenticated users (or service role) to insert/update settings
-CREATE POLICY "Allow public write on system_settings" 
-ON public.system_settings FOR ALL USING (true);
+-- Harden Write Access: Only authenticated Faculty and Administrators can insert/update settings
+DROP POLICY IF EXISTS "Allow public write on system_settings" ON public.system_settings;
+DROP POLICY IF EXISTS "Only admins and faculty can write to system_settings" ON public.system_settings;
+
+CREATE POLICY "Only admins and faculty can write to system_settings" 
+ON public.system_settings FOR ALL
+TO authenticated
+USING (
+  EXISTS (
+    SELECT 1 FROM public.profiles p
+    WHERE p.id = auth.uid() AND p.role IN ('admin', 'faculty')
+  )
+)
+WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM public.profiles p
+    WHERE p.id = auth.uid() AND p.role IN ('admin', 'faculty')
+  )
+);
 
 -- Insert default threshold (75%)
 INSERT INTO public.system_settings (key, value)

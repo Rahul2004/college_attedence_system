@@ -11,6 +11,7 @@ export default function StudentPortalPage() {
   const {
     session,
     userProfile,
+    users,
     students,
     setStudents,
     attendanceThreshold,
@@ -45,18 +46,28 @@ export default function StudentPortalPage() {
         } catch {}
       }
 
+      // Check app users directory for matched student
+      const matchedUser = (users || []).find(u => u.email?.toLowerCase() === studentEmail && u.role === 'student');
+
       // Dynamically construct authentic student record for the currently logged-in user
       const metadata = session?.user?.user_metadata || {};
       const profile = userProfile || {};
-      const studentName = admissionDetail?.fullName || profile.full_name || metadata.name || session?.user?.email?.split('@')[0] || 'Student User';
+
+      const resolvedStudentName = 
+        admissionDetail?.fullName || 
+        (profile.role === 'student' ? profile.full_name : null) || 
+        matchedUser?.name ||
+        (metadata.role === 'student' ? metadata.name : null) ||
+        (session?.user?.email ? session.user.email.split('@')[0] : 'Student User');
+
       const studentId = session?.user?.id || 'stu-active';
       return {
         id: studentId,
-        rollNo: admissionDetail?.rollNo || profile.roll_no || metadata.rollNo || metadata.roll_no || 'Pending UID',
-        name: studentName,
+        rollNo: admissionDetail?.rollNo || profile.roll_no || metadata.rollNo || metadata.roll_no || 'CS-2026',
+        name: resolvedStudentName,
         email: session?.user?.email,
         phone: admissionDetail?.phone || profile.emergency_contact || metadata.phone || '+91 98000 00000',
-        program: admissionDetail?.branch || admissionDetail?.programName || profile.program_name || metadata.program || 'Undergraduate Degree',
+        program: admissionDetail?.branch || admissionDetail?.programName || profile.program_name || metadata.program || 'B.Tech Computer Science & Engineering',
         semester: admissionDetail?.semester || profile.semester || metadata.semester || 'Semester I',
         section: admissionDetail?.section || profile.section || 'A',
         attendancePercentage: 0,
@@ -68,7 +79,7 @@ export default function StudentPortalPage() {
       };
     }
     return null;
-  }, [studentEmail, students, session, userProfile]);
+  }, [studentEmail, students, session, userProfile, users]);
 
   const pathParts = location.pathname.split('/').filter(Boolean);
   const currentTab = pathParts[1] || 'overview';

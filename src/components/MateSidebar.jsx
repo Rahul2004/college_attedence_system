@@ -40,12 +40,20 @@ export default function MateSidebar({
   onToggleExpand,
   onOpenProfile
 }) {
-  // Determine dynamically displayed name prioritizing latest synced profile, currentStudent, or session metadata
-  const displayName = 
-    userProfile?.full_name ||
-    (role === 'student' ? currentStudent?.name : null) ||
-    session?.user?.user_metadata?.name ||
-    (role === 'admin' ? 'Administrator' : role === 'student' ? 'Student' : 'Faculty In-Charge');
+  // Strict role-isolated profile display:
+  // Ensure the displayed identity strictly matches the active role and authenticated user
+  const displayName = React.useMemo(() => {
+    if (role === 'student') {
+      return currentStudent?.name || userProfile?.full_name || session?.user?.user_metadata?.name || 'Student';
+    }
+    if (role === 'faculty') {
+      return userProfile?.full_name || session?.user?.user_metadata?.name || 'Prof. Rajesh Verma';
+    }
+    if (role === 'admin') {
+      return userProfile?.full_name || session?.user?.user_metadata?.name || 'System Administrator';
+    }
+    return userProfile?.full_name || session?.user?.user_metadata?.name || 'Developer';
+  }, [role, userProfile, currentStudent, session]);
 
   const displayInitials = (displayName || 'User')
     .split(' ')

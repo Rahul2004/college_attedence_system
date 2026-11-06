@@ -22,13 +22,15 @@ export default function ProtectedRoute({ allowedRole, children }) {
     return <Navigate to="/login" replace />;
   }
 
-  // Developer Bypass: allow unrestricted access to all roles and portals
+  // Developer Bypass: allow unrestricted access to all roles and portals (Strictly gated to DEV mode)
   const isDevBypass =
-    role === 'developer' ||
-    role === 'dev' ||
-    session?.isDeveloper ||
-    session?.user?.user_metadata?.isDeveloper ||
-    (typeof window !== 'undefined' && localStorage.getItem('college_dev_bypass') === 'true');
+    Boolean(import.meta.env.DEV) && (
+      role === 'developer' ||
+      role === 'dev' ||
+      session?.isDeveloper ||
+      session?.user?.user_metadata?.isDeveloper ||
+      (typeof window !== 'undefined' && localStorage.getItem('college_dev_bypass') === 'true')
+    );
 
   if (isDevBypass) {
     return children;

@@ -86,30 +86,71 @@ export default function RootLayout() {
   // Resolve student matching authenticated session email, or dynamically construct authentic student object
   const authenticatedStudent = React.useMemo(() => {
     const studentEmail = session?.user?.email?.toLowerCase();
+    const metadata = session?.user?.user_metadata || {};
+    const profile = userProfile || {};
+
     if (studentEmail) {
       const matched = (students || []).find(s => s.email?.toLowerCase() === studentEmail);
       if (matched) return matched;
 
-      const metadata = session?.user?.user_metadata || {};
-      const profile = userProfile || {};
+      // Check admissions forms for real submitted details
+      let admissionDetail = null;
+      if (typeof window !== 'undefined') {
+        try {
+          const rawAdmissions = localStorage.getItem('college_student_admissions_forms');
+          if (rawAdmissions) {
+            const list = JSON.parse(rawAdmissions);
+            if (Array.isArray(list)) {
+              admissionDetail = list.find(f => f.email?.toLowerCase() === studentEmail);
+            }
+          }
+        } catch {}
+      }
+
+      // Check app users directory for matched student
+      const matchedUser = (users || []).find(u => u.email?.toLowerCase() === studentEmail && u.role === 'student');
+
+      // Resolve legitimate student name (prioritize admission submission, database profile, or user metadata)
+      const resolvedStudentName = 
+        admissionDetail?.fullName || 
+        (profile.role === 'student' ? profile.full_name : null) || 
+        matchedUser?.name ||
+        (metadata.role === 'student' ? metadata.name : null) ||
+        (session?.user?.email ? session.user.email.split('@')[0] : 'Student User');
+
       return {
         id: session?.user?.id || 'stu-active',
-        rollNo: profile.roll_no || metadata.rollNo || metadata.roll_no || 'CS-2026',
-        name: profile.full_name || metadata.name || session?.user?.email?.split('@')[0] || 'Student User',
+        rollNo: admissionDetail?.rollNo || profile.roll_no || metadata.rollNo || metadata.roll_no || 'CS-2026',
+        name: resolvedStudentName,
         email: session?.user?.email,
-        phone: profile.emergency_contact || metadata.phone || '+91 98000 00000',
-        program: profile.program_name || metadata.program || 'B.Tech Computer Science & Engineering',
-        semester: profile.semester || metadata.semester || 'Semester VI',
-        section: profile.section || 'A',
+        phone: admissionDetail?.phone || profile.emergency_contact || metadata.phone || '+91 98000 00000',
+        program: admissionDetail?.branch || admissionDetail?.programName || profile.program_name || metadata.program || 'B.Tech Computer Science & Engineering',
+        semester: admissionDetail?.semester || profile.semester || metadata.semester || 'Semester I',
+        section: admissionDetail?.section || profile.section || 'A',
         attendancePercentage: 0,
         attendedClasses: 0,
         totalClasses: 0,
         todayStatus: 'ABSENT',
-        status: profile.status || metadata.status || 'active'
+        status: admissionDetail?.status === 'APPROVED' ? 'active' : (profile.status || metadata.status || 'active')
       };
     }
-    return null;
-  }, [students, session, userProfile]);
+
+    return {
+      id: 'stu-active',
+      rollNo: profile.roll_no || 'CS-2026',
+      name: profile.full_name || 'Student User',
+      email: 'student@college.edu.in',
+      phone: '+91 98000 00000',
+      program: 'B.Tech Computer Science & Engineering',
+      semester: 'Semester I',
+      section: 'A',
+      attendancePercentage: 0,
+      attendedClasses: 0,
+      totalClasses: 0,
+      todayStatus: 'ABSENT',
+      status: 'active'
+    };
+  }, [students, session, userProfile, users]);
 
   return (
     <div className="min-h-screen bg-slate-100/60 font-sans flex text-slate-900 selection:bg-slate-900 selection:text-white">

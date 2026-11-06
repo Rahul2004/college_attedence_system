@@ -37,17 +37,27 @@ export default function LoginPage() {
         email: targetRole === 'admin' ? ADMIN_EMAIL : targetRole === 'developer' ? 'dev@attendos.internal' : `${targetRole}@university.edu`,
         user_metadata: {
           role: targetRole,
-          name: targetRole === 'admin' ? 'System Administrator' : targetRole === 'developer' ? 'Lead Developer (Bypass All Roles)' : undefined,
+          name: targetRole === 'admin' ? 'System Administrator' : targetRole === 'faculty' ? 'Faculty Professor' : targetRole === 'developer' ? 'Lead Developer (Bypass All Roles)' : 'Enrolled Student',
           isDeveloper: isDev
         }
       },
       isDeveloper: isDev
     };
 
+    const activeProf = {
+      id: activeSess.user.id,
+      email: activeSess.user.email,
+      role: targetRole,
+      status: 'active',
+      full_name: activeSess.user.user_metadata?.name || (targetRole === 'admin' ? 'System Administrator' : targetRole === 'faculty' ? 'Faculty Professor' : 'Enrolled Student'),
+      roll_no: targetRole === 'student' ? 'CS-2026' : ''
+    };
+
     setSession(activeSess);
     if (typeof window !== 'undefined') {
       localStorage.setItem('college_active_role', targetRole);
       localStorage.setItem('college_active_session', JSON.stringify(activeSess));
+      localStorage.setItem('college_active_profile', JSON.stringify(activeProf));
       if (isDev) {
         localStorage.setItem('college_dev_bypass', 'true');
       }

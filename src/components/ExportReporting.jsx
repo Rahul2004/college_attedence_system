@@ -99,7 +99,102 @@ export default function ExportReporting({ students = [], course, threshold = 75 
   };
 
   const handlePrint = () => {
-    window.print();
+    // Generate styled printable window with institutional letterhead
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      window.print();
+      return;
+    }
+
+    const courseCode = course?.code || 'CS-602';
+    const courseTitle = course?.title || 'Distributed Systems & Cloud Computing';
+    const today = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' });
+
+    const rowsHtml = (students || []).map(student => {
+      const isPresent = student?.todayStatus === 'PRESENT';
+      const effectiveAttended = isPresent ? (student?.attendedClasses || 0) + 1 : (student?.attendedClasses || 0);
+      const effectiveTotal = (student?.totalClasses || 0) + 1;
+      const percentage = effectiveTotal > 0 ? ((effectiveAttended / effectiveTotal) * 100).toFixed(1) : '0.0';
+      const isDefaulter = Number(percentage) < threshold;
+
+      return `
+        <tr style="border-bottom: 1px solid #e2e8f0; font-size: 12px; color: #1e293b;">
+          <td style="padding: 8px 12px; font-weight: 600;">${student?.rollNo || 'N/A'}</td>
+          <td style="padding: 8px 12px;">${student?.name || 'Student'}</td>
+          <td style="padding: 8px 12px; text-align: center;">${student?.todayStatus || 'ABSENT'}</td>
+          <td style="padding: 8px 12px; text-align: center;">${effectiveAttended}/${effectiveTotal}</td>
+          <td style="padding: 8px 12px; text-align: right; font-weight: bold; color: ${isDefaulter ? '#b91c1c' : '#047857'};">${percentage}%</td>
+          <td style="padding: 8px 12px; text-align: center;">
+            <span style="display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; background: ${isDefaulter ? '#fee2e2; color: #991b1b;' : '#d1fae5; color: #065f46;'}">
+              ${isDefaulter ? 'SHORTAGE (<' + threshold + '%)' : 'ELIGIBLE'}
+            </span>
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Institutional Attendance Sheet - ${courseCode}</title>
+          <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 40px; color: #0f172a; }
+            .header-box { border-bottom: 2px solid #0f172a; padding-bottom: 15px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: flex-start; }
+            .badge { display: inline-block; background: #0f172a; color: white; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; text-transform: uppercase; }
+            table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+            th { background: #f8fafc; border-bottom: 2px solid #cbd5e1; padding: 10px 12px; text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #475569; }
+            .sign-box { margin-top: 50px; display: flex; justify-content: space-between; padding-top: 30px; font-size: 12px; font-weight: 600; color: #334155; }
+            @media print {
+              body { padding: 20px; }
+              button { display: none; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header-box">
+            <div>
+              <span class="badge">Official Institutional Circular</span>
+              <h1 style="margin: 8px 0 4px 0; font-size: 22px; font-weight: 800;">UNIVERSITY ATTENDANCE & EXAMINATION AUDIT</h1>
+              <p style="margin: 0; font-size: 13px; color: #64748b;">Department of Computer Science & Engineering • Academic Year 2026</p>
+            </div>
+            <div style="text-align: right; font-size: 12px; color: #475569;">
+              <p style="margin: 0;"><strong>Date:</strong> ${today}</p>
+              <p style="margin: 4px 0 0 0;"><strong>Course:</strong> ${courseCode} (${courseTitle})</p>
+              <p style="margin: 4px 0 0 0;"><strong>Min Required:</strong> ${threshold.toFixed(1)}%</p>
+            </div>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Roll No</th>
+                <th>Student Full Name</th>
+                <th style="text-align: center;">Today Status</th>
+                <th style="text-align: center;">Attended/Total</th>
+                <th style="text-align: right;">Cumulative %</th>
+                <th style="text-align: center;">Exam Eligibility</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rowsHtml}
+            </tbody>
+          </table>
+
+          <div class="sign-box">
+            <div>____________________________<br/>Course Instructor Signature</div>
+            <div>____________________________<br/>Head of Department (HOD)</div>
+            <div>____________________________<br/>Dean of Academic Affairs</div>
+          </div>
+        </body>
+      </html>
+    `);
+
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+      printWindow.print();
+    }, 400);
   };
 
   const triggerDownload = (content, filename) => {

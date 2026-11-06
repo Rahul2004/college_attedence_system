@@ -752,7 +752,7 @@ export default function StudentView({
             {student?.program || student?.department || 'Academic Degree Program'} | {student?.semester || 'Semester I'}
           </span>
           <h1 className="text-2xl sm:text-3xl font-bold mt-1 tracking-tight text-white">
-            Welcome back, {student?.name && !student.name.toLowerCase().includes('prof') ? student.name.split(' ')[0] : 'Student'}
+            Welcome back, {student?.name || 'Student'}
           </h1>
           <p className="text-xs sm:text-sm text-slate-300 mt-2 font-normal leading-relaxed">
             {effectiveTotal === 0

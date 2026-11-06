@@ -24,7 +24,7 @@ import HttpErrorPage from './pages/errors/HttpErrorPage';
 
 function RootIndexRedirect() {
   const { session, role } = useAcademic();
-  const isDevBypass = role === 'developer' || session?.isDeveloper || (typeof window !== 'undefined' && localStorage.getItem('college_dev_bypass') === 'true');
+  const isDevBypass = import.meta.env.DEV && (role === 'developer' || session?.isDeveloper || (typeof window !== 'undefined' && localStorage.getItem('college_dev_bypass') === 'true'));
   if (!session) return <Navigate to="/login" replace />;
   if (role === 'admin' || role === 'developer' || isDevBypass) return <Navigate to="/admin/admin" replace />;
   if (role === 'faculty') return <Navigate to="/faculty/roster" replace />;

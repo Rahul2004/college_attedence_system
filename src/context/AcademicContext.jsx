@@ -767,10 +767,12 @@ export function AcademicProvider({ children }) {
       if (supabase) await supabase.auth.signOut();
     } catch {}
     setSession(null);
+    setUserProfile(null);
     setRole('student');
     if (typeof window !== 'undefined') {
       localStorage.removeItem('college_active_session');
       localStorage.removeItem('college_active_role');
+      localStorage.removeItem('college_active_profile');
       localStorage.removeItem('college_dev_bypass');
     }
   };
@@ -839,11 +841,11 @@ export function AcademicProvider({ children }) {
     }
     
     const isDev = newRole === 'developer' || (typeof window !== 'undefined' && localStorage.getItem('college_dev_bypass') === 'true');
-    // Find authentic user record from users list for this role
-    const matchedUser = users.find(u => u.role === newRole) || {
+    // Find authentic user record from users list matching both role AND status
+    const matchedUser = (users || []).find(u => u.role === newRole && u.status !== 'deleted') || {
       id: newRole === 'developer' ? 'dev-root' : `usr-${newRole}`,
-      email: newRole === 'developer' ? 'dev@attendos.internal' : newRole === 'admin' ? ADMIN_EMAIL : newRole === 'faculty' ? 'prof.vance@univ.edu' : 'aarav.sharma@collegemail.edu.in',
-      name: newRole === 'developer' ? 'Developer (Bypass All)' : newRole === 'admin' ? 'Dr. Evelyn Carter' : newRole === 'faculty' ? 'Prof. Rajesh Verma' : 'Aarav Sharma',
+      email: newRole === 'developer' ? 'dev@attendos.internal' : newRole === 'admin' ? ADMIN_EMAIL : newRole === 'faculty' ? 'faculty@college.edu.in' : 'student@college.edu.in',
+      name: newRole === 'developer' ? 'Lead Developer (System Root)' : newRole === 'admin' ? 'College Administrator' : newRole === 'faculty' ? 'Prof. Rajesh Verma' : 'Aarav Sharma',
       role: newRole,
       dept: newRole === 'developer' ? 'Core Systems Dev' : newRole === 'admin' ? 'Central Administration' : 'Computer Science & Engineering',
       phone: '+91 98765-43210'
@@ -863,9 +865,21 @@ export function AcademicProvider({ children }) {
       isDeveloper: isDev
     };
 
+    const newProfile = {
+      id: newSession.user.id,
+      email: newSession.user.email,
+      role: newRole,
+      status: 'active',
+      full_name: matchedUser.name,
+      department: matchedUser.dept || matchedUser.department || '',
+      roll_no: matchedUser.rollNo || (newRole === 'student' ? 'CS-2026' : '')
+    };
+
     setSession(newSession);
+    setUserProfile(newProfile);
     if (typeof window !== 'undefined') {
       localStorage.setItem('college_active_session', JSON.stringify(newSession));
+      localStorage.setItem('college_active_profile', JSON.stringify(newProfile));
     }
   };
 
