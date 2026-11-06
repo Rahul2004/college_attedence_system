@@ -337,9 +337,19 @@ export function AcademicProvider({ children }) {
         setAdmissionsForms(payload);
         if (typeof window !== 'undefined') localStorage.setItem('college_student_admissions_forms', JSON.stringify(payload));
       } else if (eventType === 'STUDENTS_UPDATE') {
+        const currentClassKey = `${selectedProgramId}_${selectedSemNumber}_${selectedSubjectCode}`;
+        // Strict Subject Isolation: Only update in-memory state if event matches currently active subject/class
+        if (payload?.classKey && payload.classKey !== currentClassKey) {
+          // Cache the update for the other subject in localStorage so it's fresh when switched to
+          if (typeof window !== 'undefined' && payload?.students) {
+            localStorage.setItem(`college_students_${payload.classKey}`, JSON.stringify(payload.students));
+          }
+          return;
+        }
         if (payload?.students) {
           setStudents(payload.students);
-        } else if (Array.isArray(payload)) {
+        } else if (Array.isArray(payload) && !payload?.classKey) {
+          // Legacy payload without classKey: only accept if explicit
           setStudents(payload);
         }
       }
@@ -357,8 +367,16 @@ export function AcademicProvider({ children }) {
           else if (type === 'PROGRAMS_UPDATE') setPrograms(payload);
           else if (type === 'ADMISSIONS_FORMS_UPDATE') setAdmissionsForms(payload);
           else if (type === 'STUDENTS_UPDATE') {
+            const currentClassKey = `${selectedProgramId}_${selectedSemNumber}_${selectedSubjectCode}`;
+            // Strict Subject Isolation for multi-tab browser sync
+            if (payload?.classKey && payload.classKey !== currentClassKey) {
+              if (typeof window !== 'undefined' && payload?.students) {
+                localStorage.setItem(`college_students_${payload.classKey}`, JSON.stringify(payload.students));
+              }
+              return;
+            }
             if (payload?.students) setStudents(payload.students);
-            else if (Array.isArray(payload)) setStudents(payload);
+            else if (Array.isArray(payload) && !payload?.classKey) setStudents(payload);
           }
         };
       }
@@ -611,9 +629,13 @@ export function AcademicProvider({ children }) {
 
   // Load Students Cache & Cloud Database (with Dynamic Integration of Approved Admissions)
   useEffect(() => {
+    let isCurrent = true;
+    // Strict Subject Isolation: Reset uncommitted changes and selected student card on subject change
+    setPendingChanges(new Set());
+    setActiveDetailStudent(null);
+
     if (!isClassConfigured) {
       setStudents([]);
-      setActiveDetailStudent(null);
       return;
     }
 
@@ -684,11 +706,15 @@ export function AcademicProvider({ children }) {
     const fallbackBase = selectedSemNumber === 'VI' ? INITIAL_STUDENTS : [];
     const baseList = (cached && cached.length > 0) ? cached : fallbackBase;
     const initialList = mergeWithAdmissions(baseList, admissionsForms);
-    setStudents(initialList);
-    setActiveDetailStudent(initialList[0] || null);
+    if (isCurrent) {
+      setStudents(initialList);
+      setActiveDetailStudent(initialList[0] || null);
+    }
 
-    // Fetch from Supabase Cloud as single source of truth
+    // Fetch from Supabase Cloud as single source of truth (guarded against race conditions)
     fetchCloudAttendance(classKey).then(cloudList => {
+      if (!isCurrent) return; // Prevent race conditions if user has already switched to another subject!
+
       const sourceList = (cloudList && Array.isArray(cloudList) && cloudList.length > 0)
         ? cloudList
         : (cached && cached.length > 0 ? cached : fallbackBase);
@@ -702,6 +728,10 @@ export function AcademicProvider({ children }) {
         }
       }
     });
+
+    return () => {
+      isCurrent = false;
+    };
   }, [selectedProgramId, selectedSemNumber, selectedSubjectCode, isClassConfigured, admissionsForms]);
 
   const saveStudentsCache = (updatedList) => {
@@ -797,26 +827,42 @@ export function AcademicProvider({ children }) {
     }
     await saveDisputesToCloud(updated);
 
-    // If APPROVED, auto-correct the student's attendance to PRESENT for that date/session!
+    // If APPROVED, auto-correct the student's attendance to PRESENT for that date/session strictly for the disputed subject!
     if (decision === 'APPROVED' && resolvedDispute) {
-      setStudents(prevStudents => {
-        const studentIndex = prevStudents.findIndex(s => s.id === resolvedDispute.studentId || s.rollNo === resolvedDispute.rollNo);
-        if (studentIndex >= 0) {
-          const s = prevStudents[studentIndex];
-          const updatedStudent = {
-            ...s,
-            todayStatus: 'PRESENT',
-            attendedClasses: s.todayStatus === 'PRESENT' ? s.attendedClasses : s.attendedClasses + 1
-          };
-          const nextList = [...prevStudents];
-          nextList[studentIndex] = updatedStudent;
-          saveStudentsCache(nextList);
-          const classKey = `${selectedProgramId}_${selectedSemNumber}_${selectedSubjectCode}`;
-          saveAttendanceToCloud(classKey, nextList);
-          return nextList;
+      const targetSubCode = resolvedDispute.subjectCode || selectedSubjectCode;
+      const targetClassKey = `${selectedProgramId}_${selectedSemNumber}_${targetSubCode}`;
+      const targetStorageKey = `college_students_${targetClassKey}`;
+
+      let targetRoster = [];
+      if (typeof window !== 'undefined') {
+        const raw = localStorage.getItem(targetStorageKey);
+        if (raw) {
+          try { targetRoster = JSON.parse(raw); } catch {}
         }
-        return prevStudents;
-      });
+      }
+      if (!targetRoster || targetRoster.length === 0) {
+        targetRoster = (selectedSubjectCode === targetSubCode) ? [...students] : (selectedSemNumber === 'VI' ? [...INITIAL_STUDENTS] : []);
+      }
+
+      const studentIndex = targetRoster.findIndex(s => s.id === resolvedDispute.studentId || s.rollNo === resolvedDispute.rollNo);
+      if (studentIndex >= 0) {
+        const s = targetRoster[studentIndex];
+        const updatedStudent = {
+          ...s,
+          todayStatus: 'PRESENT',
+          attendedClasses: s.todayStatus === 'PRESENT' ? s.attendedClasses : (s.attendedClasses || 0) + 1
+        };
+        targetRoster[studentIndex] = updatedStudent;
+        if (typeof window !== 'undefined') {
+          localStorage.setItem(targetStorageKey, JSON.stringify(targetRoster));
+        }
+        saveAttendanceToCloud(targetClassKey, targetRoster);
+
+        // Strictly update in-memory active students ONLY if currently viewing the disputed subject
+        if (selectedSubjectCode === targetSubCode) {
+          setStudents(targetRoster);
+        }
+      }
     }
 
     // Log the audit event

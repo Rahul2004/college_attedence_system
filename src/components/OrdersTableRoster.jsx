@@ -62,6 +62,11 @@ export default function OrdersTableRoster({
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
   const [isConfigExpanded, setIsConfigExpanded] = useState(false); // Collapsed on mobile for clean view
 
+  // Strict Subject Isolation: Clear selected row checkmarks whenever class, semester, or subject changes
+  useEffect(() => {
+    setSelectedIds(new Set());
+  }, [selectedProgramId, selectedSemNumber, selectedSubjectCode]);
+
   // Filter students
   const filteredStudents = students.filter(student => {
     const matchesSearch =

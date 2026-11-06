@@ -98,26 +98,51 @@ export default function StudentPortalPage() {
     setTimeout(() => setToast({ type: null, message: '' }), 4000);
   };
 
-  const handleSelfPunch = async () => {
+  const handleSelfPunch = async (subjectCode) => {
     if (!targetStudent) return;
-    const classKey = `${selectedProgramId}_${selectedSemNumber}_${selectedSubjectCode}`;
-    const updated = students.map(s => {
-      if (s.id !== targetStudent.id) return s;
+    const enrolledProg = targetStudent.programId || selectedProgramId || 'btech-cse';
+    const enrolledSem = (targetStudent.semester || 'Semester VI').replace(/semester\s*/i, '').trim();
+    const targetSubCode = subjectCode || selectedSubjectCode || 'CS-601';
+    const classKey = `${enrolledProg}_${enrolledSem}_${targetSubCode}`;
+    const storageKey = `college_students_${classKey}`;
+
+    let roster = [];
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem(storageKey);
+      if (saved) {
+        try { roster = JSON.parse(saved); } catch {}
+      }
+    }
+    if (!roster || roster.length === 0) {
+      roster = enrolledSem === 'VI' ? [...INITIAL_STUDENTS] : [targetStudent];
+    }
+
+    const updated = roster.map(s => {
+      const isMatch = s.id === targetStudent.id ||
+                      (targetStudent.rollNo && s.rollNo === targetStudent.rollNo) ||
+                      (targetStudent.email && s.email?.toLowerCase() === targetStudent.email?.toLowerCase());
+      if (!isMatch) return s;
+      const alreadyPresent = s.todayStatus === 'PRESENT';
       return {
         ...s,
         todayStatus: 'PRESENT',
-        attendedClasses: s.todayStatus === 'PRESENT' ? s.attendedClasses : s.attendedClasses + 1,
-        totalClasses: s.todayStatus === 'PRESENT' ? s.totalClasses : s.totalClasses + 1
+        attendedClasses: alreadyPresent ? s.attendedClasses : (s.attendedClasses || 0) + 1,
+        totalClasses: alreadyPresent ? s.totalClasses : (s.totalClasses || 0) + 1
       };
     });
-    setStudents(updated);
+
     if (typeof window !== 'undefined') {
-      localStorage.setItem(`college_students_${classKey}`, JSON.stringify(updated));
+      localStorage.setItem(storageKey, JSON.stringify(updated));
+    }
+
+    const activeClassKey = `${selectedProgramId}_${selectedSemNumber}_${selectedSubjectCode}`;
+    if (classKey === activeClassKey) {
+      setStudents(updated);
     }
     await saveAttendanceToCloud(classKey, updated);
     setToast({
       type: 'success',
-      message: 'Classroom punch verified! Attendance marked PRESENT and synced to professor in real time.'
+      message: `Punch verified for ${targetSubCode}! Marked PRESENT and synced in real time.`
     });
     setTimeout(() => setToast({ type: null, message: '' }), 4000);
   };

@@ -78,21 +78,7 @@ export default function StudentView({
     todayStatus: 'ABSENT'
   };
 
-  const isTodayPresent = todayMarkedPresent || safeStudent.todayStatus === 'PRESENT';
-  const effectiveAttended = (safeStudent.attendedClasses || 0) + (isTodayPresent && (safeStudent.attendedClasses || 0) === 0 ? 1 : 0);
-  const effectiveTotal = (safeStudent.totalClasses || 0) + (isTodayPresent && (safeStudent.totalClasses || 0) === 0 ? 1 : 0);
-  const percentage = effectiveTotal > 0 ? Number(((effectiveAttended / effectiveTotal) * 100).toFixed(1)) : 0;
-  const isDefaulter = effectiveTotal > 0 ? percentage < safeThreshold : false;
-
-  const recoveryClasses = isDefaulter && effectiveTotal > 0
-    ? Math.max(0, Math.ceil((reqRatio * effectiveTotal - effectiveAttended) / (remRatio || 0.25)))
-    : 0;
-
-  const safeMissable = !isDefaulter && effectiveTotal > 0
-    ? Math.max(0, Math.floor((effectiveAttended - reqRatio * effectiveTotal) / (reqRatio || 0.75)))
-    : 0;
-
-  // Resolve authentic program & semester curriculum
+  // Resolve authentic program & semester curriculum with strict subject-wise data isolation
   const registeredSubjects = useMemo(() => {
     // If student has registered program, get their actual curriculum subjects
     const programName = student?.program?.toLowerCase() || '';
@@ -117,12 +103,51 @@ export default function StudentView({
 
     const matchedSem = matchedProgram?.semesters?.find(s => s.semNumber === semRoman) || matchedProgram?.semesters?.[0];
     const curriculumSubjects = matchedSem?.subjects || [];
+    const progId = matchedProgram?.id || 'btech-cse';
 
-    // Map into authentic enrolled subjects with 0 initial attendance for new students
-    return curriculumSubjects.map(sub => {
-      const isSubToday = isTodayPresent && (selectedCourseCode === sub.code || !selectedCourseCode);
-      const subAttended = isSubToday ? 1 : 0;
-      const subTotal = isSubToday ? 1 : 0;
+    // Strict Subject Isolation: Read attendance independently for each subject from its specific classKey
+    return curriculumSubjects.map((sub, index) => {
+      const classKey = `${progId}_${semRoman}_${sub.code}`;
+      const storageKey = `college_students_${classKey}`;
+      let subjectStudentRecord = null;
+
+      if (typeof window !== 'undefined') {
+        const raw = localStorage.getItem(storageKey);
+        if (raw) {
+          try {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed)) {
+              subjectStudentRecord = parsed.find(s => 
+                (student?.id && s.id === student.id) || 
+                (student?.rollNo && s.rollNo === student.rollNo) || 
+                (student?.email && s.email?.toLowerCase() === student.email?.toLowerCase())
+              );
+            }
+          } catch {}
+        }
+      }
+
+      let subAttended = 0;
+      let subTotal = 0;
+      let subTodayStatus = 'ABSENT';
+
+      if (subjectStudentRecord) {
+        subAttended = subjectStudentRecord.attendedClasses ?? 0;
+        subTotal = subjectStudentRecord.totalClasses ?? 0;
+        subTodayStatus = subjectStudentRecord.todayStatus ?? 'ABSENT';
+      } else if (semRoman === 'VI' && student?.attendedClasses !== undefined && student?.totalClasses !== undefined) {
+        // Deterministic baseline for Semester VI demo student (isolated per subject)
+        const offset = (index % 3) - 1; // -1, 0, 1
+        subTotal = student.totalClasses || 52;
+        subAttended = Math.min(subTotal, Math.max(0, (student.attendedClasses || 44) + offset * 2));
+        subTodayStatus = (index === 0 && student.todayStatus === 'PRESENT') ? 'PRESENT' : 'ABSENT';
+      } else {
+        // Enrolled new student baseline
+        subAttended = 0;
+        subTotal = 0;
+        subTodayStatus = 'ABSENT';
+      }
+
       const subPct = subTotal > 0 ? Number(((subAttended / subTotal) * 100).toFixed(1)) : 0;
 
       return {
@@ -135,13 +160,54 @@ export default function StudentView({
         credits: sub.credits || 4,
         room: sub.room || 'Lecture Hall',
         type: sub.type || 'Core Theory',
+        todayStatus: subTodayStatus,
         status: subTotal === 0 ? 'Enrolled' : subPct >= safeThreshold ? 'Eligible' : 'Warning'
       };
     });
-  }, [student?.program, student?.semester, isTodayPresent, selectedCourseCode, safeThreshold]);
+  }, [student?.program, student?.semester, student?.id, student?.rollNo, student?.email, student?.attendedClasses, student?.totalClasses, student?.todayStatus, safeThreshold]);
 
   // Real Indian College Subjects
   const indianSubjects = registeredSubjects;
+
+  // Aggregate overall attendance stats from authentic subject records
+  const aggregatedStats = useMemo(() => {
+    let totAttended = 0;
+    let totClasses = 0;
+    let anyPresentToday = false;
+    for (const sub of registeredSubjects) {
+      totAttended += sub.attended;
+      totClasses += sub.total;
+      if (sub.todayStatus === 'PRESENT') anyPresentToday = true;
+    }
+    if (totClasses > 0) {
+      return {
+        attended: totAttended,
+        total: totClasses,
+        percentage: Number(((totAttended / totClasses) * 100).toFixed(1)),
+        isTodayPresent: anyPresentToday || todayMarkedPresent
+      };
+    }
+    return {
+      attended: safeStudent.attendedClasses || 0,
+      total: safeStudent.totalClasses || 0,
+      percentage: safeStudent.totalClasses > 0 ? Number(((safeStudent.attendedClasses / safeStudent.totalClasses) * 100).toFixed(1)) : 0,
+      isTodayPresent: todayMarkedPresent || safeStudent.todayStatus === 'PRESENT'
+    };
+  }, [registeredSubjects, safeStudent, todayMarkedPresent]);
+
+  const isTodayPresent = aggregatedStats.isTodayPresent;
+  const effectiveAttended = aggregatedStats.attended;
+  const effectiveTotal = aggregatedStats.total;
+  const percentage = aggregatedStats.percentage;
+  const isDefaulter = effectiveTotal > 0 ? percentage < safeThreshold : false;
+
+  const recoveryClasses = isDefaulter && effectiveTotal > 0
+    ? Math.max(0, Math.ceil((reqRatio * effectiveTotal - effectiveAttended) / (remRatio || 0.25)))
+    : 0;
+
+  const safeMissable = !isDefaulter && effectiveTotal > 0
+    ? Math.max(0, Math.floor((effectiveAttended - reqRatio * effectiveTotal) / (reqRatio || 0.75)))
+    : 0;
 
   // Weekly Timetable (Monday through Friday)
   const timetableDays = [
@@ -1009,8 +1075,9 @@ export default function StudentView({
           onClose={() => setIsPunchModalOpen(false)}
           onPunchSuccess={() => {
             setTodayMarkedPresent(true);
+            const targetSubject = selectedCourseCode || (indianSubjects[0]?.code || 'CS-601');
             if (propOnSelfPunch) {
-              propOnSelfPunch();
+              propOnSelfPunch(targetSubject);
             }
           }}
         />
